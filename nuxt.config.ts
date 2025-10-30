@@ -10,10 +10,14 @@ export default defineNuxtConfig({
 		'@nuxt/fonts',
 		'@nuxt/image',
 		'shadcn-nuxt',
+		'@nuxtjs/color-mode',
 	],
 	shadcn: {
 		prefix: 'UI',
 		componentDir: './components/ui',
+	},
+	colorMode: {
+		classSuffix: '',
 	},
 	eslint: {
 		config: {
