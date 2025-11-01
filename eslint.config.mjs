@@ -25,7 +25,10 @@ export default withNuxt(
 				tsconfigRootDir: '.',
 			}],
 			'unicorn/filename-case': ['error', {
-				case: 'kebabCase',
+				cases: {
+					kebabCase: true,
+					pascalCase: true,
+				},
 				ignore: ['README.md'],
 			}],
 		},

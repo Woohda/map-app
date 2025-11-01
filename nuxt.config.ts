@@ -13,8 +13,8 @@ export default defineNuxtConfig({
 		'@nuxtjs/color-mode',
 	],
 	shadcn: {
-		prefix: 'UI',
-		componentDir: './components/ui',
+		prefix: '',
+		componentDir: '@/components/ui',
 	},
 	colorMode: {
 		classSuffix: '',
