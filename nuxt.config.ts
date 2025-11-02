@@ -1,6 +1,8 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 import tailwindcss from '@tailwindcss/vite';
 
+import './app/utils/env/env';
+
 export default defineNuxtConfig({
 	compatibilityDate: '2025-07-15',
 	devtools: { enabled: true },
@@ -17,7 +19,13 @@ export default defineNuxtConfig({
 		componentDir: '@/components/ui',
 	},
 	colorMode: {
-		classSuffix: '-mode',
+		preference: 'system',
+		fallback: 'light',
+		classSuffix: '',
+		storage: 'localStorage',
+	},
+	experimental: {
+		componentIslands: true,
 	},
 	eslint: {
 		config: {
@@ -26,8 +34,6 @@ export default defineNuxtConfig({
 	},
 	css: ['@/assets/css/main.css'],
 	vite: {
-		plugins: [
-			tailwindcss(),
-		],
+		plugins: [tailwindcss()],
 	},
 });

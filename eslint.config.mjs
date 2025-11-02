@@ -16,6 +16,7 @@ export default withNuxt(
 		},
 	}, {
 		rules: {
+			'ts/no-redeclare': 'off',
 			'ts/consistent-type-definitions': ['error', 'type'],
 			'no-console': ['warn'],
 			'antfu/no-top-level-await': ['off'],
@@ -29,7 +30,7 @@ export default withNuxt(
 					kebabCase: true,
 					pascalCase: true,
 				},
-				ignore: ['README.md'],
+				ignore: ['README.md', 'migration_lock.toml'],
 			}],
 		},
 	}),
