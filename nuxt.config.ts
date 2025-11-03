@@ -1,7 +1,7 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 import tailwindcss from '@tailwindcss/vite';
 
-import './app/utils/env/env';
+import './server/lib/env/env';
 
 export default defineNuxtConfig({
 	compatibilityDate: '2025-07-15',
@@ -13,7 +13,6 @@ export default defineNuxtConfig({
 		'@nuxt/image',
 		'shadcn-nuxt',
 		'@nuxtjs/color-mode',
-		'nuxt-auth-utils',
 	],
 	runtimeConfig: {
 		session: {
