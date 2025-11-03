@@ -13,7 +13,17 @@ export default defineNuxtConfig({
 		'@nuxt/image',
 		'shadcn-nuxt',
 		'@nuxtjs/color-mode',
+		'nuxt-auth-utils',
 	],
+	runtimeConfig: {
+		session: {
+			password: '',
+			name: 'session',
+			cookie: {
+				maxAge: 60 * 24 * 7, // 7 days
+			},
+		},
+	},
 	shadcn: {
 		prefix: '',
 		componentDir: '@/components/ui',

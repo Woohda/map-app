@@ -30,6 +30,7 @@ export default withNuxt(
 				cases: {
 					kebabCase: true,
 					pascalCase: true,
+					camelCase: true,
 				},
 				ignore: ['README.md', 'migration_lock.toml'],
 			}],
