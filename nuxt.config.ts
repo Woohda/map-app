@@ -1,7 +1,8 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 import tailwindcss from '@tailwindcss/vite';
 
-import './server/lib/env/env';
+import './lib/env/env';
+import path from 'node:path';
 
 export default defineNuxtConfig({
 	compatibilityDate: '2025-07-15',
@@ -14,6 +15,13 @@ export default defineNuxtConfig({
 		'shadcn-nuxt',
 		'@nuxtjs/color-mode',
 	],
+	alias: {
+		'~': path.resolve(__dirname, 'app'),
+		'~server': path.resolve(__dirname, 'server'),
+		'~lib': path.resolve(__dirname, 'lib'),
+		'~prisma': path.resolve(__dirname, 'prisma'),
+		'~public': path.resolve(__dirname, 'public'),
+	},
 	runtimeConfig: {
 		session: {
 			password: '',

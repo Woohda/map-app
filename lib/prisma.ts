@@ -1,7 +1,7 @@
 import { PrismaClient } from '@prisma/client';
 import { withAccelerate } from '@prisma/extension-accelerate';
 
-import env from '../app/utils/env/env';
+import env from './env/env';
 
 /**
  * Эта функция создает экземпляр PrismaClient с расширением Accelerate.
