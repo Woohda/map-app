@@ -5,7 +5,7 @@ import type { HTMLAttributes } from 'vue';
 import { reactiveOmit } from '@vueuse/core';
 import { ToastViewport } from 'reka-ui';
 
-import { cn } from '@/lib/utils';
+import { cn } from '~/utils/utils';
 
 const props = defineProps<ToastViewportProps & { class?: HTMLAttributes['class'] }>();
 

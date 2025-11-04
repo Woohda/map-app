@@ -4,7 +4,7 @@ import type { ToastRootEmits } from 'reka-ui';
 import { reactiveOmit } from '@vueuse/core';
 import { ToastRoot, useForwardPropsEmits } from 'reka-ui';
 
-import { cn } from '@/lib/utils';
+import { cn } from '~/utils/utils';
 
 import type { ToastProps } from '.';
 
