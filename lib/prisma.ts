@@ -4,12 +4,15 @@ import { withAccelerate } from '@prisma/extension-accelerate';
 import env from './env/env';
 
 /**
- * Эта функция создает экземпляр PrismaClient с расширением Accelerate.
- * Она использует глобальную переменную для хранения экземпляра,
- * чтобы избежать создания нескольких экземпляров в среде разработки.
- * В производственной среде создается новый экземпляр.
- * @property {PrismaClient} prisma - экземпляр PrismaClient
- * @property {globalForPrisma} globalForPrisma - глобальная переменная для хранения экземпляра PrismaClient
+ * @module prisma
+ * @fileoverview Конфигурация и инициализация Prisma клиента с поддержкой Accelerate
+ * @description
+ * Этот модуль создает и экспортирует единственный экземпляр PrismaClient с расширением Accelerate.
+ * В режиме разработки используется глобальная переменная для хранения экземпляра, чтобы избежать создания множества подключений при hot-reload.
+ * В продакшене создается новый экземпляр для каждого запроса.
+ * ### Глобальный тип для хранения экземпляра PrismaClient:
+ * - глобальная переменная для хранения экземпляра PrismaClient (globalForPrisma)
+ * - экземпляр PrismaClient (prisma)
  */
 
 const globalForPrisma = globalThis as unknown as {
