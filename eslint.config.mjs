@@ -25,10 +25,12 @@ export default withNuxt(
 			'perfectionist/sort-imports': ['error', {
 				tsconfigRootDir: '.',
 			}],
+			'vue/no-multiple-template-root': ['off'],
 			'unicorn/filename-case': ['error', {
 				cases: {
 					kebabCase: true,
 					pascalCase: true,
+					camelCase: true,
 				},
 				ignore: ['README.md', 'migration_lock.toml'],
 			}],
