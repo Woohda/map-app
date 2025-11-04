@@ -19,5 +19,18 @@ model User {
   bio          String?
   name         String?
 
-  createdAt DateTime @default(now())
+  createdAt DateTime  @default(now())
+  Session   Session[]
+
+  @@map("users")
+}
+
+model Session {
+  id           String   @id
+  userId       String
+  expiresAt    DateTime
+  activePeriod Int?
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("sessions")
 }
