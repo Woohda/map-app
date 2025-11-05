@@ -7,9 +7,7 @@ import Header from '~/components/app/Header.vue';
 
 <template>
 	<Header />
-	<main class="flex min-h-screen flex-col">
-		<slot />
-	</main>
+	<slot />
 </template>
 
 <style scoped>
