@@ -2,15 +2,15 @@
     setup
     lang="ts"
 >
+import type { SignUpValues } from '~lib/validation';
+
 import { toTypedSchema } from '@vee-validate/zod';
 import { signUpSchema } from '~lib/validation';
 import { useForm } from 'vee-validate';
 
-import type { SignUpValue } from '~/lib/types';
-
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '~/components/ui/form';
 
-const form = useForm<SignUpValue>({
+const form = useForm<SignUpValues>({
 	validationSchema: toTypedSchema(signUpSchema),
 	initialValues: {
 		username: '',
@@ -24,7 +24,7 @@ const formDisabled = computed(() => form.isSubmitting.value);
 </script>
 
 <template>
-	<Form v-slot="{ errors }" :disabled="formDisabled" class="w-full max-w-sm mx-auto space-y-4" @submit="onSubmit">
+	<Form v-slot="{ errors }" :disabled="formDisabled" class="w-full max-w-sm mx-auto space-y-4">
 		<FormField v-slot="{ field, errorMessage }" name="name">
 			<FormItem>
 				<FormLabel>Имя</FormLabel>
@@ -79,6 +79,8 @@ const formDisabled = computed(() => form.isSubmitting.value);
 				Зарегистрироваться
 			</template>
 		</Button>
-		<FormMessage>{{ errors }}</FormMessage>
+		<p v-if="Object.keys(errors).length" class="text-center text-sm text-destructive">
+			{{ Object.values(errors)[0] }}
+		</p>
 	</Form>
 </template>
