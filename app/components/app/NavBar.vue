@@ -10,10 +10,10 @@
 			MAP_APP
 		</NuxtLink>
 		<div class="flex gap-5">
-			<NuxtLink to="/">
+			<NuxtLink class="hover:text-primary transition-colors duration-200 focus-visible:border-ring focus-visible:ring-ring/60 focus-visible:ring-[3.5px] rounded-sm outline-none" to="/">
 				Sign In
 			</NuxtLink>
-			<NuxtLink to="/">
+			<NuxtLink to="/signup" class="hover:text-primary transition-colors duration-200 focus-visible:border-ring focus-visible:ring-ring/60 focus-visible:ring-[3.5px] rounded-sm outline-none">
 				Sign Up
 			</NuxtLink>
 		</div>
