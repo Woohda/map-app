@@ -3,6 +3,7 @@ import tailwindcss from '@tailwindcss/vite';
 
 import './lib/env/env';
 import path from 'node:path';
+// import { fileURLToPath } from 'node:url';
 
 export default defineNuxtConfig({
 	compatibilityDate: '2025-07-15',
@@ -50,7 +51,38 @@ export default defineNuxtConfig({
 		},
 	},
 	css: ['@/assets/css/main.css'],
+	fonts: {
+		provider: 'local',
+		families: [
+			{
+				name: 'Tektur',
+				src: '/fonts/Tektur-Regular.ttf',
+				provider: 'local',
+				global: true,
+				weight: 'normal',
+				style: 'normal',
+				display: 'swap',
+			},
+			{
+				name: 'Space-Mono',
+				src: '/fonts/SpaceMono-Regular.ttf',
+				provider: 'local',
+				global: true,
+				weight: 'normal',
+				style: 'normal',
+				display: 'swap',
+			},
+		],
+	},
 	vite: {
 		plugins: [tailwindcss()],
+		// resolve: {
+		// 	// fix for vite/prisma build issue
+		// 	alias: {
+		// 		'.prisma/client/index-browser': fileURLToPath(
+		// 			new URL('./node_modules/@prisma/client/index-browser.js', import.meta.url),
+		// 		),
+		// 	},
+		// },
 	},
 });
