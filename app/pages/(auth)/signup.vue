@@ -3,7 +3,7 @@ import SignUpForm from '~/components/form/SignUpForm.vue';
 </script>
 
 <template>
-	<main class="flex h-screen items-center justify-center">
+	<main class="flex items-center justify-center">
 		<div
 			class="flex gap-4 w-full max-w-150 p-10 flex-col items-center justify-center border-e border-solid rounded-3xl bg-card shadow-2xl"
 		>
