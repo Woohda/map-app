@@ -4,7 +4,7 @@ import prisma from '~lib/prisma';
 import { signUpSchema } from '~lib/types/validation';
 import { checkUserExists, createSession, createSessionCookie, hashOptions } from '~server/utils/auth';
 import { hash } from 'argon2';
-import { createError, defineEventHandler, readBody, sendRedirect } from 'h3';
+import { createError, defineEventHandler, readBody } from 'h3';
 import { generateIdFromEntropySize } from 'lucia';
 
 export default defineEventHandler(async (event: H3Event) => {
@@ -52,11 +52,10 @@ export default defineEventHandler(async (event: H3Event) => {
 			const message = sessionErr instanceof Error ? sessionErr.message : 'Ошибка при создании сессии. Попробуйте позже.';
 			throw createError({ status: 500, message });
 		}
-		await sendRedirect(event, '/');
-		// return {
-		// 	status: 200,
-		// 	message: 'Пользователь успешно зарегистрирован',
-		// };
+		return {
+			status: 200,
+			message: 'Пользователь успешно зарегистрирован',
+		};
 	}
 	catch (err: unknown) {
 		if (err instanceof Error) {

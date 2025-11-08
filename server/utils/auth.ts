@@ -24,8 +24,6 @@ import { argon2id } from 'argon2';
 import { setCookie } from 'h3';
 import { Lucia } from 'lucia';
 
-import { cache } from './cache';
-
 const adapter = new PrismaAdapter(prisma.session, prisma.user);
 
 interface DatabaseUserAttributes {
@@ -98,7 +96,7 @@ export async function createSessionCookie(event: H3Event, session: Session) {
 	});
 }
 
-export const validateRequest = cache(
+export const validateRequest = defineCachedEventHandler(
 	async (
 		event: H3Event,
 	): Promise<
