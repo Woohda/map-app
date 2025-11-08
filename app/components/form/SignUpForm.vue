@@ -10,8 +10,11 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Input } from '~/components/ui/input';
 import { toast } from '~/composables/use-toast';
 
+import DotsLoader from '../ui/loader/DotsLoader.vue';
+
 const formError = ref('');
 const loading = ref(false);
+const showPassword = ref(false);
 
 async function onSubmit(
 	values: unknown,
@@ -48,6 +51,9 @@ async function onSubmit(
 		loading.value = false;
 	}
 }
+function toggleShowPassword() {
+	showPassword.value = !showPassword.value;
+}
 </script>
 
 <template>
@@ -59,9 +65,13 @@ async function onSubmit(
 						Имя
 					</FormLabel>
 					<FormControl>
-						<Input v-bind="field" type="text" placeholder="Напишите ваше имя" />
+						<Input
+							v-bind="field"
+							type="text"
+							placeholder="Напишите ваше имя"
+						/>
 					</FormControl>
-					<Transition name="fade-slide">
+					<Transition name="fade-slide" appear>
 						<FormMessage class="text-xs">
 							{{ errorMessage }}
 						</FormMessage>
@@ -75,9 +85,14 @@ async function onSubmit(
 						Почта
 					</FormLabel>
 					<FormControl>
-						<Input v-bind="field" type="email" placeholder="Напишите адрес вашей почты" />
+						<Input
+							v-bind="field"
+							type="email"
+							placeholder="Напишите адрес вашей почты"
+							autocomplete="email"
+						/>
 					</FormControl>
-					<Transition name="fade-slide">
+					<Transition name="fade-slide" appear>
 						<FormMessage class="text-xs">
 							{{ errorMessage }}
 						</FormMessage>
@@ -91,9 +106,14 @@ async function onSubmit(
 						Имя пользователя
 					</FormLabel>
 					<FormControl>
-						<Input v-bind="field" type="text" placeholder="Придумайте имя пользователя" />
+						<Input
+							v-bind="field"
+							type="text"
+							placeholder="Придумайте имя пользователя"
+							autocomplete="username"
+						/>
 					</FormControl>
-					<Transition name="fade-slide">
+					<Transition name="fade-slide" appear>
 						<FormMessage class="text-xs">
 							{{ errorMessage }}
 						</FormMessage>
@@ -107,9 +127,29 @@ async function onSubmit(
 						Пароль
 					</FormLabel>
 					<FormControl>
-						<Input v-bind="field" type="password" placeholder="Придумайте пароль" />
+						<div class="relative">
+							<Input
+								v-bind="field"
+								:type="showPassword ? 'text' : 'password'"
+								placeholder="Придумайте пароль"
+								autocomplete="new-password"
+							/>
+							<Toggle
+								:model-value="showPassword"
+								lable="Show password"
+								variant="outline"
+								size="sm"
+								class="absolute border-none bottom-[2px] right-[1px] px-0 data-[state=on]:bg-transparent hover:bg-transparent hover:text-primary duration-300"
+								@update:model-value="toggleShowPassword"
+							>
+								<Icon
+									:name="showPassword ? 'tabler:eye' : 'tabler:eye-closed'"
+									style="width:23px; height:23px;"
+								/>
+							</Toggle>
+						</div>
 					</FormControl>
-					<Transition name="fade-slide">
+					<Transition name="fade-slide" appear>
 						<FormMessage class="text-xs">
 							{{ errorMessage }}
 						</FormMessage>
@@ -118,10 +158,14 @@ async function onSubmit(
 			</FormField>
 		</fieldset>
 
-		<Button type="submit" class="w-full flex items-center justify-center gap-2 cursor-pointer" :disabled="loading || !meta.valid">
-			<span v-if="loading" class="flex gap-1">
-				<Spinner class="size-5" />
-				Регистрируем...
+		<Button
+			type="submit"
+			:disabled="loading || !meta.valid"
+			class="w-full flex items-center justify-center gap-2 cursor-pointer"
+		>
+			<span v-if="loading" class="flex gap-0.5 items-baseline">
+				Регистрируем
+				<DotsLoader />
 			</span>
 			<span v-else>Зарегистрироваться</span>
 		</Button>
