@@ -48,7 +48,7 @@
 
 :root {
 	--radius: 0.65rem;
-	--background: oklch(1 0 0);
+	--background: oklch(0.985 0 0);
 	--foreground: oklch(0.141 0.005 285.823);
 	--card: oklch(1 0 0);
 	--card-foreground: oklch(0.141 0.005 285.823);
@@ -86,7 +86,7 @@
 
 .dark {
 	--background: oklch(0.141 0.005 285.823);
-	--foreground: oklch(0.985 0 0);
+	--foreground: oklch(1 0 0);
 	--card: oklch(0.21 0.006 285.885);
 	--card-foreground: oklch(0.985 0 0);
 	--popover: oklch(0.21 0.006 285.885);
@@ -126,8 +126,8 @@ body,
 	@apply h-screen;
 	font-family: var(--tektur), monospace;
 	transition:
-		background-color 0.35s ease,
-		color 0.35s ease;
+		background-color 0.35s ease-out,
+		color 0.2s ease-out;
 }
 
 /* Для Tailwind dark mode */

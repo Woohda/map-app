@@ -32,12 +32,12 @@ const isTheme = computed({
 		label="Toggle theme"
 		variant="outline"
 		size="sm"
-		class="px-0 text-lg data-[state=on]:bg-transparent hover:border-primary transition-colors duration-200"
+		class="px-0 text-lg data-[state=on]:bg-transparent hover:border-primary transition-colors duration-300"
 	>
 		<Icon
 			:name="isTheme ? 'tabler:moon' : 'tabler:sun-high'"
 			class="w-full transition-transform duration-300"
-			:class="isTheme ? 'rotate-0 scale-100' : 'text-primary rotate-90 scale-75'"
+			:class="isTheme ? 'rotate-0' : 'text-primary rotate-90'"
 		/>
 	</Toggle>
 </template>
