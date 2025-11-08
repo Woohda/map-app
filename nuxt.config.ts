@@ -76,6 +76,12 @@ export default defineNuxtConfig({
 	},
 	vite: {
 		plugins: [tailwindcss()],
+		css: {
+			devSourcemap: true,
+		},
+		build: {
+			sourcemap: true,
+		},
 		// resolve: {
 		// 	// fix for vite/prisma build issue
 		// 	alias: {
@@ -84,5 +90,11 @@ export default defineNuxtConfig({
 		// 		),
 		// 	},
 		// },
+	},
+	postcss: {
+		plugins: {
+			'@tailwindcss/postcss': {},
+			'autoprefixer': {},
+		},
 	},
 });
