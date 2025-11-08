@@ -8,6 +8,7 @@ import { signUpSchema } from '~lib/types/validation';
 import { Button } from '~/components/ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '~/components/ui/form';
 import { Input } from '~/components/ui/input';
+import { toast } from '~/composables/use-toast';
 
 const formError = ref('');
 const loading = ref(false);
@@ -26,9 +27,12 @@ async function onSubmit(
 			method: 'POST',
 			body: formData,
 		});
-
-		// если дошли сюда — всё успешно
 		resetForm();
+		toast({
+			description: 'Вы успешно зарегистрировались',
+			variant: 'success',
+		});
+		await navigateTo('/');
 	}
 	catch (error: unknown) {
 		if (error?.response?._data?.statusCode === 409 && error?.response?._data?.data?.field) {

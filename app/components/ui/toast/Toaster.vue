@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { isVNode } from 'vue';
 
-import { useToast } from '~/utils/use-toast';
+import { useToast } from '~/composables/use-toast';
 
 import { Toast, ToastClose, ToastDescription, ToastProvider, ToastTitle, ToastViewport } from '.';
 
