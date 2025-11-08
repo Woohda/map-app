@@ -31,11 +31,11 @@ const props = defineProps<{
 	0%,
 	80%,
 	100% {
-		transform: translateY(0px);
+		scale: 1.2;
 		opacity: 1;
 	}
 	50% {
-		transform: translateY(-3px);
+		scale: 0.5;
 		opacity: 0.65;
 	}
 }
