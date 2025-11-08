@@ -14,8 +14,8 @@ export default defineEventHandler(async (event: H3Event) => {
 		const { name, email, username, password } = signUpSchema.parse(credentials);
 
 		// проверяем, существует ли пользователь с таким email
-		const existingUser = await checkUserExists(email);
-		if (existingUser) {
+		const existingEmail = await checkUserExists(email);
+		if (existingEmail) {
 			throw createError({ status: 409, data: { field: 'email' }, message: 'Пользователь с такой почтой уже существует' });
 		}
 

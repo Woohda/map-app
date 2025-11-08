@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import type { AuthResponse } from '~lib/types/api';
 import type { SignInValues } from '~lib/types/validation';
 
 import { toTypedSchema } from '@vee-validate/zod';
@@ -16,34 +17,31 @@ const showPassword = ref(false);
 
 async function onSubmit(
 	values: unknown,
-	{ resetForm, setFieldValue }: { resetForm: () => void; setFieldValue: (field: string, value: string) => void },
+	{ resetForm }: { resetForm: () => void },
 ) {
 	loading.value = true;
 	formError.value = '';
 
 	try {
 		const formData = values as SignInValues;
-		setTimeout(() => {
-			Promise.resolve(formData);
-		}, 2000);
-		resetForm();
+		await $fetch<AuthResponse>('/api/auth/sign-in', {
+			method: 'POST',
+			body: formData,
+		});
 		toast({
-			description: 'Вы успешно зарегистрировались',
+			description: 'Вы успешно вошли в аккаунт',
 			variant: 'success',
 		});
 		await navigateTo('/');
 	}
 	catch (error: unknown) {
-		if (error?.response?._data?.statusCode === 409 && error?.response?._data?.data?.field) {
-			setFieldValue(error?.response?._data?.data?.field, '');
-			setFieldValue('password', '');
-		}
 		// универсально достаём сообщение из разных версий Nuxt/$fetch
 		formError.value
 			= error?.response?._data?.message
-				|| 'Ошибка регистрации. Попробуйте еще раз';
+				|| 'Ошибка входа. Попробуйте еще раз';
 	}
 	finally {
+		resetForm();
 		loading.value = false;
 	}
 }

@@ -26,7 +26,7 @@ async function onSubmit(
 	try {
 		const formData = values as SignUpValues;
 
-		await $fetch<AuthResponse>('/api/auth/signup', {
+		await $fetch<AuthResponse>('/api/auth/sign-up', {
 			method: 'POST',
 			body: formData,
 		});
