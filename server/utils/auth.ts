@@ -30,8 +30,9 @@ const adapter = new PrismaAdapter(prisma.session, prisma.user);
 
 interface DatabaseUserAttributes {
 	id: string;
-	username: string;
 	name: string;
+	username: string;
+	email: string;
 	avatarUrl: string | null;
 }
 
@@ -55,8 +56,9 @@ export const lucia = new Lucia(adapter, {
 	getUserAttributes(databaseUserAttributes) {
 		return {
 			id: databaseUserAttributes.id,
-			username: databaseUserAttributes.username,
 			name: databaseUserAttributes.name,
+			username: databaseUserAttributes.username,
+			email: databaseUserAttributes.email,
 			avatarUrl: databaseUserAttributes.avatarUrl,
 		};
 	},
