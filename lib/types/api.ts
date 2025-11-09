@@ -1,7 +1,6 @@
-export type FieldErrors = Record<string, string>;
+import type { User } from 'lucia';
 
 // Универсальный ответ для запросов авторизации
-export type AuthResponse<TSuccess = true>
-	= | { fieldErrors: FieldErrors } // ошибки по полям
-		| { generalError: string } // общая ошибка
-		| { success: TSuccess }; // успешный результат (можно типизировать для login, signup)
+export type AuthResponse
+	= | { user: User }
+		| { fieldErrors?: Record<string, string>; generalError?: string };
