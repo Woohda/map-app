@@ -10,7 +10,7 @@
  * - Подходит для временного хранения данных (например, из БД или API).
  */
 
-export function cache<T extends (...args: any[]) => Promise<any>>(fn: T, ttl = 60) {
+export function cache<T extends (...args: any[]) => Promise<any>>(fn: T, ttl = 40) {
 	const map = new Map<string, { value: any; expires: number }>();
 	return async (...args: Parameters<T>): Promise<ReturnType<T>> => {
 		const now = Date.now();
