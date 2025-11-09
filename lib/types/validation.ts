@@ -47,7 +47,7 @@ export const signUpSchema = z.object({
 export type SignUpValues = z.infer<typeof signUpSchema>;
 
 export const signInSchema = z.object({
-	user: requiredString,
+	login: requiredString,
 	password: requiredString,
 });
 
