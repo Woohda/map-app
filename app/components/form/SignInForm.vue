@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import type { AuthResponse } from '~lib/types/api';
 import type { SignInValues } from '~lib/types/validation';
+import type { User } from 'lucia';
 
 import { toTypedSchema } from '@vee-validate/zod';
 import { signInSchema } from '~lib/types/validation';
@@ -10,10 +10,12 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Input } from '~/components/ui/input';
 import DotsLoader from '~/components/ui/loader/DotsLoader.vue';
 import { toast } from '~/composables/use-toast';
+import { useAuthUser } from '~/composables/useAuthUser';
 
 const formError = ref('');
 const loading = ref(false);
 const showPassword = ref(false);
+const authUser = useAuthUser();
 
 async function onSubmit(
 	values: unknown,
@@ -24,15 +26,16 @@ async function onSubmit(
 
 	try {
 		const formData = values as SignInValues;
-		await $fetch<AuthResponse>('/api/auth/sign-in', {
+		const user = await $fetch<User>('/api/auth/sign-in', {
 			method: 'POST',
 			body: formData,
 		});
+		authUser.value = user ?? null;
 		toast({
-			description: 'Вы успешно вошли в аккаунт',
+			description: `Добро пожаловать, ${authUser.value?.name}!`,
 			variant: 'success',
 		});
-		await navigateTo('/');
+		await navigateTo('/profile');
 	}
 	catch (error: unknown) {
 		// универсально достаём сообщение из разных версий Nuxt/$fetch
@@ -54,7 +57,7 @@ function toggleShowPassword() {
 <template>
 	<Form v-slot="{ meta }" :validation-schema="toTypedSchema(signInSchema)" class="w-full max-w-sm mx-auto flex flex-col gap-4" @submit="onSubmit">
 		<fieldset :disabled="loading" class="w-full space-y-4">
-			<FormField v-slot="{ field, errorMessage }" name="user">
+			<FormField v-slot="{ field, errorMessage }" name="login">
 				<FormItem>
 					<FormLabel class="mb-1">
 						Почта/Имя пользователя:
