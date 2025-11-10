@@ -29,14 +29,14 @@ const isTheme = computed({
 	<Toggle
 		v-if="isReady"
 		v-model="isTheme"
-		label="Toggle theme"
+		label="Кнопка переключения темы"
 		variant="outline"
 		size="sm"
-		class="px-0 text-lg data-[state=on]:bg-transparent hover:border-primary transition-colors duration-300"
+		class="px-0 text-lg data-[state=on]:bg-transparent hover:border-primary transition-colors duration-200"
 	>
 		<Icon
 			:name="isTheme ? 'tabler:moon' : 'tabler:sun-high'"
-			class="w-full transition-transform duration-300"
+			class="w-full transition-transform duration-450"
 			:class="isTheme ? 'rotate-0' : 'text-primary rotate-90'"
 		/>
 	</Toggle>
