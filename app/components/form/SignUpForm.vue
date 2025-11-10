@@ -1,21 +1,19 @@
 <script setup lang="ts">
 import type { SignUpValues } from '~lib/types/validation';
-import type { User } from 'lucia';
 
 import { toTypedSchema } from '@vee-validate/zod';
 import { signUpSchema } from '~lib/types/validation';
+import { useAuthUserStore } from '~stores/auth';
 
 import { Button } from '~/components/ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '~/components/ui/form';
 import { Input } from '~/components/ui/input';
 import DotsLoader from '~/components/ui/loader/DotsLoader.vue';
-import { toast } from '~/composables/use-toast';
-import { useAuthUser } from '~/composables/useAuthUser';
 
 const formError = ref('');
 const loading = ref(false);
 const showPassword = ref(false);
-const authUser = useAuthUser();
+const { signUp } = useAuthUserStore();
 
 async function onSubmit(
 	values: unknown,
@@ -26,19 +24,10 @@ async function onSubmit(
 
 	try {
 		const formData = values as SignUpValues;
-		const user = await $fetch<User>('/api/auth/sign-up', {
-			method: 'POST',
-			body: formData,
-		});
-		authUser.value = user ?? null;
+		await signUp(formData);
 		resetForm();
-		toast({
-			description: `${authUser.value?.name}, Вы успешно зарегистрировались!`,
-			variant: 'success',
-		});
-		await navigateTo('/profile');
 	}
-	catch (error: unknown) {
+	catch (error: any) {
 		if (error?.response?._data?.statusCode === 409 && error?.response?._data?.data?.field) {
 			setFieldValue(error?.response?._data?.data?.field, '');
 			setFieldValue('password', '');

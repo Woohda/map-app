@@ -2,25 +2,9 @@
     setup
     lang="ts"
 >
-import type { User } from 'lucia';
+import { useAuthUserStore } from '~stores/auth';
 
-import { useAuthUser } from '~/composables/useAuthUser';
-
-const authUser = useAuthUser();
-
-async function logout() {
-	try {
-		await $fetch<User>('/api/auth/logout', {
-			method: 'POST',
-			credentials: 'include',
-		});
-		authUser.value = null;
-		await navigateTo('/');
-	}
-	catch (error: unknown) {
-		console.error('Ошибка выхода из аккаунта', error);
-	}
-}
+const { logout } = useAuthUserStore();
 </script>
 
 <template>

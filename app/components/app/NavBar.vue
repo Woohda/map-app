@@ -2,9 +2,12 @@
     setup
     lang="ts"
 >
+import { useAuthUserStore } from '~stores/auth';
+import { storeToRefs } from 'pinia';
+
 import LogoutButton from '~/components/button/LogoutButton.vue';
 
-const authUser = useAuthUser();
+const { isAuthenticated } = storeToRefs(useAuthUserStore());
 </script>
 
 <template>
@@ -12,7 +15,7 @@ const authUser = useAuthUser();
 		<NuxtLink to="/">
 			MAP_APP
 		</NuxtLink>
-		<div v-if="authUser" class="flex items-center gap-5">
+		<div v-if="isAuthenticated" class="flex items-center gap-5">
 			<span>
 				Профиль
 			</span>
