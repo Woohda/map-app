@@ -125,9 +125,7 @@ body,
 #__nuxt {
 	@apply h-screen;
 	font-family: var(--tektur), monospace;
-	transition:
-		background-color 0.35s ease-out,
-		color 0.2s ease-out;
+	transition: background-color 0.45s ease-in-out;
 }
 
 /* Для Tailwind dark mode */
