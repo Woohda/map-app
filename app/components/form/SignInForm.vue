@@ -96,10 +96,11 @@ function toggleShowPassword() {
 								lable="Show password"
 								variant="outline"
 								size="sm"
-								class="absolute border-none bottom-[2px] right-[1px] px-0 text-foreground data-[state=on]:bg-transparent hover:bg-transparent hover:text-primary duration-300"
+								class="absolute border-none bottom-[2px] right-[1px] px-0 text-foreground data-[state=on]:bg-transparent hover:bg-transparent hover:text-primary transition-colors duration-200"
 								@update:model-value="toggleShowPassword"
 							>
 								<Icon
+									:key="showPassword ? 'eye' : 'eye-closed'"
 									:name="showPassword ? 'tabler:eye' : 'tabler:eye-closed'"
 									style="width:23px; height:23px;"
 								/>
@@ -127,7 +128,7 @@ function toggleShowPassword() {
 			<span v-else>Войти</span>
 		</Button>
 
-		<Transition name="fade" appear>
+		<Transition name="fade-slide" appear>
 			<p v-if="formError" class="text-destructive text-center text-xs">
 				{{ formError }}
 			</p>
@@ -156,19 +157,5 @@ function toggleShowPassword() {
 .fade-slide-leave-to {
 	opacity: 0;
 	transform: translateY(-5px);
-}
-
-/* Плавное появление общего сообщения */
-.fade-enter-active,
-.fade-leave-active {
-	transition: opacity 0.5s ease;
-}
-.fade-enter-from,
-.fade-leave-to {
-	opacity: 0;
-}
-.fade-enter-to,
-.fade-leave-from {
-	opacity: 1;
 }
 </style>
