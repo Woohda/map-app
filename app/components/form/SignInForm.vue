@@ -1,21 +1,19 @@
 <script setup lang="ts">
 import type { SignInValues } from '~lib/types/validation';
-import type { User } from 'lucia';
 
 import { toTypedSchema } from '@vee-validate/zod';
 import { signInSchema } from '~lib/types/validation';
+import { useAuthUserStore } from '~stores/auth';
 
 import { Button } from '~/components/ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '~/components/ui/form';
 import { Input } from '~/components/ui/input';
 import DotsLoader from '~/components/ui/loader/DotsLoader.vue';
-import { toast } from '~/composables/use-toast';
-import { useAuthUser } from '~/composables/useAuthUser';
 
 const formError = ref('');
 const loading = ref(false);
 const showPassword = ref(false);
-const authUser = useAuthUser();
+const { signIn } = useAuthUserStore();
 
 async function onSubmit(
 	values: unknown,
@@ -26,18 +24,9 @@ async function onSubmit(
 
 	try {
 		const formData = values as SignInValues;
-		const user = await $fetch<User>('/api/auth/sign-in', {
-			method: 'POST',
-			body: formData,
-		});
-		authUser.value = user ?? null;
-		toast({
-			description: `Добро пожаловать, ${authUser.value?.name}!`,
-			variant: 'success',
-		});
-		await navigateTo('/profile');
+		await signIn(formData);
 	}
-	catch (error: unknown) {
+	catch (error: any) {
 		// универсально достаём сообщение из разных версий Nuxt/$fetch
 		formError.value
 			= error?.response?._data?.message

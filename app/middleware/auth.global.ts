@@ -34,15 +34,14 @@
 
 import type { User } from 'lucia';
 
+import { useAuthUserStore } from '~stores/auth';
 import { useRequestEvent } from 'nuxt/app';
 
-import { useAuthUser } from '~/composables/useAuthUser';
-
 export default defineNuxtRouteMiddleware(async (to) => {
-	const authUser = useAuthUser();
+	const authUser = useAuthUserStore();
 	const publicPages = ['/', '/sign-in', '/sign-up'];
 
-	if (authUser.value) {
+	if (authUser.isAuthenticated) {
 		if (['/sign-in', '/sign-up'].includes(to.path)) {
 			return navigateTo('/');
 		}
@@ -54,7 +53,7 @@ export default defineNuxtRouteMiddleware(async (to) => {
 		const cookies = event?.node.req?.headers.cookie || '';
 		const hasSessionCookie = cookies.includes('auth-session');
 		if (!hasSessionCookie) {
-			authUser.value = null;
+			authUser.currentUser = null;
 			if (!publicPages.includes(to.path))
 				return navigateTo('/sign-in');
 			return;
@@ -68,17 +67,17 @@ export default defineNuxtRouteMiddleware(async (to) => {
 				headers: { cookie: cookies },
 			});
 
-			authUser.value = user ?? null;
+			authUser.currentUser = user ?? null;
 		}
 		catch {
-			authUser.value = null;
+			authUser.currentUser = null;
 		}
 
-		if (authUser.value && ['/sign-in', '/sign-up'].includes(to.path)) {
+		if (authUser.currentUser && ['/sign-in', '/sign-up'].includes(to.path)) {
 			return navigateTo('/');
 		}
 
-		if (!authUser.value && !publicPages.includes(to.path)) {
+		if (!authUser.currentUser && !publicPages.includes(to.path)) {
 			return navigateTo('/sign-in');
 		}
 	}

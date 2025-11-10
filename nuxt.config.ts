@@ -15,10 +15,12 @@ export default defineNuxtConfig({
 		'@nuxt/image',
 		'shadcn-nuxt',
 		'@nuxtjs/color-mode',
+		'@pinia/nuxt',
 	],
 	alias: {
 		'~': path.resolve(__dirname, 'app'),
 		'~server': path.resolve(__dirname, 'server'),
+		'~stores': path.resolve(__dirname, 'stores'),
 		'~lib': path.resolve(__dirname, 'lib'),
 		'~prisma': path.resolve(__dirname, 'prisma'),
 		'~public': path.resolve(__dirname, 'public'),
