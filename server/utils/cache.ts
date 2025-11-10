@@ -1,16 +1,17 @@
 /**
- * @module cache
+ * @module server/utils/cache
  * @description
  * Модуль предоставляет универсальную функцию кэширования асинхронных операций.
  * Позволяет сохранять результаты вызовов функций в памяти на ограниченное время (TTL),
  * чтобы снизить количество повторных вычислений или запросов к внешним ресурсам.
- * @remarks
+ * ---
+ * #### Особенности:
  * - Кэш реализован с помощью `Map` и живёт только в памяти текущего процесса.
  * - При перезапуске приложения или очистке контекста данные кэша теряются.
  * - Подходит для временного хранения данных (например, из БД или API).
  */
 
-export function cache<T extends (...args: any[]) => Promise<any>>(fn: T, ttl = 60) {
+export function cache<T extends (...args: any[]) => Promise<any>>(fn: T, ttl = 40) {
 	const map = new Map<string, { value: any; expires: number }>();
 	return async (...args: Parameters<T>): Promise<ReturnType<T>> => {
 		const now = Date.now();

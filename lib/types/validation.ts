@@ -1,10 +1,11 @@
 import { z } from 'zod/v4';
 
 /**
- * @module validation
+ * @module lib/types/validation
  * @fileoverview Валидация и типизация данных с использованием Zod
  * @description
  * Модуль валидации данных приложения с использованием библиотеки Zod.
+ * ---
  * ## Основные возможности:
  * - Валидация данных форм;
  * - Типизация входных данных;
@@ -21,15 +22,15 @@ import { z } from 'zod/v4';
  */
 
 const requiredString = z
-	.string()
-	.trim()
-	.min(1, 'Поле обязательно для заполнения');
+	.string({ error: iss => iss.input === undefined ? 'Поле обязательно для заполнения' : 'Invalid input.' })
+	.trim();
 
 export const signUpSchema = z.object({
 	email: z
-		.email('Введите корректный email')
-		.min(1, 'Поле обязательно для заполнения'),
-	name: requiredString.max(30, 'Имя не должно превышать 30 символов'),
+		.email('Введите корректный email'),
+	name: requiredString
+		.min(1, 'Имя должно содержать минимум 1 символ')
+		.max(30, 'Имя не должно превышать 30 символов'),
 	username: requiredString
 		.min(3, 'Имя пользователя должно содержать минимум 3 символа')
 		.regex(
@@ -47,7 +48,7 @@ export const signUpSchema = z.object({
 export type SignUpValues = z.infer<typeof signUpSchema>;
 
 export const signInSchema = z.object({
-	user: requiredString,
+	login: requiredString,
 	password: requiredString,
 });
 

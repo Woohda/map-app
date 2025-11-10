@@ -1,17 +1,30 @@
 /**
+ * @module server/utils/auth
  * @fileoverview
  * Модуль аутентификации и управления пользовательскими сессиями для Nuxt 4 + H3 + Lucia.
- * Использует Prisma в качестве ORM, Argon2id для безопасного хэширования паролей
- * и кастомную систему кэширования для оптимизации проверок сессий.
- * @module server/utils/auth
- *
  * @description
- * ### Основные задачи модуля:
- * - Создание и проверка пользовательских сессий через Lucia.
- * - Управление cookie (создание, обновление, очистка).
- * - Проверка существования пользователя по email или username.
- * - Конфигурация и инициализация Lucia с адаптером Prisma.
- * - Поддержка безопасного хэширования паролей с помощью Argon2id.
+ * Данный модуль реализует серверную логику аутентификации для приложения на Nuxt 4,
+ * используя стек H3 (Nitro), Lucia Auth и Prisma.
+ * ---
+ * #### Состояния и зависимости:
+ * - Используется Lucia Auth для управления сессиями, а PrismaAdapter — для интеграции с ORM Prisma.
+ * - В качестве хранилища пользователей и сессий выступает база данных, управляемая Prisma.
+ * - Для хэширования паролей применяется алгоритм Argon2id с заданными параметрами безопасности.
+ * - Для ускорения повторных проверок сессий используется собственное кэширование.
+ *
+ * #### Основные функции:
+ * - `createSession(userId)`: Создаёт новую сессию для пользователя или возвращает существующую, если она уже есть.
+ * - `createNewSessionCookie(event)`: Устанавливает "пустую" cookie для сессии (например, при выходе).
+ * - `createSessionCookie(event, session)`: Устанавливает cookie сессии для пользователя.
+ * - `validateRequest(event)`: Валидирует сессию пользователя по cookie, при необходимости обновляет или сбрасывает cookie, использует кэширование.
+ * - `checkUserExists(identifier)`: Проверяет наличие пользователя по email или username (без учёта регистра).
+ * - `hashOptions`: Конфигурация для Argon2id, используемая при хэшировании паролей.
+ *
+ * #### Особенности:
+ * - Все операции с cookie производятся с учётом безопасности (secure, sameSite).
+ * - Модуль расширяет типизацию Lucia для поддержки дополнительных пользовательских атрибутов.
+ * - Валидация сессии происходит максимально эффективно за счёт кэширования.
+ * - Все функции возвращают результат в виде промисов, что позволяет использовать их в асинхронных обработчиках.
  */
 
 import type { H3Event } from 'h3';
@@ -30,8 +43,9 @@ const adapter = new PrismaAdapter(prisma.session, prisma.user);
 
 interface DatabaseUserAttributes {
 	id: string;
-	username: string;
 	name: string;
+	username: string;
+	email: string;
 	avatarUrl: string | null;
 }
 
@@ -42,10 +56,9 @@ declare module 'lucia' {
 	}
 }
 
-// создаем экземпляр Lucia и передаем ему адаптер
 export const lucia = new Lucia(adapter, {
 	sessionCookie: {
-		name: '(auth)-session',
+		name: 'auth-session',
 		expires: false,
 		attributes: {
 			secure: env.NODE_ENV === 'production',
@@ -55,8 +68,9 @@ export const lucia = new Lucia(adapter, {
 	getUserAttributes(databaseUserAttributes) {
 		return {
 			id: databaseUserAttributes.id,
-			username: databaseUserAttributes.username,
 			name: databaseUserAttributes.name,
+			username: databaseUserAttributes.username,
+			email: databaseUserAttributes.email,
 			avatarUrl: databaseUserAttributes.avatarUrl,
 		};
 	},

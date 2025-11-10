@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import type { SignUpValues } from '~lib/types/validation';
+import type { SignInValues } from '~lib/types/validation';
 import type { User } from 'lucia';
 
 import { toTypedSchema } from '@vee-validate/zod';
-import { signUpSchema } from '~lib/types/validation';
+import { signInSchema } from '~lib/types/validation';
 
 import { Button } from '~/components/ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '~/components/ui/form';
@@ -19,36 +19,32 @@ const authUser = useAuthUser();
 
 async function onSubmit(
 	values: unknown,
-	{ resetForm, setFieldValue }: { resetForm: () => void; setFieldValue: (field: string, value: string) => void },
+	{ resetForm }: { resetForm: () => void },
 ) {
 	loading.value = true;
 	formError.value = '';
 
 	try {
-		const formData = values as SignUpValues;
-		const user = await $fetch<User>('/api/auth/sign-up', {
+		const formData = values as SignInValues;
+		const user = await $fetch<User>('/api/auth/sign-in', {
 			method: 'POST',
 			body: formData,
 		});
 		authUser.value = user ?? null;
-		resetForm();
 		toast({
-			description: `${authUser.value?.name}, Вы успешно зарегистрировались!`,
+			description: `Добро пожаловать, ${authUser.value?.name}!`,
 			variant: 'success',
 		});
 		await navigateTo('/profile');
 	}
 	catch (error: unknown) {
-		if (error?.response?._data?.statusCode === 409 && error?.response?._data?.data?.field) {
-			setFieldValue(error?.response?._data?.data?.field, '');
-			setFieldValue('password', '');
-		}
 		// универсально достаём сообщение из разных версий Nuxt/$fetch
 		formError.value
 			= error?.response?._data?.message
-				|| 'Ошибка регистрации. Попробуйте еще раз';
+				|| 'Ошибка входа. Попробуйте еще раз';
 	}
 	finally {
+		resetForm();
 		loading.value = false;
 	}
 }
@@ -59,60 +55,19 @@ function toggleShowPassword() {
 </script>
 
 <template>
-	<Form v-slot="{ meta }" :validation-schema="toTypedSchema(signUpSchema)" class="w-full max-w-sm mx-auto flex flex-col gap-4" @submit="onSubmit">
+	<Form v-slot="{ meta }" :validation-schema="toTypedSchema(signInSchema)" class="w-full max-w-sm mx-auto flex flex-col gap-4" @submit="onSubmit">
 		<fieldset :disabled="loading" class="w-full space-y-4">
-			<FormField v-slot="{ field, errorMessage }" name="name">
+			<FormField v-slot="{ field, errorMessage }" name="login">
 				<FormItem>
 					<FormLabel class="mb-1">
-						Имя
+						Почта/Имя пользователя:
 					</FormLabel>
 					<FormControl>
 						<Input
 							v-bind="field"
 							type="text"
-							placeholder="Напишите ваше имя"
-						/>
-					</FormControl>
-					<Transition name="fade-slide" appear>
-						<FormMessage class="text-xs">
-							{{ errorMessage }}
-						</FormMessage>
-					</Transition>
-				</FormItem>
-			</FormField>
-
-			<FormField v-slot="{ field, errorMessage }" name="email">
-				<FormItem>
-					<FormLabel class="mb-1">
-						Почта
-					</FormLabel>
-					<FormControl>
-						<Input
-							v-bind="field"
-							type="email"
-							placeholder="Напишите адрес вашей почты"
+							placeholder="Введите адрес почты или имя пользователя"
 							autocomplete="email"
-						/>
-					</FormControl>
-					<Transition name="fade-slide" appear>
-						<FormMessage class="text-xs">
-							{{ errorMessage }}
-						</FormMessage>
-					</Transition>
-				</FormItem>
-			</FormField>
-
-			<FormField v-slot="{ field, errorMessage }" name="username">
-				<FormItem>
-					<FormLabel class="mb-1">
-						Имя пользователя
-					</FormLabel>
-					<FormControl>
-						<Input
-							v-bind="field"
-							type="text"
-							placeholder="Придумайте имя пользователя"
-							autocomplete="username"
 						/>
 					</FormControl>
 					<Transition name="fade-slide" appear>
@@ -133,15 +88,15 @@ function toggleShowPassword() {
 							<Input
 								v-bind="field"
 								:type="showPassword ? 'text' : 'password'"
-								placeholder="Придумайте пароль"
-								autocomplete="new-password"
+								placeholder="Введите пароль от аккаунта"
+								autocomplete="current-password"
 							/>
 							<Toggle
 								:model-value="showPassword"
 								lable="Show password"
 								variant="outline"
 								size="sm"
-								class="absolute border-none bottom-[2px] right-[1px] px-0 data-[state=on]:bg-transparent hover:bg-transparent hover:text-primary transition-colors duration-200"
+								class="absolute border-none bottom-[2px] right-[1px] px-0 text-foreground data-[state=on]:bg-transparent hover:bg-transparent hover:text-primary transition-colors duration-200"
 								@update:model-value="toggleShowPassword"
 							>
 								<Icon
@@ -167,13 +122,13 @@ function toggleShowPassword() {
 			class="w-full flex items-center justify-center gap-2 cursor-pointer"
 		>
 			<span v-if="loading" class="flex gap-0.5 items-baseline">
-				Регистрируем
+				Заходим
 				<DotsLoader />
 			</span>
-			<span v-else>Зарегистрироваться</span>
+			<span v-else>Войти</span>
 		</Button>
 
-		<Transition name="fade">
+		<Transition name="fade-slide" appear>
 			<p v-if="formError" class="text-destructive text-center text-xs">
 				{{ formError }}
 			</p>

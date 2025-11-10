@@ -16,8 +16,8 @@ model User {
   username     String  @unique
   passwordHash String?
   avatarUrl    String?
+  name         String
   bio          String?
-  name         String?
 
   createdAt DateTime  @default(now())
   Session   Session[]

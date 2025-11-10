@@ -4,12 +4,13 @@ import { withAccelerate } from '@prisma/extension-accelerate';
 import env from './env/env';
 
 /**
- * @module prisma
+ * @module lib/prisma
  * @fileoverview Конфигурация и инициализация Prisma клиента с поддержкой Accelerate
  * @description
  * Этот модуль создает и экспортирует единственный экземпляр PrismaClient с расширением Accelerate.
  * В режиме разработки используется глобальная переменная для хранения экземпляра, чтобы избежать создания множества подключений при hot-reload.
  * В продакшене создается новый экземпляр для каждого запроса.
+ * ---
  * ### Глобальный тип для хранения экземпляра PrismaClient:
  * - глобальная переменная для хранения экземпляра PrismaClient (globalForPrisma)
  * - экземпляр PrismaClient (prisma)
