@@ -38,7 +38,7 @@ const { error } = defineProps<{
 		<Button
 			type="button"
 			variant="outline"
-			class="group/button relative w-27 h-27 flex items-center justify-center shadow-none border-none rounded-2xl hover:scale-110 hover:bg-transparent transition duration-500 focus:outline-none focus:ring-4 focus:ring-primary/50"
+			class="group/button relative w-27 h-27 flex items-center justify-center shadow-none border-none rounded-2xl hover:scale-110 hover:bg-transparent transition duration-500 focus-visible:border-ring focus-visible:ring-ring/60 focus-visible:ring-[3.5px] outline-none"
 			aria-label="На главную"
 			@click="navigateTo('/', { replace: true })"
 		>
