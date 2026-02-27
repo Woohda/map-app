@@ -17,6 +17,13 @@ export default defineNuxtConfig({
 		'@nuxtjs/color-mode',
 		'@pinia/nuxt',
 	],
+	typescript: {
+		tsConfig: {
+			compilerOptions: {
+				allowArbitraryExtensions: true,
+			},
+		},
+	},
 	alias: {
 		'~': path.resolve(__dirname, 'app'),
 		'~server': path.resolve(__dirname, 'server'),
