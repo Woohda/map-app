@@ -9,7 +9,6 @@ import {
 	SidebarMenuItem,
 } from '@/components/ui/sidebar';
 
-// Menu items.
 const items = [
 	{
 		title: 'Локации',
@@ -31,10 +30,14 @@ const items = [
 				<SidebarGroupContent>
 					<SidebarMenu>
 						<SidebarMenuItem v-for="item in items" :key="item.title">
-							<SidebarMenuButton as-child>
+							<SidebarMenuButton as-child size="lg">
 								<NuxtLink class="flex items-center cursor-pointer">
-									<Icon :name="item.icon" style="width: 20px; height: 20px;" />
-									<span>{{ item.title }}</span>
+									<Icon :name="item.icon" size="23" class="shrink-0" />
+									<span
+										class="flex items-center transition-[width,opacity,margin] duration-300 ease-linear group-data-[collapsible=icon]:w-0 group-data-[collapsible=icon]:opacity-0 group-data-[collapsible=icon]:ml-0 w-full opacity-100 ml-2 overflow-hidden whitespace-nowrap"
+									>
+										{{ item.title }}
+									</span>
 								</NuxtLink>
 							</SidebarMenuButton>
 						</SidebarMenuItem>
@@ -45,6 +48,4 @@ const items = [
 	</Sidebar>
 </template>
 
-<style scoped>
-
-</style>
+<style scoped></style>
