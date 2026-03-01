@@ -1,5 +1,9 @@
 <script setup lang="ts">
 import SignInForm from '~/components/form/SignInForm.vue';
+
+definePageMeta({
+	layout: 'auth',
+});
 </script>
 
 <template>
