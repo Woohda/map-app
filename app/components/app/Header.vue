@@ -1,10 +1,8 @@
 <script setup lang="ts">
-import { useAuthUserStore } from '~stores/auth';
-
 import NavBar from '~/components/app/NavBar.vue';
 import ThemeToggle from '~/components/button/ThemeToggle.vue';
 
-const { isAuthenticated } = storeToRefs(useAuthUserStore());
+const route = useRoute();
 </script>
 
 <template>
@@ -14,7 +12,10 @@ const { isAuthenticated } = storeToRefs(useAuthUserStore());
 		<div
 			class="mx-auto flex h-16 w-full max-w-7xl items-center gap-3 px-4 md:px-6"
 		>
-			<SidebarTrigger v-if="isAuthenticated" class="shrink-0" />
+			<SidebarTrigger
+				v-if="!['/sign-in', '/sign-up'].includes(route.path)"
+				class="shrink-0"
+			/>
 			<div class="min-w-0 flex-1">
 				<NavBar />
 			</div>

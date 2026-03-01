@@ -6,7 +6,14 @@ import { signInSchema } from '~lib/types/validation';
 import { useAuthUserStore } from '~stores/auth';
 
 import { Button } from '~/components/ui/button';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '~/components/ui/form';
+import {
+	Form,
+	FormControl,
+	FormField,
+	FormItem,
+	FormLabel,
+	FormMessage,
+} from '~/components/ui/form';
 import { Input } from '~/components/ui/input';
 import DotsLoader from '~/components/ui/loader/DotsLoader.vue';
 
@@ -29,8 +36,7 @@ async function onSubmit(
 	catch (error: any) {
 		// универсально достаём сообщение из разных версий Nuxt/$fetch
 		formError.value
-			= error?.response?._data?.message
-				|| 'Ошибка входа. Попробуйте еще раз';
+			= error?.response?._data?.message || 'Ошибка входа. Попробуйте еще раз';
 	}
 	finally {
 		resetForm();
@@ -44,7 +50,12 @@ function toggleShowPassword() {
 </script>
 
 <template>
-	<Form v-slot="{ meta }" :validation-schema="toTypedSchema(signInSchema)" class="w-full max-w-sm mx-auto flex flex-col gap-4" @submit="onSubmit">
+	<Form
+		v-slot="{ meta }"
+		:validation-schema="toTypedSchema(signInSchema)"
+		class="w-full max-w-sm mx-auto flex flex-col gap-4"
+		@submit="onSubmit"
+	>
 		<fieldset :disabled="loading" class="w-full space-y-4">
 			<FormField v-slot="{ field, errorMessage }" name="login">
 				<FormItem>
@@ -85,13 +96,13 @@ function toggleShowPassword() {
 								lable="Show password"
 								variant="outline"
 								size="sm"
-								class="absolute border-none bottom-[2px] right-[1px] px-0 text-foreground data-[state=on]:bg-transparent hover:bg-transparent hover:text-primary transition-colors duration-200"
+								class="absolute border-none bottom-0.5 right-px px-0 text-foreground data-[state=on]:bg-transparent hover:bg-transparent hover:text-primary transition-colors duration-200"
 								@update:model-value="toggleShowPassword"
 							>
 								<Icon
 									:key="showPassword ? 'eye' : 'eye-closed'"
 									:name="showPassword ? 'tabler:eye' : 'tabler:eye-closed'"
-									style="width:23px; height:23px;"
+									style="width: 23px; height: 23px"
 								/>
 							</Toggle>
 						</div>
