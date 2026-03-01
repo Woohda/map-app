@@ -19,8 +19,13 @@ model User {
   name         String
   bio          String?
 
-  createdAt DateTime  @default(now())
-  Session   Session[]
+  Session          Session[]
+  Location         Location[]
+  LocationLog      LocationLog[]
+  LocationLogImage LocationLogImage[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@map("users")
 }
@@ -33,4 +38,57 @@ model Session {
   user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("sessions")
+}
+
+model Location {
+  id          String        @id
+  userId      String
+  name        String
+  slag        String        @unique
+  description String?
+  latitude    Float
+  longitude   Float
+  LocationLog LocationLog[]
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("locations")
+}
+
+model LocationLog {
+  id               String             @id
+  userId           String
+  LocationId       String
+  name             String
+  description      String?
+  startedAt        Int
+  endedAt          Int
+  latitude         Float
+  longitude        Float
+  LocationLogImage LocationLogImage[]
+
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  location Location @relation(fields: [LocationId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("location_logs")
+}
+
+model LocationLogImage {
+  id            String      @id
+  userId        String
+  locationLogId String
+  url           String
+  user          User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  locationLog   LocationLog @relation(fields: [locationLogId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("location_log_images")
 }
