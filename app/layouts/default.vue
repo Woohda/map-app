@@ -9,15 +9,13 @@ import Header from '~/components/app/Header.vue';
 <template>
 	<SidebarProvider
 		:default-open="true"
-		class="min-h-svh w-full"
+		class="min-h-screen w-full"
 	>
 		<AppSidebar />
-		<SidebarInset class="min-h-svh">
+		<SidebarInset class="min-h-screen">
 			<Header />
-			<main class="w-full flex-1">
-				<div class="mx-auto w-full max-w-7xl px-4 py-6 md:px-6">
-					<slot />
-				</div>
+			<main class="w-full">
+				<slot />
 			</main>
 		</SidebarInset>
 	</SidebarProvider>

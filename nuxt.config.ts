@@ -1,8 +1,8 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 import tailwindcss from '@tailwindcss/vite';
-
-import './lib/env/env';
 import path from 'node:path';
+
+import env from './lib/env/env';
 // import { fileURLToPath } from 'node:url';
 
 export default defineNuxtConfig({
@@ -16,6 +16,7 @@ export default defineNuxtConfig({
 		'shadcn-nuxt',
 		'@nuxtjs/color-mode',
 		'@pinia/nuxt',
+		'vue-yandex-maps/nuxt',
 	],
 	typescript: {
 		tsConfig: {
@@ -35,6 +36,9 @@ export default defineNuxtConfig({
 	shadcn: {
 		prefix: '',
 		componentDir: '@/components/ui',
+	},
+	yandexMaps: {
+		apikey: env.NUXT_PUBLIC_YANDEX_MAPS_API_KEY,
 	},
 	colorMode: {
 		preference: 'system',

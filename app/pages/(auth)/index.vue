@@ -1,16 +1,11 @@
-<script
-    setup
-    lang="ts"
->
-
+<script setup lang="ts">
+import Map from '~/components/app/Map.vue';
 </script>
 
 <template>
-	<div class="text-3xl font-bold underline">
-		Hello world
+	<div class="h-screen w-full">
+		<Map />
 	</div>
 </template>
 
-<style scoped>
-
-</style>
+<style scoped></style>
