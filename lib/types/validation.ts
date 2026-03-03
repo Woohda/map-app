@@ -14,11 +14,13 @@ import { z } from 'zod/v4';
  * - Базовая схема для обязательного строкового поля (requiredString)
  * - Регистрация пользователя (signUpSchema);
  * - Авторизация (signInSchema);
- * - Обновление профиля (updateUserProfileSchema).
+ * - Обновление профиля (updateUserProfileSchema);
+ * - Добавления локации (addLocationSchema).
  * ## Типы данных для значений:
  * - Формы регистрации (SignUpValues);
  * - Формы авторизации (SignInValues);
- * - Формы обновления профиля (UpdateUserProfileValues).
+ * - Формы обновления профиля (UpdateUserProfileValues);
+ * - Формы добавления локации (AddLocationValues).
  */
 
 const requiredString = z
@@ -60,3 +62,10 @@ export const updateUserProfileSchema = z.object({
 });
 
 export type UpdateUserProfileValues = z.infer<typeof updateUserProfileSchema>;
+
+export const addLocationSchema = z.object({
+	title: requiredString,
+	description: requiredString,
+});
+
+export type AddLocationValues = z.infer<typeof addLocationSchema>;
