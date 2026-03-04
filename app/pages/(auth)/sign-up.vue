@@ -1,5 +1,9 @@
 <script setup lang="ts">
 import SignUpForm from '~/components/form/SignUpForm.vue';
+
+definePageMeta({
+	layout: 'auth',
+});
 </script>
 
 <template>

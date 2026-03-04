@@ -1,9 +1,10 @@
 <script setup lang="ts">
-import type { SignInValues } from '~lib/types/validation';
+import type { LngLat } from '@yandex/ymaps3-types';
+import type { AddLocationFormValues, AddLocationValues } from '~lib/types/validation';
 
 import { toTypedSchema } from '@vee-validate/zod';
-import { signInSchema } from '~lib/types/validation';
-import { useAuthUserStore } from '~stores/auth';
+import { addLocationFormSchema } from '~lib/types/validation';
+import { useLocationStore } from '~stores/map';
 
 import { Button } from '~/components/ui/button';
 import {
@@ -16,11 +17,20 @@ import {
 } from '~/components/ui/form';
 import { Input } from '~/components/ui/input';
 import DotsLoader from '~/components/ui/loader/DotsLoader.vue';
+import { Textarea } from '~/components/ui/textarea';
+
+interface Props {
+	coordinates: LngLat | null;
+	onClose: () => void;
+}
+
+const props = defineProps<Props>();
 
 const formError = ref('');
 const loading = ref(false);
-const showPassword = ref(false);
-const { signIn } = useAuthUserStore();
+const { addLocation } = useLocationStore();
+
+const currentCoordinates = computed(() => props.coordinates || [0, 0]);
 
 async function onSubmit(
 	values: unknown,
@@ -28,46 +38,45 @@ async function onSubmit(
 ) {
 	loading.value = true;
 	formError.value = '';
-
 	try {
-		const formData = values as SignInValues;
-		await signIn(formData);
+		const formData = values as AddLocationFormValues;
+		const submitData: AddLocationValues = {
+			...formData,
+			longitude: currentCoordinates.value[0],
+			latitude: currentCoordinates.value[1],
+		};
+		await addLocation(submitData);
+		resetForm();
+		props.onClose();
 	}
 	catch (error: any) {
-		// универсально достаём сообщение из разных версий Nuxt/$fetch
 		formError.value
-			= error?.response?._data?.message || 'Ошибка входа. Попробуйте еще раз';
+			= error?.response?._data?.message || 'Ошибка добавления локации. Попробуйте еще раз';
 	}
 	finally {
-		resetForm();
 		loading.value = false;
 	}
-}
-
-function toggleShowPassword() {
-	showPassword.value = !showPassword.value;
 }
 </script>
 
 <template>
 	<Form
 		v-slot="{ meta }"
-		:validation-schema="toTypedSchema(signInSchema)"
-		class="w-full max-w-sm mx-auto flex flex-col gap-4"
+		:validation-schema="toTypedSchema(addLocationFormSchema)"
+		class="flex flex-col gap-4"
 		@submit="onSubmit"
 	>
 		<fieldset :disabled="loading" class="w-full space-y-4">
-			<FormField v-slot="{ field, errorMessage }" name="login">
+			<FormField v-slot="{ field, errorMessage }" name="name">
 				<FormItem>
 					<FormLabel class="mb-1">
-						Почта/Имя пользователя:
+						Название локации:
 					</FormLabel>
 					<FormControl>
 						<Input
 							v-bind="field"
 							type="text"
-							placeholder="Введите адрес почты или имя пользователя"
-							autocomplete="email"
+							placeholder="Название локации"
 						/>
 					</FormControl>
 					<Transition name="fade-slide" appear>
@@ -78,34 +87,17 @@ function toggleShowPassword() {
 				</FormItem>
 			</FormField>
 
-			<FormField v-slot="{ field, errorMessage }" name="password">
+			<FormField v-slot="{ field, errorMessage }" name="description">
 				<FormItem>
 					<FormLabel class="mb-1">
-						Пароль
+						Описание локации:
 					</FormLabel>
 					<FormControl>
-						<div class="relative">
-							<Input
-								v-bind="field"
-								:type="showPassword ? 'text' : 'password'"
-								placeholder="Введите пароль от аккаунта"
-								autocomplete="current-password"
-							/>
-							<Toggle
-								:model-value="showPassword"
-								lable="Show password"
-								variant="outline"
-								size="sm"
-								class="absolute border-none bottom-0.5 right-px px-0 text-foreground data-[state=on]:bg-transparent hover:bg-transparent hover:text-primary transition-colors duration-200"
-								@update:model-value="toggleShowPassword"
-							>
-								<Icon
-									:key="showPassword ? 'eye' : 'eye-closed'"
-									:name="showPassword ? 'tabler:eye' : 'tabler:eye-closed'"
-									style="width: 23px; height: 23px"
-								/>
-							</Toggle>
-						</div>
+						<Textarea
+							v-bind="field"
+							placeholder="Напишите описание локации..."
+							rows="3"
+						/>
 					</FormControl>
 					<Transition name="fade-slide" appear>
 						<FormMessage class="text-xs">
@@ -114,18 +106,29 @@ function toggleShowPassword() {
 					</Transition>
 				</FormItem>
 			</FormField>
+
+			<FormField name="coordinates">
+				<FormItem>
+					<FormLabel class="mb-1">
+						Координаты:
+					</FormLabel>
+					<FormControl class="text-sm text-muted-foreground">
+						{{ currentCoordinates[0].toFixed(6) }}, {{ currentCoordinates[1].toFixed(6) }}
+					</FormControl>
+				</FormItem>
+			</FormField>
 		</fieldset>
 
 		<Button
 			type="submit"
 			:disabled="loading || !meta.valid"
-			class="w-full flex items-center justify-center gap-2 cursor-pointer"
+			class="w-full flex gap-2"
 		>
 			<span v-if="loading" class="flex gap-0.5 items-baseline">
-				Заходим
+				Добавление
 				<DotsLoader />
 			</span>
-			<span v-else>Войти</span>
+			<span v-else>Добавить</span>
 		</Button>
 
 		<Transition name="fade-slide" appear>
