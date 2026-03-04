@@ -63,9 +63,17 @@ export const updateUserProfileSchema = z.object({
 
 export type UpdateUserProfileValues = z.infer<typeof updateUserProfileSchema>;
 
-export const addLocationSchema = z.object({
-	title: requiredString,
-	description: requiredString,
+export const addLocationFormSchema = z.object({
+	name: requiredString.min(1, 'Название должно содержать минимум 1 символ')
+		.max(100, 'Название не должно превышать 50 символов'),
+	description: requiredString.min(1, 'Описание должно содержать минимум 1 символ')
+		.max(500, 'Описание не должно превышать 500 символов'),
 });
 
+export const addLocationSchema = addLocationFormSchema.extend({
+	latitude: z.number(),
+	longitude: z.number(),
+});
+
+export type AddLocationFormValues = z.infer<typeof addLocationFormSchema>;
 export type AddLocationValues = z.infer<typeof addLocationSchema>;
