@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import type { LngLat } from '@yandex/ymaps3-types';
-import type { LocationFormData } from '~lib/types/map';
-import type { AddLocationValues } from '~lib/types/validation';
+import type { AddLocationFormValues, AddLocationValues } from '~lib/types/validation';
 
 import { toTypedSchema } from '@vee-validate/zod';
-import { addLocationSchema } from '~lib/types/validation';
+import { addLocationFormSchema } from '~lib/types/validation';
+import { useLocationStore } from '~stores/map';
 
 import { Button } from '~/components/ui/button';
 import {
@@ -20,14 +20,15 @@ import DotsLoader from '~/components/ui/loader/DotsLoader.vue';
 import { Textarea } from '~/components/ui/textarea';
 
 interface Props {
-	coordinates?: LngLat | null;
-	onSubmit: (data: LocationFormData) => Promise<void>;
+	coordinates: LngLat | null;
+	onClose: () => void;
 }
 
 const props = defineProps<Props>();
 
 const formError = ref('');
 const loading = ref(false);
+const { addLocation } = useLocationStore();
 
 const currentCoordinates = computed(() => props.coordinates || [0, 0]);
 
@@ -37,16 +38,16 @@ async function onSubmit(
 ) {
 	loading.value = true;
 	formError.value = '';
-
 	try {
-		const formData = values as AddLocationValues;
-		const submitData: LocationFormData = {
+		const formData = values as AddLocationFormValues;
+		const submitData: AddLocationValues = {
 			...formData,
-			coordinates: currentCoordinates.value,
+			longitude: currentCoordinates.value[0],
+			latitude: currentCoordinates.value[1],
 		};
-
-		await props.onSubmit(submitData);
+		await addLocation(submitData);
 		resetForm();
+		props.onClose();
 	}
 	catch (error: any) {
 		formError.value
@@ -61,15 +62,15 @@ async function onSubmit(
 <template>
 	<Form
 		v-slot="{ meta }"
-		:validation-schema="toTypedSchema(addLocationSchema)"
+		:validation-schema="toTypedSchema(addLocationFormSchema)"
 		class="flex flex-col gap-4"
 		@submit="onSubmit"
 	>
 		<fieldset :disabled="loading" class="w-full space-y-4">
-			<FormField v-slot="{ field, errorMessage }" name="title">
+			<FormField v-slot="{ field, errorMessage }" name="name">
 				<FormItem>
 					<FormLabel class="mb-1">
-						Название:
+						Название локации:
 					</FormLabel>
 					<FormControl>
 						<Input
@@ -92,7 +93,11 @@ async function onSubmit(
 						Описание локации:
 					</FormLabel>
 					<FormControl>
-						<Textarea v-bind="field" placeholder="Напишите описание локации..." />
+						<Textarea
+							v-bind="field"
+							placeholder="Напишите описание локации..."
+							rows="3"
+						/>
 					</FormControl>
 					<Transition name="fade-slide" appear>
 						<FormMessage class="text-xs">
@@ -107,25 +112,24 @@ async function onSubmit(
 					<FormLabel class="mb-1">
 						Координаты:
 					</FormLabel>
-					<FormControl>
-						<span class="text-sm text-muted-foreground">{{ currentCoordinates[0].toFixed(6) }}, {{ currentCoordinates[1].toFixed(6) }}</span>
+					<FormControl class="text-sm text-muted-foreground">
+						{{ currentCoordinates[0].toFixed(6) }}, {{ currentCoordinates[1].toFixed(6) }}
 					</FormControl>
 				</FormItem>
 			</FormField>
 		</fieldset>
 
-		<div class="w-full flex gap-2">
-			<Button
-				type="submit"
-				:disabled="loading || !meta.valid"
-			>
-				<span v-if="loading" class="flex gap-0.5 items-baseline">
-					Добавление
-					<DotsLoader />
-				</span>
-				<span v-else>Добавить</span>
-			</Button>
-		</div>
+		<Button
+			type="submit"
+			:disabled="loading || !meta.valid"
+			class="w-full flex gap-2"
+		>
+			<span v-if="loading" class="flex gap-0.5 items-baseline">
+				Добавление
+				<DotsLoader />
+			</span>
+			<span v-else>Добавить</span>
+		</Button>
 
 		<Transition name="fade-slide" appear>
 			<p v-if="formError" class="text-destructive text-center text-xs">

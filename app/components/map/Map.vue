@@ -1,11 +1,12 @@
 <script setup lang="ts">
 import type { YMapClusterer } from '@yandex/ymaps3-clusterer';
-import type { YMap, YMapTheme } from '@yandex/ymaps3-types';
+import type { YMap } from '@yandex/ymaps3-types';
 import type { MapClickEvent, MapLocation, MapMarker } from '~lib/types/map';
 
 import { useAuthUserStore } from '~stores/auth';
+import { useLocationStore } from '~stores/map';
 import { usePopupStore } from '~stores/popup';
-import { ref, shallowRef } from 'vue';
+import { computed, onMounted, ref, shallowRef } from 'vue';
 import {
 	YandexMap,
 	YandexMapClusterer,
@@ -25,9 +26,10 @@ import PopupWrapper from '~/components/popup/PopupWrapper.vue';
 const colorMode = useColorMode();
 const map = shallowRef<null | YMap>(null);
 const clusterer = shallowRef<YMapClusterer | null>(null);
-const gridSize = ref(11);
+const gridSize = ref(10);
 const popupStore = usePopupStore();
 const authStore = useAuthUserStore();
+const locationStore = useLocationStore();
 const selectedMarker = ref<MapMarker | null>(null);
 const clickedCoordinates = ref<MapClickEvent['coordinates'] | null>(null);
 
@@ -36,20 +38,13 @@ const location = ref<MapLocation>({
 	zoom: 12,
 });
 
-const markers = ref<MapMarker[]>([
-	{
-		id: '1',
-		coordinates: [37.617635, 55.755814],
-		name: 'Moscow Center',
-		description: 'The heart of Russia',
-	},
-	{
-		id: '12',
-		coordinates: [37.537, 55.749],
-		name: 'Moscow City',
-		description: 'Business district',
-	},
-]);
+onMounted(() => {
+	locationStore.initializeLocations();
+});
+
+const markers = computed(() => {
+	return locationStore.markers;
+});
 
 function handleMarkerClick(marker: MapMarker): void {
 	selectedMarker.value = marker;
@@ -71,10 +66,6 @@ function closePopup(): void {
 	selectedMarker.value = null;
 	clickedCoordinates.value = null;
 }
-
-async function handleAddLocation(): Promise<void> {
-
-}
 </script>
 
 <template>
@@ -87,13 +78,13 @@ async function handleAddLocation(): Promise<void> {
 			width="100%"
 			height="100%"
 		>
-			<YandexMapDefaultSchemeLayer :settings="{ theme: colorMode.value as YMapTheme }" />
+			<YandexMapDefaultSchemeLayer :settings="{ theme: colorMode.value }" />
 			<YandexMapDefaultFeaturesLayer />
 			<YandexMapListener :settings="{ onDblClick: logMapDoubleClick }" />
 
 			<YandexMapClusterer
 				v-model="clusterer"
-				:grid-size="2 ** gridSize"
+				:grid-size="10 * gridSize"
 				:zoom-on-cluster-click="{ duration: 800, easing: 'ease-in-out' }"
 			>
 				<YandexMapMarker
@@ -140,7 +131,6 @@ async function handleAddLocation(): Promise<void> {
 				v-if="popupStore.popup.type === 'addLocation'"
 				:coordinates="clickedCoordinates"
 				:on-close="closePopup"
-				:on-submit="handleAddLocation"
 			/>
 		</PopupWrapper>
 		<div
@@ -160,6 +150,17 @@ async function handleAddLocation(): Promise<void> {
 				<p class="text-xs text-muted-foreground">
 					Двойное нажатие для добавления новой локации.
 				</p>
+			</div>
+		</div>
+		<div
+			v-if="locationStore.loading"
+			class="pointer-events-none absolute top-20 right-1/2"
+		>
+			<div
+				class="flex gap-2 items-center pointer-events-auto rounded-xl border bg-background/80 py-2 px-3 shadow-lg backdrop-blur-sm"
+			>
+				<Spinner />
+				<span class="text-sm">Загрузка локаций</span>
 			</div>
 		</div>
 	</div>

@@ -5,7 +5,7 @@ import AddLocationForm from '~/components/form/AddLocationForm.vue';
 
 interface Props {
 	coordinates: LngLat | null;
-	onSubmit: (data: any) => Promise<void>;
+	onClose: () => void;
 }
 
 const props = defineProps<Props>();
@@ -16,6 +16,6 @@ const props = defineProps<Props>();
 		<h2 class="text-xl font-bold">
 			Добавить локацию
 		</h2>
-		<AddLocationForm :coordinates="props.coordinates" :on-submit="props.onSubmit" />
+		<AddLocationForm :coordinates="props.coordinates" :on-close="props.onClose" />
 	</div>
 </template>
