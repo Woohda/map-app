@@ -63,7 +63,7 @@ export default defineEventHandler(async (event: H3Event) => {
 
 		const locationId = generateIdFromEntropySize(10);
 
-		await prisma.location.create({
+		const location = await prisma.location.create({
 			data: {
 				id: locationId,
 				userId: user.id,
@@ -74,6 +74,8 @@ export default defineEventHandler(async (event: H3Event) => {
 				longitude: validatedData.longitude,
 			},
 		});
+
+		return location;
 	}
 	catch (err: unknown) {
 		if (err instanceof Error) {
