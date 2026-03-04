@@ -38,7 +38,7 @@ export default defineNuxtConfig({
 		componentDir: '@/components/ui',
 	},
 	yandexMaps: {
-		apikey: env.NUXT_PUBLIC_YANDEX_MAPS_API_KEY,
+		apikey: env.YANDEX_MAPS_API_KEY,
 	},
 	colorMode: {
 		preference: 'system',

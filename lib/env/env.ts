@@ -30,7 +30,7 @@ import tryParseEnv from './try-parse-env';
 const EnvSchema = z.object({
 	NODE_ENV: z.string(),
 	PRISMA_DATABASE_URL: z.string(),
-	NUXT_PUBLIC_YANDEX_MAPS_API_KEY: z.string(),
+	YANDEX_MAPS_API_KEY: z.string(),
 });
 
 export type EnvSchema = z.infer<typeof EnvSchema>;
