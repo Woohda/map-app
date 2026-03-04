@@ -11,7 +11,7 @@ defineProps<Props>();
 <template>
 	<div class="flex flex-col gap-2 bg-card p-1">
 		<h3 class="text-xl font-bold">
-			{{ marker.title }}
+			{{ marker.name }}
 		</h3>
 		<p class="text-muted-foreground">
 			{{ marker.description }}

@@ -3,6 +3,7 @@ import type { YMapClusterer } from '@yandex/ymaps3-clusterer';
 import type { YMap, YMapTheme } from '@yandex/ymaps3-types';
 import type { MapClickEvent, MapLocation, MapMarker } from '~lib/types/map';
 
+import { useAuthUserStore } from '~stores/auth';
 import { usePopupStore } from '~stores/popup';
 import { ref, shallowRef } from 'vue';
 import {
@@ -26,6 +27,7 @@ const map = shallowRef<null | YMap>(null);
 const clusterer = shallowRef<YMapClusterer | null>(null);
 const gridSize = ref(11);
 const popupStore = usePopupStore();
+const authStore = useAuthUserStore();
 const selectedMarker = ref<MapMarker | null>(null);
 const clickedCoordinates = ref<MapClickEvent['coordinates'] | null>(null);
 
@@ -38,13 +40,13 @@ const markers = ref<MapMarker[]>([
 	{
 		id: '1',
 		coordinates: [37.617635, 55.755814],
-		title: 'Moscow Center',
+		name: 'Moscow Center',
 		description: 'The heart of Russia',
 	},
 	{
 		id: '12',
 		coordinates: [37.537, 55.749],
-		title: 'Moscow City',
+		name: 'Moscow City',
 		description: 'Business district',
 	},
 ]);
@@ -55,6 +57,9 @@ function handleMarkerClick(marker: MapMarker): void {
 }
 
 function logMapDoubleClick(object: any, event: MapClickEvent): void {
+	if (!authStore.isAuthenticated) {
+		return;
+	}
 	if (!object || (object.type !== 'feature' && object.type !== 'marker')) {
 		clickedCoordinates.value = event.coordinates;
 		popupStore.showAddLocation();
