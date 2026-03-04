@@ -40,7 +40,7 @@ export const signUpSchema = z.object({
 			'Имя пользователя может содержать только латинские буквы, цифры и символ _',
 		)
 		.transform(val => val.toLowerCase()),
-	password: requiredString.min(8, 'Пароль должен содержать минимум 8 символов'),
+	password: requiredString.min(2, 'Пароль должен содержать минимум 8 символов'),
 	// .regex(
 	// 	/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]+$/,
 	// 	'Пароль должен содержать хотя бы одну заглавную букву, одну строчную букву, одну цифру и один специальный символ',
@@ -66,8 +66,7 @@ export type UpdateUserProfileValues = z.infer<typeof updateUserProfileSchema>;
 export const addLocationFormSchema = z.object({
 	name: requiredString.min(1, 'Название должно содержать минимум 1 символ')
 		.max(100, 'Название не должно превышать 50 символов'),
-	description: requiredString.min(1, 'Описание должно содержать минимум 1 символ')
-		.max(500, 'Описание не должно превышать 500 символов'),
+	description: z.string().min(1, 'Описание должно содержать минимум 1 символ').max(500, 'Описание не должно превышать 500 символов'),
 });
 
 export const addLocationSchema = addLocationFormSchema.extend({

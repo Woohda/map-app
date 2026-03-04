@@ -4,7 +4,7 @@ type BaseMapMarker = Pick<YMapMarkerProps, 'coordinates' | 'id'>;
 
 export interface MapMarker extends BaseMapMarker {
 	name: string;
-	description: string;
+	description: string | null;
 }
 
 export interface MapLocation {

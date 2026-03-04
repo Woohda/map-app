@@ -5,5 +5,4 @@ export enum PopupType {
 
 export interface PopupState {
 	type: PopupType | null;
-	data?: unknown;
 }
