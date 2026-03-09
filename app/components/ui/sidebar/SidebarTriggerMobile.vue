@@ -10,11 +10,12 @@ const props = defineProps<{
 	class?: HTMLAttributes['class'];
 }>();
 
-const { toggleSidebar } = useSidebar();
+const { isMobile, toggleSidebar } = useSidebar();
 </script>
 
 <template>
 	<Button
+		v-if="isMobile"
 		data-sidebar="trigger"
 		data-slot="sidebar-trigger"
 		variant="ghost"

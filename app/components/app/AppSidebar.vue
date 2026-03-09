@@ -7,6 +7,7 @@ import {
 	SidebarMenu,
 	SidebarMenuButton,
 	SidebarMenuItem,
+	useSidebar,
 } from '@/components/ui/sidebar';
 
 const items = [
@@ -21,10 +22,12 @@ const items = [
 		icon: 'tabler:map-pin',
 	},
 ];
+const route = useRoute();
+const { isMobile } = useSidebar();
 </script>
 
 <template>
-	<Sidebar variant="floating" collapsible="icon">
+	<Sidebar v-if="['/'].includes(route.path) || (isMobile && ['/profile'].includes(route.path))" variant="floating" collapsible="icon">
 		<SidebarContent>
 			<SidebarGroup>
 				<SidebarGroupContent>
