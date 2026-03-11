@@ -10,6 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       PRISMA_DATABASE_URL: ${{ secrets.PRISMA_DATABASE_URL }}
+      YANDEX_MAPS_API_KEY: ${{ secrets.YANDEX_MAPS_API_KEY }}
     steps:
       - uses: actions/checkout@v4
       - uses: oven-sh/setup-bun@v2
