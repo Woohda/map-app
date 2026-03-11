@@ -1,9 +1,28 @@
 /**
  * @module stores/auth
- * @fileoverview Pinia store для управления текущим авторизованным пользователем.
- * @description
- * Использует Composition API синтаксис (`defineStore('...', () => {...})`).
- * Состояние реактивное, типизировано `User | null` и доступно глобально в приложении.
+ * @fileoverview Pinia store для управления аутентификацией пользователей
+ *
+ * ## Функциональность:
+ * - 📝 Регистрация новых пользователей
+ * - 🔐 Вход существующих пользователей
+ * - 🚪 Выход из системы
+ * - 👤 Хранение данных текущего пользователя
+ * - 🔍 Проверка статуса аутентификации
+ *
+ * ## Состояние:
+ * - `currentUser` - данные текущего пользователя (User | null)
+ * - `isAuthenticated` - computed свойство для проверки авторизации
+ *
+ * ## Функции:
+ * - `signIn(formData)` - аутентификация пользователя
+ * - `signUp(formData)` - регистрация нового пользователя
+ * - `logout()` - выход из системы
+ *
+ * ## Использование:
+ * ```typescript
+ * const authStore = useAuthUserStore();
+ * await authStore.signIn({ email, password });
+ * ```
  */
 
 import type { SignInValues, SignUpValues } from '~lib/types/validation';
@@ -62,7 +81,6 @@ export const useAuthUserStore = defineStore('authUser', () => {
 			});
 		}
 	}
-
 	return {
 		currentUser,
 		isAuthenticated,
