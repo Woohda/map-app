@@ -10,19 +10,19 @@ const props = defineProps<{
 	class?: HTMLAttributes['class'];
 }>();
 
-const { state, toggleSidebar } = useSidebar();
+const { isMobile, toggleSidebar } = useSidebar();
 </script>
 
 <template>
 	<Button
+		v-if="isMobile"
 		data-sidebar="trigger"
 		data-slot="sidebar-trigger"
-		variant="outline"
+		variant="ghost"
 		size="s"
-		:class="cn('absolute z-10 top-[-9px] right-3 w-6 h-6 bg-card border-accent-foreground rounded-full hover:border-primary hover:text-primary duration-300', props.class)"
+		:class="cn('hover:text-primary duration-300', props.class)"
 		@click="toggleSidebar"
 	>
-		<Icon v-if="state === 'expanded'" name="tabler:x" />
-		<Icon v-else name="tabler:chevrons-right" />
+		<Icon name="tabler:layout-sidebar" size="27" />
 	</Button>
 </template>

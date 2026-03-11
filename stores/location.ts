@@ -75,7 +75,6 @@ export const useLocationStore = defineStore('location', () => {
 			await loadLocations();
 		}
 	}
-
 	return {
 		markers,
 		loading,

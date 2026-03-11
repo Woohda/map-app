@@ -1,12 +1,13 @@
 <script setup lang="ts">
 import type { YMapClusterer } from '@yandex/ymaps3-clusterer';
-import type { YMap } from '@yandex/ymaps3-types';
-import type { MapClickEvent, MapLocation, MapMarker } from '~lib/types/map';
+import type { LngLat, YMap } from '@yandex/ymaps3-types';
+import type { MapClickEvent, MapMarker } from '~lib/types/map';
 
 import { useAuthUserStore } from '~stores/auth';
-import { useLocationStore } from '~stores/map';
+import { useLocationStore } from '~stores/location';
 import { usePopupStore } from '~stores/popup';
-import { computed, onMounted, ref, shallowRef } from 'vue';
+import { useGeolocationStore } from '~stores/userGeolocation';
+import { computed, onMounted, ref, shallowRef, watch, watchEffect } from 'vue';
 import {
 	YandexMap,
 	YandexMapClusterer,
@@ -14,6 +15,7 @@ import {
 	YandexMapDefaultFeaturesLayer,
 	YandexMapDefaultSchemeLayer,
 	YandexMapGeolocationControl,
+	yandexMapIsLoaded,
 	YandexMapListener,
 	YandexMapMarker,
 	YandexMapZoomControl,
@@ -27,28 +29,46 @@ const colorMode = useColorMode();
 const map = shallowRef<null | YMap>(null);
 const clusterer = shallowRef<YMapClusterer | null>(null);
 const gridSize = ref(10);
+const selectedMarker = ref<MapMarker | null>(null);
+const clickedCoordinates = ref<MapClickEvent['coordinates'] | null>(null);
 const popupStore = usePopupStore();
 const authStore = useAuthUserStore();
 const locationStore = useLocationStore();
-const selectedMarker = ref<MapMarker | null>(null);
-const clickedCoordinates = ref<MapClickEvent['coordinates'] | null>(null);
-
-const location = ref<MapLocation>({
-	center: [37.617635, 55.755814],
-	zoom: 12,
-});
-
-onMounted(() => {
-	locationStore.initializeLocations();
-});
-
+const userGeolocationStore = useGeolocationStore();
 const markers = computed(() => {
 	return locationStore.markers;
 });
 
+onMounted(async () => {
+	const unwatch = watch(yandexMapIsLoaded, async (loaded) => {
+		if (loaded) {
+			await locationStore.initializeLocations();
+			const userLocation = await userGeolocationStore.getUserLocation();
+			if (userLocation) {
+				moveToLocation(userLocation.center);
+			}
+			unwatch();
+		}
+	});
+});
+
+watchEffect(() => {
+	const err = userGeolocationStore.error;
+	if (err) {
+		popupStore.showErrorInfo(err);
+	}
+});
+
+function moveToLocation(coords: LngLat) {
+	if (map.value) {
+		map.value.setLocation({ center: coords, zoom: 15, duration: 3000, easing: 'ease-in-out' });
+	}
+}
+
 function handleMarkerClick(marker: MapMarker): void {
+	moveToLocation(marker.coordinates);
 	selectedMarker.value = marker;
-	popupStore.showMarkerInfo();
+	popupStore.showMarkerInfo(marker);
 }
 
 function logMapDoubleClick(object: any, event: MapClickEvent): void {
@@ -57,23 +77,40 @@ function logMapDoubleClick(object: any, event: MapClickEvent): void {
 	}
 	if (!object || (object.type !== 'feature' && object.type !== 'marker')) {
 		clickedCoordinates.value = event.coordinates;
-		popupStore.showAddLocation();
+		popupStore.showAddLocation(event.coordinates);
 	}
 }
 
 function closePopup(): void {
 	popupStore.clearPopup();
-	selectedMarker.value = null;
-	clickedCoordinates.value = null;
 }
 </script>
 
 <template>
 	<div class="relative h-full w-full overflow-hidden">
+		<div
+			v-if="!yandexMapIsLoaded"
+			class="absolute inset-0 flex items-center justify-center bg-background/50 backdrop-blur-sm z-50"
+		>
+			<div class="flex items-center gap-2">
+				<Spinner />
+				<span class="text-sm text-muted-foreground">Загрузка карты...</span>
+			</div>
+		</div>
+		<div
+			v-if="userGeolocationStore.loading"
+			class="absolute inset-0 flex items-center justify-center bg-background/50 backdrop-blur-sm z-50"
+		>
+			<div class="flex items-center gap-2">
+				<Spinner />
+				<span class="text-sm text-muted-foreground">Определение вашей геолокации...</span>
+			</div>
+		</div>
+
 		<YandexMap
 			v-model="map"
 			:settings="{
-				location,
+				location: userGeolocationStore.location,
 			}"
 			width="100%"
 			height="100%"
@@ -132,7 +169,19 @@ function closePopup(): void {
 				:coordinates="clickedCoordinates"
 				:on-close="closePopup"
 			/>
-		</PopupWrapper>
+			<div
+				v-if="popupStore.popup.type === 'errorInfo' && popupStore.popup.data"
+				class="flex flex-col gap-1 items-center p-2"
+			>
+				<span class="text-lg font-semibold text-destructive self-start">
+					<Icon name="tabler:alert-triangle" size="24" class="align-text-top" />
+					Ошибка геолокации
+				</span>
+				<p class="text-sm text-muted-foreground">
+					{{ String(popupStore.popup.data) }}
+				</p>
+			</div>
+		</popupwrapper>
 		<div
 			v-if="!popupStore.popup.type"
 			class="pointer-events-none absolute top-20 right-5"
@@ -160,7 +209,7 @@ function closePopup(): void {
 				class="flex gap-2 items-center pointer-events-auto rounded-xl border bg-background/80 py-2 px-3 shadow-lg backdrop-blur-sm"
 			>
 				<Spinner />
-				<span class="text-sm">Загрузка локаций</span>
+				<span class="text-sm">Загрузка локаций...</span>
 			</div>
 		</div>
 	</div>
