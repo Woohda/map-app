@@ -4,7 +4,7 @@ import type { AddLocationFormValues, AddLocationValues } from '~lib/types/valida
 
 import { toTypedSchema } from '@vee-validate/zod';
 import { addLocationFormSchema } from '~lib/types/validation';
-import { useLocationStore } from '~stores/map';
+import { useLocationStore } from '~stores/location';
 
 import { Button } from '~/components/ui/button';
 import {
