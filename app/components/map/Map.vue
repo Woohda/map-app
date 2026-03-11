@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { YMapClusterer } from '@yandex/ymaps3-clusterer';
-import type { LngLat, YMap } from '@yandex/ymaps3-types';
+import type { YMap } from '@yandex/ymaps3-types';
 import type { MapClickEvent, MapMarker } from '~lib/types/map';
 
 import { useAuthUserStore } from '~stores/auth';
@@ -24,12 +24,13 @@ import {
 import AddLocation from '~/components/map/AddLocation.vue';
 import MarkerInfo from '~/components/map/MarkerInfo.vue';
 import PopupWrapper from '~/components/popup/PopupWrapper.vue';
+import { useMapController } from '~/composables/useMapController';
 
 const colorMode = useColorMode();
 const map = shallowRef<null | YMap>(null);
+const mapController = useMapController();
 const clusterer = shallowRef<YMapClusterer | null>(null);
 const gridSize = ref(10);
-const selectedMarker = ref<MapMarker | null>(null);
 const clickedCoordinates = ref<MapClickEvent['coordinates'] | null>(null);
 const popupStore = usePopupStore();
 const authStore = useAuthUserStore();
@@ -45,11 +46,17 @@ onMounted(async () => {
 			await locationStore.initializeLocations();
 			const userLocation = await userGeolocationStore.getUserLocation();
 			if (userLocation) {
-				moveToLocation(userLocation.center);
+				mapController.navigateTo(userLocation.center, { duration: 2500, zoom: 15 });
 			}
 			unwatch();
 		}
 	});
+});
+
+watch(map, (newMap) => {
+	if (newMap) {
+		mapController.setMap(newMap);
+	}
 });
 
 watchEffect(() => {
@@ -59,16 +66,10 @@ watchEffect(() => {
 	}
 });
 
-function moveToLocation(coords: LngLat) {
-	if (map.value) {
-		map.value.setLocation({ center: coords, zoom: 15, duration: 3000, easing: 'ease-in-out' });
-	}
-}
-
 function handleMarkerClick(marker: MapMarker): void {
-	moveToLocation(marker.coordinates);
-	selectedMarker.value = marker;
+	locationStore.selectMapMarker(marker);
 	popupStore.showMarkerInfo(marker);
+	mapController.navigateTo(marker.coordinates);
 }
 
 function logMapDoubleClick(object: any, event: MapClickEvent): void {
@@ -137,7 +138,7 @@ function closePopup(): void {
 						size="40"
 						class="text-primary transition-transform duration-300 hover:scale-120 cursor-pointer"
 						:class="{
-							'scale-135': selectedMarker?.id === marker.id,
+							'scale-135': locationStore.selectedMarker?.id === marker.id,
 						}"
 					/>
 				</YandexMapMarker>
@@ -152,7 +153,7 @@ function closePopup(): void {
 
 			<YandexMapControls :settings="{ position: 'right' }">
 				<YandexMapZoomControl />
-				<YandexMapGeolocationControl />
+				<YandexMapGeolocationControl v-if="!userGeolocationStore.error" />
 			</YandexMapControls>
 		</YandexMap>
 
@@ -161,8 +162,8 @@ function closePopup(): void {
 			@close="closePopup"
 		>
 			<MarkerInfo
-				v-if="popupStore.popup.type === 'markerInfo' && selectedMarker"
-				:marker="selectedMarker"
+				v-if="popupStore.popup.type === 'markerInfo' && locationStore.selectedMarker"
+				:marker="locationStore.selectedMarker"
 			/>
 			<AddLocation
 				v-if="popupStore.popup.type === 'addLocation'"
