@@ -1,9 +1,30 @@
 /**
- * @module stores/map
- * @fileoverview Pinia store для управления локациями на карте.
- * @description
- * Использует Composition API синтаксис (`defineStore('...', () => {...})`).
- * Обеспечивает реактивное управление маркерами, загрузкой данных и добавлением новых локаций.
+ * @module stores/location
+ * @fileoverview Pinia store для управления локациями на карте
+ *
+ * ## Функциональность:
+ * - 📍 Загрузка локаций с сервера
+ * - ➕ Добавление новых локаций
+ * - 🎯 Выбор маркера на карте
+ * - 🔄 Инициализация при первом запуске
+ * - 📊 Управление состоянием загрузки
+ *
+ * ## Состояние:
+ * - `markers` - массив всех маркеров на карте
+ * - `selectedMarker` - текущий выбранный маркер
+ * - `loading` - статус загрузки локаций
+ *
+ * ## Функции:
+ * - `loadLocations()` - загрузка локаций с сервера
+ * - `addLocation(locationData)` - добавление новой локации
+ * - `initializeLocations()` - инициализация при первом запуске
+ * - `selectMapMarker(marker)` - выбор маркера на карте
+ *
+ * ## Использование:
+ * ```typescript
+ * const locationStore = useLocationStore();
+ * await locationStore.loadLocations();
+ * ```
  */
 
 import type { LocationData } from '~lib/types/location';
@@ -17,6 +38,7 @@ import { toast } from '~/composables/use-toast';
 
 export const useLocationStore = defineStore('location', () => {
 	const markers = ref<MapMarker[]>([]);
+	const selectedMarker = ref<MapMarker | null>(null);
 	const loading = ref(false);
 
 	async function loadLocations(): Promise<void> {
@@ -75,10 +97,18 @@ export const useLocationStore = defineStore('location', () => {
 			await loadLocations();
 		}
 	}
+
+	function selectMapMarker(marker: MapMarker): void {
+		selectedMarker.value = marker;
+	}
+
 	return {
 		markers,
+		selectedMarker,
 		loading,
+		loadLocations,
 		addLocation,
+		selectMapMarker,
 		initializeLocations,
 	};
 });

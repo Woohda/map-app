@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { YMapClusterer } from '@yandex/ymaps3-clusterer';
-import type { LngLat, YMap } from '@yandex/ymaps3-types';
+import type { YMap } from '@yandex/ymaps3-types';
 import type { MapClickEvent, MapMarker } from '~lib/types/map';
 
 import { useAuthUserStore } from '~stores/auth';
@@ -24,12 +24,14 @@ import {
 import AddLocation from '~/components/map/AddLocation.vue';
 import MarkerInfo from '~/components/map/MarkerInfo.vue';
 import PopupWrapper from '~/components/popup/PopupWrapper.vue';
+import { useMapController } from '~/composables/useMapController';
 
 const colorMode = useColorMode();
 const map = shallowRef<null | YMap>(null);
+const hasInteracted = ref(false);
+const mapController = useMapController();
 const clusterer = shallowRef<YMapClusterer | null>(null);
 const gridSize = ref(10);
-const selectedMarker = ref<MapMarker | null>(null);
 const clickedCoordinates = ref<MapClickEvent['coordinates'] | null>(null);
 const popupStore = usePopupStore();
 const authStore = useAuthUserStore();
@@ -45,11 +47,17 @@ onMounted(async () => {
 			await locationStore.initializeLocations();
 			const userLocation = await userGeolocationStore.getUserLocation();
 			if (userLocation) {
-				moveToLocation(userLocation.center);
+				mapController.navigateTo(userLocation.center, { duration: 2500, zoom: 15 });
 			}
 			unwatch();
 		}
 	});
+});
+
+watch(map, (newMap) => {
+	if (newMap) {
+		mapController.setMap(newMap);
+	}
 });
 
 watchEffect(() => {
@@ -59,16 +67,10 @@ watchEffect(() => {
 	}
 });
 
-function moveToLocation(coords: LngLat) {
-	if (map.value) {
-		map.value.setLocation({ center: coords, zoom: 15, duration: 3000, easing: 'ease-in-out' });
-	}
-}
-
 function handleMarkerClick(marker: MapMarker): void {
-	moveToLocation(marker.coordinates);
-	selectedMarker.value = marker;
+	locationStore.selectMapMarker(marker);
 	popupStore.showMarkerInfo(marker);
+	mapController.navigateTo(marker.coordinates);
 }
 
 function logMapDoubleClick(object: any, event: MapClickEvent): void {
@@ -81,13 +83,19 @@ function logMapDoubleClick(object: any, event: MapClickEvent): void {
 	}
 }
 
+function handleFirstInteraction(): void {
+	if (!hasInteracted.value) {
+		hasInteracted.value = true;
+	}
+}
+
 function closePopup(): void {
 	popupStore.clearPopup();
 }
 </script>
 
 <template>
-	<div class="relative h-full w-full overflow-hidden">
+	<div class="relative h-full w-full overflow-hidden flex justify-center">
 		<div
 			v-if="!yandexMapIsLoaded"
 			class="absolute inset-0 flex items-center justify-center bg-background/50 backdrop-blur-sm z-50"
@@ -117,7 +125,14 @@ function closePopup(): void {
 		>
 			<YandexMapDefaultSchemeLayer :settings="{ theme: colorMode.value }" />
 			<YandexMapDefaultFeaturesLayer />
-			<YandexMapListener :settings="{ onDblClick: logMapDoubleClick }" />
+			<YandexMapListener
+				:settings="{
+					onDblClick: logMapDoubleClick,
+					onMouseDown: handleFirstInteraction,
+					onTouchStart: handleFirstInteraction,
+					onTouchMove: handleFirstInteraction,
+				}"
+			/>
 
 			<YandexMapClusterer
 				v-model="clusterer"
@@ -137,7 +152,7 @@ function closePopup(): void {
 						size="40"
 						class="text-primary transition-transform duration-300 hover:scale-120 cursor-pointer"
 						:class="{
-							'scale-135': selectedMarker?.id === marker.id,
+							'scale-135': locationStore.selectedMarker?.id === marker.id,
 						}"
 					/>
 				</YandexMapMarker>
@@ -152,7 +167,7 @@ function closePopup(): void {
 
 			<YandexMapControls :settings="{ position: 'right' }">
 				<YandexMapZoomControl />
-				<YandexMapGeolocationControl />
+				<YandexMapGeolocationControl v-if="!userGeolocationStore.error" />
 			</YandexMapControls>
 		</YandexMap>
 
@@ -161,8 +176,8 @@ function closePopup(): void {
 			@close="closePopup"
 		>
 			<MarkerInfo
-				v-if="popupStore.popup.type === 'markerInfo' && selectedMarker"
-				:marker="selectedMarker"
+				v-if="popupStore.popup.type === 'markerInfo' && locationStore.selectedMarker"
+				:marker="locationStore.selectedMarker"
 			/>
 			<AddLocation
 				v-if="popupStore.popup.type === 'addLocation'"
@@ -183,7 +198,7 @@ function closePopup(): void {
 			</div>
 		</popupwrapper>
 		<div
-			v-if="!popupStore.popup.type"
+			v-if="!popupStore.popup.type && !hasInteracted"
 			class="pointer-events-none absolute top-20 right-5"
 		>
 			<div
@@ -203,7 +218,7 @@ function closePopup(): void {
 		</div>
 		<div
 			v-if="locationStore.loading"
-			class="pointer-events-none absolute top-20 right-1/2"
+			class="absolute bottom-3 pointer-events-none"
 		>
 			<div
 				class="flex gap-2 items-center pointer-events-auto rounded-xl border bg-background/80 py-2 px-3 shadow-lg backdrop-blur-sm"

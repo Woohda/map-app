@@ -1,12 +1,44 @@
+/**
+ * @module stores/userGeolocation
+ * @fileoverview Pinia store для управления геолокацией пользователя
+ *
+ * ## Функциональность:
+ * - 📍 Определение местоположения пользователя
+ * - 🔍 Проверка разрешений на геолокацию
+ * - ⚠️ Обработка ошибок геолокации
+ * - 🗺️ Установка центра и зума карты
+ * - 🔄 Управление состоянием загрузки
+ * - 🚫 Предотвращение повторных ошибок в сессии
+ *
+ * ## Состояние:
+ * - `location` - текущее местоположение (center, zoom)
+ * - `loading` - статус получения геолокации
+ * - `error` - сообщение об ошибке или null
+ *
+ * ## Функции:
+ * - `getUserLocation()` - получение геолокации пользователя
+ * - `checkGeolocationPermission()` - проверка разрешений
+ * - `resetErrorFlag()` - сброс флага ошибки
+ *
+ * ## Использование:
+ * ```typescript
+ * const geolocationStore = useGeolocationStore();
+ * await geolocationStore.getUserLocation();
+ * ```
+ */
+
 import type { MapLocation } from '~lib/types/map';
 
 import { defineStore } from 'pinia';
-import { ref } from 'vue';
+import { onMounted, ref } from 'vue';
 import { isYandexMapReadyToInit } from 'vue-yandex-maps';
 
 import { useToast } from '~/composables/use-toast';
 
 const { toast } = useToast();
+
+const GEOLOCATION_ERROR_SESSION_KEY = 'geolocation_error_shown';
+const hasErrorInSession = ref(false);
 
 async function checkGeolocationPermission(): Promise<PermissionState> {
 	if (!navigator.permissions) {
@@ -29,6 +61,13 @@ export const useGeolocationStore = defineStore('geolocation', () => {
 	});
 	const loading = ref(false);
 	const error = ref<string | null>(null);
+
+	onMounted(() => {
+		const wasErrorShown = sessionStorage.getItem(GEOLOCATION_ERROR_SESSION_KEY);
+		if (wasErrorShown === 'true') {
+			hasErrorInSession.value = true;
+		}
+	});
 
 	async function getUserLocation() {
 		loading.value = true;
@@ -71,19 +110,27 @@ export const useGeolocationStore = defineStore('geolocation', () => {
 					variant: 'destructive',
 				});
 			}
-			else {
+			if (!hasErrorInSession.value && !sessionStorage.getItem(GEOLOCATION_ERROR_SESSION_KEY)) {
 				error.value = err.message;
 			}
+
+			hasErrorInSession.value = true;
+			sessionStorage.setItem(GEOLOCATION_ERROR_SESSION_KEY, 'true');
 		}
 		finally {
 			loading.value = false;
 		}
-	};
+	}
+	function resetErrorFlag() {
+		hasErrorInSession.value = false;
+		sessionStorage.removeItem(GEOLOCATION_ERROR_SESSION_KEY);
+	}
 
 	return {
 		location,
 		loading,
 		error,
+		resetErrorFlag,
 		getUserLocation,
 	};
 });

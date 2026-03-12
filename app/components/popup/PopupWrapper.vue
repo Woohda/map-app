@@ -44,7 +44,7 @@ function closePopup(): void {
 		>
 			<div
 				v-if="show"
-				class="absolute top-19 left-1/2 w-full max-w-sm -translate-x-1/2 z-50"
+				class="absolute top-20 left-1/2 w-full max-w-sm -translate-x-1/2 z-50"
 			>
 				<div
 					class="relative rounded-2xl p-3 border bg-card shadow-2xl backdrop-blur-md"

@@ -4,8 +4,8 @@ import Header from '~/components/app/Header.vue';
 
 <template>
 	<Header />
-	<main class="w-full flex-1">
-		<div class="mx-auto w-full max-w-7xl px-4 py-6 md:px-6">
+	<main class="min-h-screen pt-20">
+		<div class="w-full flex justify-center max-sm:px-5">
 			<slot />
 		</div>
 	</main>
