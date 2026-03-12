@@ -5,7 +5,7 @@ import { computed, ref } from 'vue';
 import type { ToastProps } from '~/components/ui/toast';
 
 const TOAST_LIMIT = 1;
-const TOAST_REMOVE_DELAY = 1000000;
+const TOAST_REMOVE_DELAY = 2000;
 
 export type StringOrVNode
 	= | string
@@ -150,6 +150,7 @@ function toast(props: Toast) {
 			...props,
 			id,
 			open: true,
+			duration: 2000,
 			onOpenChange: (open: boolean) => {
 				if (!open)
 					dismiss();

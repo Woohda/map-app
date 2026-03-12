@@ -202,7 +202,7 @@ function closePopup(): void {
 			class="pointer-events-none absolute top-20 right-5"
 		>
 			<div
-				class="flex flex-col gap-1 pointer-events-auto rounded-xl border bg-background/80 p-4 shadow-lg backdrop-blur-sm"
+				class="flex flex-col gap-1 pointer-events-auto rounded-xl border bg-background/70 p-4 shadow-lg backdrop-blur-sm"
 			>
 				<h3 class="flex items-center gap-1 font-bold">
 					<Icon name="tabler:map-pin" size="25" class="text-primary" />
@@ -221,7 +221,7 @@ function closePopup(): void {
 			class="absolute bottom-3 pointer-events-none"
 		>
 			<div
-				class="flex gap-2 items-center pointer-events-auto rounded-xl border bg-background/80 py-2 px-3 shadow-lg backdrop-blur-sm"
+				class="flex gap-2 items-center pointer-events-auto rounded-xl border bg-background/70 py-2 px-3 shadow-lg backdrop-blur-sm"
 			>
 				<Spinner />
 				<span class="text-sm">Загрузка локаций...</span>
