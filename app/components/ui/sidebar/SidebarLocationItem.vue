@@ -21,9 +21,9 @@ function handleLocationClick() {
 	<SidebarMenuItem>
 		<SidebarMenuButton class="w-full flex justify-between items-center cursor-pointer px-1" @click="handleLocationClick">
 			<div class="flex gap-1 items-center min-w-0 flex-1">
-				<Icon name="tabler:map-pin" size="16" class="shrink-0 text-muted-foreground" />
+				<Icon name="tabler:map-pin" size="16" class="shrink-0" />
 				<span
-					class="truncate transition-[width,opacity,margin] duration-300 ease-linear group-data-[collapsible=icon]:w-0 group-data-[collapsible=icon]:opacity-0 group-data-[collapsible=icon]:ml-0 w-full opacity-100 text-sm"
+					class="w-full text-sm truncate"
 				>
 					{{ location.name }}
 				</span>
