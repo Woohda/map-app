@@ -1,6 +1,8 @@
 <template>
 	<NuxtLayout>
 		<NuxtPage />
-		<Toaster />
+		<ClientOnly>
+			<Toaster />
+		</ClientOnly>
 	</NuxtLayout>
 </template>
