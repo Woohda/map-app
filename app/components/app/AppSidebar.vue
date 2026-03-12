@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { MapMarker } from '~lib/types/map';
 
+import { useAuthUserStore } from '~stores/auth';
 import { useLocationStore } from '~stores/location';
 import { usePopupStore } from '~stores/popup';
 import { useGeolocationStore } from '~stores/userGeolocation';
@@ -27,6 +28,7 @@ const locationStore = useLocationStore();
 const popupStore = usePopupStore();
 const userGeolocationStore = useGeolocationStore();
 const mapController = useMapController();
+const authStore = useAuthUserStore();
 
 const nearestLocations = computed(() => {
 	if (!userGeolocationStore.location.center || locationStore.markers.length === 0) {
@@ -69,16 +71,16 @@ const items = [
 <template>
 	<Sidebar v-if="['/'].includes(route.path) || (isMobile && ['/profile'].includes(route.path))" variant="floating" collapsible="icon">
 		<SidebarContent>
-			<SidebarTrigger />
+			<SidebarTrigger v-if="!isMobile" />
 			<SidebarGroup>
 				<SidebarGroupContent>
 					<SidebarMenu>
 						<SidebarMenuItem v-for="item in items" :key="item.title">
 							<SidebarMenuButton as-child size="lg" class="px-1">
-								<NuxtLink class="flex items-center cursor-pointer">
-									<Icon :name="item.icon" size="23" class="shrink-0" />
+								<NuxtLink>
+									<Icon :name="item.icon" size="22" class="shrink-0" />
 									<span
-										class="flex items-center transition-[width,opacity,margin] duration-300 ease-linear group-data-[collapsible=icon]:w-0 group-data-[collapsible=icon]:opacity-0 group-data-[collapsible=icon]:ml-0 w-full opacity-100 ml-2 overflow-hidden whitespace-nowrap"
+										class="flex items-center transition-[width,opacity,margin] duration-300 ease-linear group-data-[collapsible=icon]:w-0 group-data-[collapsible=icon]:opacity-0 group-data-[collapsible=icon]:ml-0 w-full opacity-100 ml-1 overflow-hidden whitespace-nowrap"
 									>
 										{{ item.title }}
 									</span>
@@ -89,8 +91,19 @@ const items = [
 				</SidebarGroupContent>
 			</SidebarGroup>
 			<Separator v-if="state === 'expanded'" />
-			<SidebarGroup v-if="nearestLocations.length > 0 && state === 'expanded'">
-				<SidebarGroupLabel>Ближайшие локации:</SidebarGroupLabel>
+			<SidebarGroup
+				v-if="nearestLocations.length > 0"
+				:aria-hidden="state !== 'expanded'"
+				class="transition-all duration-400 ease-in-out"
+				:class="[
+					state === 'expanded'
+						? 'opacity-100 max-h-96'
+						: 'opacity-0 max-h-0 pointer-events-none',
+				]"
+			>
+				<SidebarGroupLabel>
+					Ближайшие локации:
+				</SidebarGroupLabel>
 				<SidebarGroupContent>
 					<SidebarMenu>
 						<SidebarLocationItem
@@ -99,6 +112,35 @@ const items = [
 							:location="location"
 							@select="handleLocationSelect"
 						/>
+					</SidebarMenu>
+				</SidebarGroupContent>
+			</SidebarGroup>
+			<Separator v-if="authStore.isAuthenticated && isMobile" />
+			<SidebarGroup v-if="authStore.isAuthenticated && isMobile">
+				<SidebarGroupContent>
+					<SidebarMenu>
+						<SidebarMenuItem>
+							<SidebarMenuButton as-child size="lg" class="px-1">
+								<NuxtLink class="flex items-center cursor-pointer">
+									<Icon name="tabler:user" size="22" class="shrink-0" />
+									<span
+										class="flex items-center transition-[width,opacity,margin] duration-300 ease-linear group-data-[collapsible=icon]:w-0 group-data-[collapsible=icon]:opacity-0 group-data-[collapsible=icon]:ml-0 w-full opacity-100 ml-1 overflow-hidden whitespace-nowrap"
+									>
+										Профиль
+									</span>
+								</NuxtLink>
+							</SidebarMenuButton>
+						</SidebarMenuItem>
+						<SidebarMenuItem>
+							<SidebarMenuButton size="lg" class="px-1" @click="authStore.logout">
+								<Icon name="tabler:logout" size="22" class="shrink-0" />
+								<span
+									class="flex items-center transition-[width,opacity,margin] duration-300 ease-linear group-data-[collapsible=icon]:w-0 group-data-[collapsible=icon]:opacity-0 group-data-[collapsible=icon]:ml-0 w-full opacity-100 ml-1 overflow-hidden whitespace-nowrap"
+								>
+									Выйти
+								</span>
+							</SidebarMenuButton>
+						</SidebarMenuItem>
 					</SidebarMenu>
 				</SidebarGroupContent>
 			</SidebarGroup>
