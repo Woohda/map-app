@@ -9,7 +9,7 @@ defineProps<Props>();
 </script>
 
 <template>
-	<div class="flex flex-col gap-2 bg-card p-1">
+	<div class="flex flex-col gap-2 p-1">
 		<h3 class="text-xl font-bold">
 			{{ marker.name }}
 		</h3>

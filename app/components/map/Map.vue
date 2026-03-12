@@ -98,7 +98,7 @@ function closePopup(): void {
 	<div class="relative h-full w-full overflow-hidden flex justify-center">
 		<div
 			v-if="!yandexMapIsLoaded"
-			class="absolute inset-0 flex items-center justify-center bg-background/50 backdrop-blur-sm z-50"
+			class="absolute inset-0 flex items-center justify-center bg-background/80 backdrop-blur supports-backdrop-filter:bg-background/0 z-50"
 		>
 			<div class="flex items-center gap-2">
 				<Spinner />
@@ -107,7 +107,7 @@ function closePopup(): void {
 		</div>
 		<div
 			v-if="userGeolocationStore.loading"
-			class="absolute inset-0 flex items-center justify-center bg-background/50 backdrop-blur-sm z-50"
+			class="absolute inset-0 flex items-center justify-center bg-background/80 backdrop-blur supports-backdrop-filter:bg-background/0 z-50"
 		>
 			<div class="flex items-center gap-2">
 				<Spinner />
@@ -167,7 +167,7 @@ function closePopup(): void {
 
 			<YandexMapControls :settings="{ position: 'right' }">
 				<YandexMapZoomControl />
-				<YandexMapGeolocationControl v-if="!userGeolocationStore.error" />
+				<YandexMapGeolocationControl />
 			</YandexMapControls>
 		</YandexMap>
 
