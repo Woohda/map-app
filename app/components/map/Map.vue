@@ -28,6 +28,7 @@ import { useMapController } from '~/composables/useMapController';
 
 const colorMode = useColorMode();
 const map = shallowRef<null | YMap>(null);
+const hasInteracted = ref(false);
 const mapController = useMapController();
 const clusterer = shallowRef<YMapClusterer | null>(null);
 const gridSize = ref(10);
@@ -82,13 +83,19 @@ function logMapDoubleClick(object: any, event: MapClickEvent): void {
 	}
 }
 
+function handleFirstInteraction(): void {
+	if (!hasInteracted.value) {
+		hasInteracted.value = true;
+	}
+}
+
 function closePopup(): void {
 	popupStore.clearPopup();
 }
 </script>
 
 <template>
-	<div class="relative h-full w-full overflow-hidden">
+	<div class="relative h-full w-full overflow-hidden flex justify-center">
 		<div
 			v-if="!yandexMapIsLoaded"
 			class="absolute inset-0 flex items-center justify-center bg-background/50 backdrop-blur-sm z-50"
@@ -118,7 +125,14 @@ function closePopup(): void {
 		>
 			<YandexMapDefaultSchemeLayer :settings="{ theme: colorMode.value }" />
 			<YandexMapDefaultFeaturesLayer />
-			<YandexMapListener :settings="{ onDblClick: logMapDoubleClick }" />
+			<YandexMapListener
+				:settings="{
+					onDblClick: logMapDoubleClick,
+					onMouseDown: handleFirstInteraction,
+					onTouchStart: handleFirstInteraction,
+					onTouchMove: handleFirstInteraction,
+				}"
+			/>
 
 			<YandexMapClusterer
 				v-model="clusterer"
@@ -184,7 +198,7 @@ function closePopup(): void {
 			</div>
 		</popupwrapper>
 		<div
-			v-if="!popupStore.popup.type"
+			v-if="!popupStore.popup.type && !hasInteracted"
 			class="pointer-events-none absolute top-20 right-5"
 		>
 			<div
@@ -204,7 +218,7 @@ function closePopup(): void {
 		</div>
 		<div
 			v-if="locationStore.loading"
-			class="pointer-events-none absolute top-20 right-1/2"
+			class="absolute bottom-3 pointer-events-none"
 		>
 			<div
 				class="flex gap-2 items-center pointer-events-auto rounded-xl border bg-background/80 py-2 px-3 shadow-lg backdrop-blur-sm"
