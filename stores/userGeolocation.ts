@@ -30,7 +30,7 @@
 import type { MapLocation } from '~lib/types/map';
 
 import { defineStore } from 'pinia';
-import { onMounted, ref } from 'vue';
+import { ref } from 'vue';
 import { isYandexMapReadyToInit } from 'vue-yandex-maps';
 
 import { useToast } from '~/composables/use-toast';
@@ -38,7 +38,6 @@ import { useToast } from '~/composables/use-toast';
 const { toast } = useToast();
 
 const GEOLOCATION_ERROR_SESSION_KEY = 'geolocation_error_shown';
-const hasErrorInSession = ref(false);
 
 async function checkGeolocationPermission(): Promise<PermissionState> {
 	if (!navigator.permissions) {
@@ -62,20 +61,13 @@ export const useGeolocationStore = defineStore('geolocation', () => {
 	const loading = ref(false);
 	const error = ref<string | null>(null);
 
-	onMounted(() => {
-		const wasErrorShown = sessionStorage.getItem(GEOLOCATION_ERROR_SESSION_KEY);
-		if (wasErrorShown === 'true') {
-			hasErrorInSession.value = true;
-		}
-	});
-
 	async function getUserLocation() {
 		loading.value = true;
 		try {
 			const permission = await checkGeolocationPermission();
 
 			if (permission === 'denied') {
-				throw new Error('Не удалось определить ваше точное местоположение. Разрешите отображение вашей геолокации в настройках или карта останется в режиме по умолчанию.', { cause: permission });
+				throw new Error('Не удалось определить ваше точное местоположение. Разрешите доступ к вашему точному местоположению в настройках или карта останется в режиме по умолчанию.', { cause: permission });
 			}
 
 			if (!isYandexMapReadyToInit.value) {
@@ -97,6 +89,8 @@ export const useGeolocationStore = defineStore('geolocation', () => {
 					center: [lon, lat],
 					zoom: 14,
 				};
+				sessionStorage.removeItem(GEOLOCATION_ERROR_SESSION_KEY);
+				error.value = null;
 			}
 			return location.value;
 		}
@@ -104,33 +98,28 @@ export const useGeolocationStore = defineStore('geolocation', () => {
 		catch (err: any) {
 			const errorMessage = 'Не удалось определить ваше местоположение.';
 			console.warn(errorMessage, err);
-			if (!err.cause) {
+			if (err.cause === 'denied') {
+				if (!sessionStorage.getItem(GEOLOCATION_ERROR_SESSION_KEY)) {
+					error.value = err.message;
+					sessionStorage.setItem(GEOLOCATION_ERROR_SESSION_KEY, 'true');
+				}
+			}
+			else {
 				toast({
 					description: err.message || errorMessage,
 					variant: 'destructive',
 				});
 			}
-			if (!hasErrorInSession.value && !sessionStorage.getItem(GEOLOCATION_ERROR_SESSION_KEY)) {
-				error.value = err.message;
-			}
-
-			hasErrorInSession.value = true;
-			sessionStorage.setItem(GEOLOCATION_ERROR_SESSION_KEY, 'true');
 		}
 		finally {
 			loading.value = false;
 		}
-	}
-	function resetErrorFlag() {
-		hasErrorInSession.value = false;
-		sessionStorage.removeItem(GEOLOCATION_ERROR_SESSION_KEY);
 	}
 
 	return {
 		location,
 		loading,
 		error,
-		resetErrorFlag,
 		getUserLocation,
 	};
 });
