@@ -2,11 +2,60 @@
     setup
     lang="ts"
 >
+import { useAuthUserStore } from '~stores/auth';
+import { storeToRefs } from 'pinia';
 
+import EditProfileForm from '~/components/form/EditProfileForm.vue';
+import { Tabs } from '~/components/ui/tabs';
+
+const { currentUser } = storeToRefs(useAuthUserStore());
+
+definePageMeta({
+	layout: 'main',
+});
 </script>
 
 <template>
-	<h1>ПРОФИЛЬ</h1>
+	<div
+		class="flex gap-8 w-full items-start justify-center min-h-screen max-xl:gap-5 max-md:flex-col max-md:items-center max-md:justify-start"
+	>
+		<div class="w-full max-w-90 flex flex-col gap-2 items-center p-4 rounded-xl border-b border-r shadow-2xl bg-background/90 backdrop-blur supports-backdrop-filter:bg-background/65">
+			<div class="w-30 h-30 flex items-center justify-center bg-accent rounded-full">
+				<Icon name="tabler:user" size="100" class="shrink-0" />
+			</div>
+			<div>
+				<div class="w-full flex flex-col items-center gap-2">
+					<h2 class="text-2xl font-bold">
+						{{ currentUser?.name }}
+					</h2>
+					<p class="text-sm text-muted-foreground">
+						@{{ currentUser?.username }}
+					</p>
+					<p class="text-sm text-center">
+						{{ currentUser?.bio }}
+					</p>
+				</div>
+			</div>
+		</div>
+		<div class=" max-sm:min-w-full max-w-190 min-w-md max-sm:max-w-lg py-4 px-10 rounded-xl border-r border-b bg-background/90 backdrop-blur supports-backdrop-filter:bg-background/65 shadow-2xl">
+			<Tabs default-value="Профиль">
+				<TabsList>
+					<TabsTrigger value="Профиль">
+						Профиль
+					</TabsTrigger>
+					<TabsTrigger value="Локации">
+						Мои локации
+					</TabsTrigger>
+				</TabsList>
+				<TabsContent value="Профиль">
+					<EditProfileForm />
+				</TabsContent>
+				<TabsContent value="Локации">
+					<span>АОРПШЫОРВГЫВРЫОЛРВЛВРЫЛЫРОВЛ</span>
+				</TabsContent>
+			</Tabs>
+		</div>
+	</div>
 </template>
 
 <style scoped>
