@@ -57,16 +57,17 @@ export const signInSchema = z.object({
 export type SignInValues = z.infer<typeof signInSchema>;
 
 export const updateUserProfileSchema = z.object({
-	name: requiredString.max(30, 'Имя не должно превышать 30 символов'),
-	bio: z.string().trim().max(150, 'Биография не должна превышать 150 символов'),
+	name: z.string().trim().max(30, 'Имя не должно превышать 30 символов').optional(),
+	email: z.email('Введите корректный email').optional(),
+	bio: z.string().trim().max(150, 'Биография не должна превышать 150 символов').optional(),
 });
 
 export type UpdateUserProfileValues = z.infer<typeof updateUserProfileSchema>;
 
 export const addLocationFormSchema = z.object({
 	name: requiredString.min(1, 'Название должно содержать минимум 1 символ')
-		.max(100, 'Название не должно превышать 50 символов'),
-	description: z.string().min(1, 'Описание должно содержать минимум 1 символ').max(500, 'Описание не должно превышать 500 символов'),
+		.max(50, 'Название не должно превышать 50 символов'),
+	description: z.string().trim().min(1, 'Описание должно содержать минимум 1 символ').max(500, 'Описание не должно превышать 500 символов').optional(),
 });
 
 export const addLocationSchema = addLocationFormSchema.extend({

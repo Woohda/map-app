@@ -13,6 +13,7 @@ export function getUserDataSelect() {
 	return {
 		id: true,
 		username: true,
+		email: true,
 		name: true,
 		avatarUrl: true,
 		bio: true,

@@ -32,16 +32,17 @@
  * '/', '/sign-in', '/sign-up'
  */
 
-import type { User } from 'lucia';
+import type { UserData } from '~lib/types/user';
 
 import { useAuthUserStore } from '~stores/auth';
 import { useRequestEvent } from 'nuxt/app';
+import { storeToRefs } from 'pinia';
 
 export default defineNuxtRouteMiddleware(async (to) => {
-	const authUser = useAuthUserStore();
+	const { currentUser, isAuthenticated } = storeToRefs(useAuthUserStore());
 	const publicPages = ['/', '/sign-in', '/sign-up'];
 
-	if (authUser.isAuthenticated) {
+	if (isAuthenticated.value) {
 		if (['/sign-in', '/sign-up'].includes(to.path)) {
 			return navigateTo('/');
 		}
@@ -53,31 +54,32 @@ export default defineNuxtRouteMiddleware(async (to) => {
 		const cookies = event?.node.req?.headers.cookie || '';
 		const hasSessionCookie = cookies.includes('auth-session');
 		if (!hasSessionCookie) {
-			authUser.currentUser = null;
+			currentUser.value = null;
 			if (!publicPages.includes(to.path))
 				return navigateTo('/sign-in');
 			return;
 		}
 
 		try {
-			const user = await $fetch<User | null>('/api/auth/user', {
+			const timestamp = Date.now();
+			const user = await $fetch<UserData | null>(`/api/auth/user?t=${timestamp}`, {
 				credentials: 'include',
 				method: 'GET',
 				cache: 'no-store',
 				headers: { cookie: cookies },
 			});
 
-			authUser.currentUser = user ?? null;
+			currentUser.value = user ?? null;
 		}
 		catch {
-			authUser.currentUser = null;
+			currentUser.value = null;
 		}
 
-		if (authUser.currentUser && ['/sign-in', '/sign-up'].includes(to.path)) {
+		if (currentUser.value && ['/sign-in', '/sign-up'].includes(to.path)) {
 			return navigateTo('/');
 		}
 
-		if (!authUser.currentUser && !publicPages.includes(to.path)) {
+		if (!currentUser.value && !publicPages.includes(to.path)) {
 			return navigateTo('/sign-in');
 		}
 	}
