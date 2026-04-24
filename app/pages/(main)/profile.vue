@@ -20,7 +20,7 @@ definePageMeta({
 	<div
 		class="flex gap-8 w-full items-start justify-center max-xl:gap-5 max-md:flex-col max-md:items-center max-md:justify-start"
 	>
-		<div class="w-full max-w-90 flex flex-col gap-2 items-center p-4 rounded-xl border-b border-r shadow-2xl bg-background/90 backdrop-blur supports-backdrop-filter:bg-background/65">
+		<div class="w-full max-w-sm flex flex-col gap-2 items-center p-4 rounded-xl border-b border-r shadow-2xl bg-background/90 backdrop-blur supports-backdrop-filter:bg-background/65">
 			<div class="w-30 h-30 flex items-center justify-center bg-accent rounded-full">
 				<Icon name="tabler:user" size="100" class="shrink-0" />
 			</div>
@@ -38,7 +38,7 @@ definePageMeta({
 				</div>
 			</div>
 		</div>
-		<div class=" max-sm:min-w-full max-w-190 min-w-md max-sm:max-w-lg py-4 px-10 rounded-xl border-r border-b bg-background/90 backdrop-blur supports-backdrop-filter:bg-background/65 shadow-2xl">
+		<div class="w-full max-w-xl min-w-80 p-4 rounded-xl border-r border-b bg-background/90 backdrop-blur supports-backdrop-filter:bg-background/65 shadow-2xl">
 			<Tabs default-value="Профиль">
 				<TabsList>
 					<TabsTrigger value="Профиль">

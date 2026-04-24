@@ -3,7 +3,8 @@
  * @fileoverview Pinia store для управления локациями на карте
  *
  * ## Функциональность:
- * - 📍 Загрузка локаций с сервера
+ * - 📍 Загрузка всех локаций с сервера
+ * - 👤 Загрузка локаций текущего пользователя
  * - ➕ Добавление новых локаций
  * - 🎯 Выбор маркера на карте
  * - 🔄 Инициализация при первом запуске
@@ -12,18 +13,25 @@
  * ## Состояние:
  * - `markers` - массив всех маркеров на карте
  * - `selectedMarker` - текущий выбранный маркер
- * - `loading` - статус загрузки локаций
+ * - `loading` - статус загрузки всех локаций
+ * - `userMarkers` - массив локаций текущего пользователя
+ * - `userLoading` - статус загрузки локаций пользователя
  *
  * ## Функции:
- * - `loadLocations()` - загрузка локаций с сервера
- * - `addLocation(locationData)` - добавление новой локации
- * - `initializeLocations()` - инициализация при первом запуске
+ * - `loadLocations()` - загрузка всех локаций с сервера
+ * - `loadUserLocations()` - загрузка локаций пользователя
+ * - `addLocation(locationData)` - добавление новой локации (добавляет в оба массива)
+ * - `initializeLocations()` - инициализация всех локаций при первом запуске
+ * - `initializeUserLocations()` - инициализация локаций пользователя в профиле
  * - `selectMapMarker(marker)` - выбор маркера на карте
  *
  * ## Использование:
  * ```typescript
  * const locationStore = useLocationStore();
- * await locationStore.loadLocations();
+ * // Загрузить все локации для карты
+ * await locationStore.initializeLocations();
+ * // Загрузить локации пользователя для профиля
+ * await locationStore.initializeUserLocations();
  * ```
  */
 
@@ -114,6 +122,7 @@ export const useLocationStore = defineStore('location', () => {
 			description: newLocation.description,
 		};
 
+		markers.value.push(newMarker);
 		userMarkers.value.push(newMarker);
 		toast({
 			description: `Локация "${newLocation.name}" сохранена!`,
@@ -128,6 +137,12 @@ export const useLocationStore = defineStore('location', () => {
 		}
 	}
 
+	async function initializeUserLocations(): Promise<void> {
+		if (userMarkers.value.length === 0 && !userLoading.value) {
+			await loadUserLocations();
+		}
+	}
+
 	function selectMapMarker(marker: MapMarker): void {
 		selectedMarker.value = marker;
 	}
@@ -138,10 +153,9 @@ export const useLocationStore = defineStore('location', () => {
 		loading,
 		userMarkers,
 		userLoading,
-		loadLocations,
-		loadUserLocations,
 		addLocation,
 		selectMapMarker,
 		initializeLocations,
+		initializeUserLocations,
 	};
 });
