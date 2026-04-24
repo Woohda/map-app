@@ -123,7 +123,7 @@ function closePopup(): void {
 			width="100%"
 			height="100%"
 		>
-			<YandexMapDefaultSchemeLayer :settings="{ theme: colorMode.value }" />
+			<YandexMapDefaultSchemeLayer :settings="{ theme: colorMode.value as 'dark' | 'light' }" />
 			<YandexMapDefaultFeaturesLayer />
 			<YandexMapListener
 				:settings="{
