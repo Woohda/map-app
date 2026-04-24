@@ -40,6 +40,8 @@ export const useLocationStore = defineStore('location', () => {
 	const markers = ref<MapMarker[]>([]);
 	const selectedMarker = ref<MapMarker | null>(null);
 	const loading = ref(false);
+	const userMarkers = ref<MapMarker[]>([]);
+	const userLoading = ref(false);
 
 	async function loadLocations(): Promise<void> {
 		loading.value = true;
@@ -69,6 +71,34 @@ export const useLocationStore = defineStore('location', () => {
 		}
 	}
 
+	async function loadUserLocations(): Promise<void> {
+		userLoading.value = true;
+		try {
+			const locations = await $fetch<LocationData[]>('/api/map/user-locations', {
+				credentials: 'include',
+				method: 'GET',
+				cache: 'no-store',
+			});
+
+			userMarkers.value = locations.map(location => ({
+				id: location.id,
+				coordinates: [location.longitude, location.latitude] as [number, number],
+				name: location.name,
+				description: location.description,
+			}));
+		}
+		catch (err) {
+			toast({
+				description: `Локации пользователя не загрузились, попробуйте еще раз!`,
+				variant: 'destructive',
+			});
+			console.error('Error loading user locations:', err);
+		}
+		finally {
+			userLoading.value = false;
+		}
+	}
+
 	async function addLocation(locationData: AddLocationValues,
 	): Promise<MapMarker> {
 		const newLocation = await $fetch<LocationData>('/api/map/add-location', {
@@ -84,7 +114,7 @@ export const useLocationStore = defineStore('location', () => {
 			description: newLocation.description,
 		};
 
-		markers.value.push(newMarker);
+		userMarkers.value.push(newMarker);
 		toast({
 			description: `Локация "${newLocation.name}" сохранена!`,
 			variant: 'success',
@@ -106,7 +136,10 @@ export const useLocationStore = defineStore('location', () => {
 		markers,
 		selectedMarker,
 		loading,
+		userMarkers,
+		userLoading,
 		loadLocations,
+		loadUserLocations,
 		addLocation,
 		selectMapMarker,
 		initializeLocations,
