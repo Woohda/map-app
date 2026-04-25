@@ -23,6 +23,11 @@ import { Textarea } from '~/components/ui/textarea';
 const formError = ref('');
 const loading = ref(false);
 const { currentUser } = storeToRefs(useAuthUserStore());
+const formValues = ref<UpdateUserProfileValues>({
+	name: '',
+	email: '',
+	bio: '',
+});
 
 const initialValues = computed((): UpdateUserProfileValues => {
 	if (!currentUser.value) {
@@ -38,6 +43,18 @@ const initialValues = computed((): UpdateUserProfileValues => {
 		bio: currentUser.value.bio || '',
 	};
 });
+
+const hasChanges = computed(() => {
+	const current = formValues.value;
+	const initial = initialValues.value;
+	return current.name !== initial.name
+		|| current.email !== initial.email
+		|| current.bio !== initial.bio;
+});
+
+function updateFormValues(values: UpdateUserProfileValues) {
+	formValues.value = values;
+}
 
 async function onSubmit(
 	values: unknown,
@@ -85,8 +102,11 @@ async function onSubmit(
 </script>
 
 <template>
-	<Form :validation-schema="toTypedSchema(updateUserProfileSchema)" :initial-values="initialValues" @submit="onSubmit">
+	<Form v-slot="{ values }" :validation-schema="toTypedSchema(updateUserProfileSchema)" :initial-values="initialValues" @submit="onSubmit">
 		<fieldset :disabled="loading" class="w-full flex flex-col gap-4 mb-4">
+			<div class="hidden">
+				{{ updateFormValues(values) }}
+			</div>
 			<div class="w-full flex items-start gap-10 max-xl:gap-5 max-sm:flex-col">
 				<FormField v-slot="{ field, errorMessage }" name="name">
 					<FormItem class="w-full">
@@ -154,7 +174,7 @@ async function onSubmit(
 
 		<Button
 			type="submit"
-			:disabled="loading"
+			:disabled="loading || !hasChanges"
 			class="flex items-center justify-center gap-2 cursor-pointer justify-self-end"
 		>
 			<span v-if="loading" class="flex gap-0.5 items-baseline">
