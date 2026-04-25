@@ -6,7 +6,6 @@ import { storeToRefs } from 'pinia';
 import { computed, onMounted, onUnmounted, ref } from 'vue';
 
 const locationStore = useLocationStore();
-const { initializeUserLocations } = locationStore;
 const { userMarkers, userLoading } = storeToRefs(locationStore);
 
 async function handleLocationClick(marker: MapMarker) {
@@ -36,9 +35,7 @@ const containerStyle = computed(() => ({
 }));
 
 onMounted(async () => {
-	await initializeUserLocations();
 	updateHeight();
-
 	window.addEventListener('resize', updateHeight);
 	window.visualViewport?.addEventListener('resize', updateHeight);
 });
