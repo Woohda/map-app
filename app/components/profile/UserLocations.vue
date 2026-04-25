@@ -1,10 +1,18 @@
 <script setup lang="ts">
+import type { MapMarker } from '~lib/types/map';
+
 import { useLocationStore } from '~stores/location';
 import { storeToRefs } from 'pinia';
 import { computed, onMounted, onUnmounted, ref } from 'vue';
 
-const { initializeUserLocations } = useLocationStore();
-const { userMarkers, userLoading } = storeToRefs(useLocationStore());
+const locationStore = useLocationStore();
+const { initializeUserLocations } = locationStore;
+const { userMarkers, userLoading } = storeToRefs(locationStore);
+
+async function handleLocationClick(marker: MapMarker) {
+	locationStore.setPendingNavigation(marker.slug);
+	await navigateTo('/');
+}
 
 const listContainerRef = ref<HTMLDivElement>();
 const containerMaxHeight = ref('auto');
@@ -16,7 +24,7 @@ function updateHeight() {
 	const viewportHeight = window.visualViewport?.height ?? window.innerHeight;
 	const rect = listContainerRef.value.getBoundingClientRect();
 	const topOffset = rect.top;
-	const bottomPadding = 40;
+	const bottomPadding = 38;
 
 	const availableHeight = viewportHeight - topOffset - bottomPadding;
 	containerMaxHeight.value = `${Math.max(availableHeight, 200)}px`;
@@ -71,10 +79,12 @@ onUnmounted(() => {
 					<div
 						v-for="marker in userMarkers"
 						:key="marker.id"
-						class="group p-2 mr-1 border rounded-lg hover:bg-accent/50 transition-colors cursor-pointer ffocus-visible:border-ring focus-visible:ring-ring/60 focus-visible:ring-[3.5px] outline-none"
+						class="group p-2 mr-1 border rounded-lg hover:bg-accent/50 transition-colors cursor-pointer focus-visible:border-ring focus-visible:ring-ring/60 focus-visible:ring-[3.5px] outline-none"
 						tabindex="0"
 						role="button"
 						:aria-label="`Локация: ${marker.name}${marker.description ? `, ${marker.description}` : ''}`"
+						@click="handleLocationClick(marker)"
+						@keydown.enter="handleLocationClick(marker)"
 					>
 						<div class="flex items-center gap-1">
 							<div class="flex shrink-0">

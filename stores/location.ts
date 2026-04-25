@@ -42,16 +42,18 @@ import type { AddLocationValues } from '~lib/types/validation';
 import { defineStore } from 'pinia';
 import { ref } from 'vue';
 
-import { toast } from '~/composables/use-toast';
+import { useToast } from '~/composables/use-toast';
 
 export const useLocationStore = defineStore('location', () => {
+	const { toast } = useToast();
 	const markers = ref<MapMarker[]>([]);
-	const selectedMarker = ref<MapMarker | null>(null);
+	const selectedMarkerSlug = ref<string | null>(null);
 	const loading = ref(false);
 	const userMarkers = ref<MapMarker[]>([]);
 	const userLoading = ref(false);
+	const pendingNavigationSlug = ref<string | null>(null);
 
-	async function loadLocations(): Promise<void> {
+	async function loadLocations() {
 		loading.value = true;
 		try {
 			const locations = await $fetch<LocationData[]>('/api/map/locations', {
@@ -62,6 +64,7 @@ export const useLocationStore = defineStore('location', () => {
 
 			markers.value = locations.map(location => ({
 				id: location.id,
+				slug: location.slug,
 				coordinates: [location.longitude, location.latitude] as [number, number],
 				name: location.name,
 				description: location.description,
@@ -79,7 +82,7 @@ export const useLocationStore = defineStore('location', () => {
 		}
 	}
 
-	async function loadUserLocations(): Promise<void> {
+	async function loadUserLocations() {
 		userLoading.value = true;
 		try {
 			const locations = await $fetch<LocationData[]>('/api/map/user-locations', {
@@ -90,6 +93,7 @@ export const useLocationStore = defineStore('location', () => {
 
 			userMarkers.value = locations.map(location => ({
 				id: location.id,
+				slug: location.slug,
 				coordinates: [location.longitude, location.latitude] as [number, number],
 				name: location.name,
 				description: location.description,
@@ -117,6 +121,7 @@ export const useLocationStore = defineStore('location', () => {
 
 		const newMarker: MapMarker = {
 			id: newLocation.id,
+			slug: newLocation.slug,
 			coordinates: [newLocation.longitude, newLocation.latitude] as [number, number],
 			name: newLocation.name,
 			description: newLocation.description,
@@ -130,31 +135,36 @@ export const useLocationStore = defineStore('location', () => {
 		});
 		return newMarker;
 	}
-
-	async function initializeLocations(): Promise<void> {
+	async function initializeLocations() {
 		if (markers.value.length === 0 && !loading.value) {
 			await loadLocations();
 		}
 	}
 
-	async function initializeUserLocations(): Promise<void> {
+	async function initializeUserLocations() {
 		if (userMarkers.value.length === 0 && !userLoading.value) {
 			await loadUserLocations();
 		}
 	}
 
-	function selectMapMarker(marker: MapMarker): void {
-		selectedMarker.value = marker;
+	function selectMapMarker(slug: string | null): void {
+		selectedMarkerSlug.value = slug;
+	}
+
+	function setPendingNavigation(slug: string | null): void {
+		pendingNavigationSlug.value = slug;
 	}
 
 	return {
 		markers,
-		selectedMarker,
+		selectedMarkerSlug,
 		loading,
 		userMarkers,
 		userLoading,
+		pendingNavigationSlug,
 		addLocation,
 		selectMapMarker,
+		setPendingNavigation,
 		initializeLocations,
 		initializeUserLocations,
 	};

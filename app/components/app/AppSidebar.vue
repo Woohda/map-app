@@ -49,7 +49,7 @@ const nearestLocations = computed(() => {
 });
 
 function handleLocationSelect(marker: MapMarker) {
-	locationStore.selectMapMarker(marker);
+	locationStore.selectMapMarker(marker.slug);
 	popupStore.showMarkerInfo(marker);
 	mapController.navigateTo(marker.coordinates);
 }
