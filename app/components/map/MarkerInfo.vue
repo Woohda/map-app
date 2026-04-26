@@ -1,11 +1,20 @@
 <script setup lang="ts">
 import type { MapMarker } from '~lib/types/map';
 
+import { useAuthUserStore } from '~stores/auth';
+import { storeToRefs } from 'pinia';
+
 interface Props {
 	marker: MapMarker;
 }
 
-defineProps<Props>();
+const props = defineProps<Props>();
+
+const { currentUser } = storeToRefs(useAuthUserStore());
+
+const isCurrentUser = computed(() => {
+	return currentUser.value?.username === props.marker.username;
+});
 </script>
 
 <template>
@@ -18,7 +27,12 @@ defineProps<Props>();
 		</p>
 		<div class="flex items-center gap-1 text-sm text-muted-foreground">
 			<span>Создал:</span>
-			<span class="text-xs">{{ marker.userName }}</span>
+			<NuxtLink
+				:to="isCurrentUser ? '/profile' : `/profile/${marker.username}`"
+				class="text-xs text-primary hover:underline"
+			>
+				{{ marker.userName }}
+			</NuxtLink>
 		</div>
 		<div class="flex justify-center">
 			<Button size="sm" variant="outline" class="w-1/2">
