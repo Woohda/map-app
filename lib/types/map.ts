@@ -6,6 +6,7 @@ export interface MapMarker extends BaseMapMarker {
 	name: string;
 	slug: string;
 	description: string | null;
+	userName: string;
 }
 
 export interface MapLocation {

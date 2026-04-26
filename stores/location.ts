@@ -68,6 +68,7 @@ export const useLocationStore = defineStore('location', () => {
 				coordinates: [location.longitude, location.latitude] as [number, number],
 				name: location.name,
 				description: location.description,
+				userName: location.user.name,
 			}));
 		}
 		catch (err) {
@@ -97,6 +98,7 @@ export const useLocationStore = defineStore('location', () => {
 				coordinates: [location.longitude, location.latitude] as [number, number],
 				name: location.name,
 				description: location.description,
+				userName: location.user.name,
 			}));
 		}
 		catch (err) {
@@ -125,6 +127,7 @@ export const useLocationStore = defineStore('location', () => {
 			coordinates: [newLocation.longitude, newLocation.latitude] as [number, number],
 			name: newLocation.name,
 			description: newLocation.description,
+			userName: newLocation.user.name,
 		};
 
 		markers.value.push(newMarker);
