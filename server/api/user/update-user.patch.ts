@@ -11,7 +11,7 @@
  * 3. Валидация данных через `updateUserProfileSchema`.
  * 4. Обновление данных пользователя в базе данных по его ID.
  * 5. Возврат обновленного объекта пользователя с полями:
- *    - `id`, `name`, `username`, `email`, `avatarUrl`, `bio`, `createdAt`, `updatedAt`.
+ *    - `id`, `name`, `username`, `email`, `avatarUrl`, `bio`, `_count`.
  *
  * ### Ошибки:
  * - 401 Unauthorized — если пользователь не авторизован.
