@@ -15,7 +15,8 @@ import { z } from 'zod/v4';
  * - Регистрация пользователя (signUpSchema);
  * - Авторизация (signInSchema);
  * - Обновление профиля (updateUserProfileSchema);
- * - Добавления локации (addLocationSchema).
+ * - Форма добавления локации (addLocationFormSchema);
+ * - Добавление локации с координатами (addLocationSchema).
  * ## Типы данных для значений:
  * - Формы регистрации (SignUpValues);
  * - Формы авторизации (SignInValues);

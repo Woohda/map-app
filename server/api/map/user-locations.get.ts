@@ -11,8 +11,8 @@
  * 3. Включение связанных данных пользователя для каждой локации.
  * 4. Возврат массива локаций с полями:
  *    - `id`, `name`, `slug`, `description`, `latitude`, `longitude`
- *    - `createdAt`, `updatedAt`
- *    - `user` - объект с данными пользователя (`id`, `name`, `username`)
+ *    - `createdAt`, `updatedAt`, `userId`
+ *    - `user` - объект с данными пользователя (`id`, `name`, `username`, `email`, `avatarUrl`, `bio`, `_count`)
  *
  * ### Ошибки:
  * - 401 Unauthorized — если пользователь не авторизован.
