@@ -69,6 +69,7 @@ export const useLocationStore = defineStore('location', () => {
 				name: location.name,
 				description: location.description,
 				userName: location.user.name,
+				username: location.user.username,
 			}));
 		}
 		catch (err) {
@@ -99,6 +100,7 @@ export const useLocationStore = defineStore('location', () => {
 				name: location.name,
 				description: location.description,
 				userName: location.user.name,
+				username: location.user.username,
 			}));
 		}
 		catch (err) {
@@ -128,6 +130,7 @@ export const useLocationStore = defineStore('location', () => {
 			name: newLocation.name,
 			description: newLocation.description,
 			userName: newLocation.user.name,
+			username: newLocation.user.username,
 		};
 
 		markers.value.push(newMarker);
