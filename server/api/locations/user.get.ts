@@ -1,5 +1,5 @@
 /**
- * @module server/api/map/user-locations.get
+ * @module server/api/locations/user.get
  * @fileoverview Серверный обработчик маршрута для получения локаций текущего пользователя.
  * @description
  * Этот модуль реализует серверный endpoint для получения локаций, созданных текущим пользователем.

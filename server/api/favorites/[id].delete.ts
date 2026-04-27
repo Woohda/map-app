@@ -1,5 +1,5 @@
 /**
- * @module server/api/favorites/[locationId].delete
+ * @module server/api/favorites/[id].delete
  * @fileoverview Серверный endpoint для удаления локации из избранного.
  * @description
  * Этот модуль реализует серверный endpoint для удаления локации из списка избранных пользователя.
@@ -7,7 +7,7 @@
  * ---
  * ### Логика работы:
  * 1. Валидация сессии пользователя через `validateRequest`.
- * 2. Получение locationId из параметров маршрута.
+ * 2. Получение id из параметров маршрута.
  * 3. Удаление записи из FavoriteLocation.
  * 4. Возврат сообщения об успешном удалении.
  *
@@ -32,18 +32,18 @@ export default defineEventHandler(async (event: H3Event) => {
 			});
 		}
 
-		const locationId = getRouterParam(event, 'locationId');
-		if (!locationId) {
+		const id = getRouterParam(event, 'id');
+		if (!id) {
 			throw createError({
 				status: 400,
-				message: 'locationId обязателен',
+				message: 'id обязателен',
 			});
 		}
 
 		await prisma.favoriteLocation.deleteMany({
 			where: {
 				userId: loggedInUser.id,
-				locationId,
+				locationId: id,
 			},
 		});
 

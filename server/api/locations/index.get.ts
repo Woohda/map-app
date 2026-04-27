@@ -1,5 +1,5 @@
 /**
- * @module server/api/map/locations.get
+ * @module server/api/locations/index.get
  * @fileoverview Серверный обработчик маршрута для получения списка всех локаций.
  * @description
  * Этот модуль реализует серверный endpoint для получения списка всех локаций из базы данных.

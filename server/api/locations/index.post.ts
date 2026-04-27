@@ -1,5 +1,5 @@
 /**
- * @module server/api/map/add-location.post
+ * @module server/api/locations/index.post
  * @fileoverview Серверный обработчик маршрута для добавления новой локации.
  * @description
  * Этот модуль реализует серверный endpoint для создания новой локации с привязкой к авторизованному пользователю.

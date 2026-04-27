@@ -7,6 +7,7 @@
  * - 👤 Загрузка локаций текущего пользователя
  * - ⭐ Загрузка избранных локаций пользователя
  * - ➕ Добавление новых локаций
+ * - 🗑️ Удаление локаций пользователя
  * - ❤️ Добавление/удаление локаций в избранное
  * - 🎯 Выбор маркера на карте
  * - 🔄 Инициализация при первом запуске
@@ -27,6 +28,7 @@
  * - `loadUserLocations()` - загрузка локаций пользователя
  * - `loadFavorites()` - загрузка избранных локаций
  * - `addLocation(locationData)` - добавление новой локации (добавляет в оба массива)
+ * - `removeLocation(locationId)` - удаление локации пользователя
  * - `addToFavorites(locationId)` - добавление локации в избранное
  * - `removeFromFavorites(locationId)` - удаление локации из избранного
  * - `initializeLocations()` - инициализация всех локаций при первом запуске
@@ -44,6 +46,8 @@
  * await locationStore.initializeUserLocations();
  * // Загрузить избранные локации
  * await locationStore.initializeFavorites();
+ * // Удалить локацию
+ * await locationStore.removeLocation(locationId);
  * ```
  */
 
@@ -70,7 +74,7 @@ export const useLocationStore = defineStore('location', () => {
 	async function loadLocations() {
 		loading.value = true;
 		try {
-			const locations = await $fetch<LocationData[]>('/api/map/locations', {
+			const locations = await $fetch<LocationData[]>('/api/locations', {
 				credentials: 'include',
 				method: 'GET',
 				cache: 'no-store',
@@ -102,7 +106,7 @@ export const useLocationStore = defineStore('location', () => {
 	async function loadUserLocations() {
 		userLoading.value = true;
 		try {
-			const locations = await $fetch<LocationData[]>('/api/map/user-locations', {
+			const locations = await $fetch<LocationData[]>('/api/locations/user', {
 				credentials: 'include',
 				method: 'GET',
 				cache: 'no-store',
@@ -133,7 +137,7 @@ export const useLocationStore = defineStore('location', () => {
 
 	async function addLocation(locationData: AddLocationValues,
 	): Promise<MapMarker> {
-		const newLocation = await $fetch<LocationData>('/api/map/add-location', {
+		const newLocation = await $fetch<LocationData>('/api/locations', {
 			credentials: 'include',
 			method: 'POST',
 			body: locationData,
@@ -255,6 +259,32 @@ export const useLocationStore = defineStore('location', () => {
 		}
 	}
 
+	async function removeLocation(locationId: string) {
+		try {
+			await $fetch(`/api/locations/${locationId}`, {
+				credentials: 'include',
+				method: 'DELETE',
+			});
+
+			markers.value = markers.value.filter(m => m.id !== locationId);
+			userMarkers.value = userMarkers.value.filter(m => m.id !== locationId);
+			favorites.value = favorites.value.filter(m => m.id !== locationId);
+
+			toast({
+				description: `Локация удалена!`,
+				variant: 'success',
+			});
+		}
+		catch (err) {
+			toast({
+				description: `Не удалось удалить локацию, попробуйте еще раз!`,
+				variant: 'destructive',
+			});
+			console.error('Error removing location:', err);
+			throw err;
+		}
+	}
+
 	async function initializeLocations() {
 		if (markers.value.length === 0 && !loading.value) {
 			await loadLocations();
@@ -294,6 +324,7 @@ export const useLocationStore = defineStore('location', () => {
 		loadFavorites,
 		addToFavorites,
 		removeFromFavorites,
+		removeLocation,
 		selectMapMarker,
 		setPendingNavigation,
 		initializeLocations,

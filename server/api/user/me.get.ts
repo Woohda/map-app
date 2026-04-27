@@ -1,5 +1,5 @@
 /**
- * @module server/api/auth/user.get
+ * @module server/api/user/me.get
  * @fileoverview Серверный endpoint для получения текущего авторизованного пользователя.
  * @description
  * Создает server API route в Nuxt 3/Nitro с помощью `defineEventHandler` из пакета `h3`.
@@ -19,7 +19,7 @@
  * ### Особенности:
  * - Работает как на сервере (SSR), так и при SPA-навигации.
  * - Интегрируется с middleware (`auth.global.ts`) для глобальной проверки сессии.
- * - Может быть вызван на клиенте через `$fetch('/api/user')`.
+ * - Может быть вызван на клиенте через `$fetch('/api/user/me')`.
  *
  * ### Применение:
  * - Инициализация состояния `authUser`.

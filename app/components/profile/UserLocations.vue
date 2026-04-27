@@ -15,8 +15,8 @@ async function handleLocationClick(marker: MapMarker) {
 	locationStore.setPendingNavigation(marker.slug);
 	await navigateTo('/');
 }
-async function handleRemove() {
-	// TODO: implement remove functionality
+async function handleLocationRemove(marker: MapMarker) {
+	await locationStore.removeLocation(marker.id);
 }
 
 const listContainerRef = ref<HTMLDivElement>();
@@ -60,7 +60,7 @@ const { containerStyle } = useContainerHeight(listContainerRef);
 							:marker="marker"
 							icon="map-pin"
 							@onclick="handleLocationClick"
-							@on-remove="handleRemove"
+							@on-remove="handleLocationRemove"
 						/>
 					</div>
 				</div>

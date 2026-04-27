@@ -3,7 +3,7 @@
  * @fileoverview Глобальный middleware для проверки авторизации пользователя.
  * @description
  * Этот middleware выполняется только на сервере (SSR) при заходе на любой маршрут.
- * Он проверяет наличие куки `auth-session` в запросе и, если она есть, делает запрос к серверному API `/api/auth/user` для получения данных пользователя.
+ * Он проверяет наличие куки `auth-session` в запросе и, если она есть, делает запрос к серверному API `/api/user/me` для получения данных пользователя.
  * Если куки нет, запрос не выполняется, и пользователь считается неавторизованным.
  *
  * На клиенте middleware не выполняет запросы, а использует состояние пользователя, полученное на сервере.
@@ -15,7 +15,7 @@
  *    - `authUser.value` устанавливается в `null`.
  *    - Если маршрут не публичный — редирект на `/sign-in`.
  * 3. Если куки есть:
- *    - Выполняется `$fetch` к `/api/auth/user` для получения данных пользователя.
+ *    - Выполняется `$fetch` к `/api/user/me` для получения данных пользователя.
  *    - Если пользователь получен, сохраняется в `authUser.value`, иначе `null`.
  * 4. Редиректы:
  *    - Если пользователь не авторизован и маршрут не публичный → редирект на `/sign-in`.
@@ -62,7 +62,7 @@ export default defineNuxtRouteMiddleware(async (to) => {
 
 		try {
 			const timestamp = Date.now();
-			const user = await $fetch<UserData | null>(`/api/auth/user?t=${timestamp}`, {
+			const user = await $fetch<UserData | null>(`/api/user/me?t=${timestamp}`, {
 				credentials: 'include',
 				method: 'GET',
 				cache: 'no-store',
