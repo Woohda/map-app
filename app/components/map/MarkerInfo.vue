@@ -53,7 +53,9 @@ async function toggleFavorite() {
 	<div class="flex flex-col gap-1 p-2">
 		<div class="flex flex-col items-center justify-between">
 			<div class="w-full flex flex-col gap-2">
-				<h3 class="pr-6 text-xl font-bold line-clamp-2 break-words hyphens-auto">
+				<h3
+					class="pr-6 text-xl font-bold line-clamp-2 break-words hyphens-auto"
+				>
 					{{ marker.name }}
 				</h3>
 				<p
@@ -85,6 +87,10 @@ async function toggleFavorite() {
 			</NuxtLink>
 		</div>
 		<div class="flex justify-center gap-2">
+			<Button size="sm" variant="outline" class="w-1/2">
+				<Icon name="tabler:route" class="mr-2 h-4 w-4" />
+				Маршрут
+			</Button>
 			<Button
 				v-if="currentUser"
 				size="sm"
@@ -98,10 +104,6 @@ async function toggleFavorite() {
 					:class="isFavorite ? 'text-red-500' : ''"
 				/>
 				{{ isFavorite ? "В избранном" : "В избранное" }}
-			</Button>
-			<Button size="sm" variant="outline" class="w-1/2">
-				<Icon name="tabler:route" class="mr-2 h-4 w-4" />
-				Маршрут
 			</Button>
 		</div>
 	</div>
