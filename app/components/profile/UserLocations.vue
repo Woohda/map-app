@@ -15,7 +15,7 @@ async function handleLocationClick(marker: MapMarker) {
 	locationStore.setPendingNavigation(marker.slug);
 	await navigateTo('/');
 }
-async function handleLocationRemove(marker: MapMarker) {
+async function handleRemoveLocation(marker: MapMarker) {
 	await locationStore.removeLocation(marker.id);
 }
 
@@ -59,8 +59,7 @@ const { containerStyle } = useContainerHeight(listContainerRef);
 						<LocationItemCard
 							:marker="marker"
 							icon="map-pin"
-							@onclick="handleLocationClick"
-							@on-remove="handleLocationRemove"
+							:on-remove="handleRemoveLocation"
 						/>
 					</div>
 				</div>

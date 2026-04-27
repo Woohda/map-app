@@ -39,7 +39,7 @@ async function handleRemoveClick(marker: MapMarker, event: Event) {
 			</h4>
 			<p
 				v-if="marker.description"
-				class="text-xs text-muted-foreground line-clamp-3 break-words hyphens-auto"
+				class="pr-1 text-xs text-muted-foreground line-clamp-3 break-words hyphens-auto"
 			>
 				{{ marker.description }}
 			</p>
