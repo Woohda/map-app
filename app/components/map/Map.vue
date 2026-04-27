@@ -68,10 +68,7 @@ onMounted(async () => {
 			await locationStore.initializeLocations();
 			const userLocation = await userGeolocationStore.getUserLocation();
 			if (userLocation) {
-				mapController.navigateTo(userLocation.center, {
-					duration: 2500,
-					zoom: 15,
-				});
+				mapController.navigateTo(userLocation.center);
 			}
 			unwatch();
 		}
@@ -199,7 +196,7 @@ async function closePopup(): Promise<void> {
 			<YandexMapClusterer
 				v-model="clusterer"
 				:grid-size="10 * GRID_SIZE"
-				:zoom-on-cluster-click="{ duration: 800, easing: 'ease-in-out' }"
+				:zoom-on-cluster-click="{ duration: 1000, easing: 'ease-in-out' }"
 			>
 				<YandexMapMarker
 					v-for="marker in markers"
