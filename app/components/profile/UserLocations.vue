@@ -3,7 +3,10 @@ import type { MapMarker } from '~lib/types/map';
 
 import { useLocationStore } from '~stores/location';
 import { storeToRefs } from 'pinia';
-import { computed, onMounted, onUnmounted, ref } from 'vue';
+import { ref } from 'vue';
+
+import LocationItemCard from '~/components/shared/LocationItemCard.vue';
+import { useContainerHeight } from '~/composables/useContainerHeight';
 
 const locationStore = useLocationStore();
 const { userMarkers, userLoading } = storeToRefs(locationStore);
@@ -12,38 +15,12 @@ async function handleLocationClick(marker: MapMarker) {
 	locationStore.setPendingNavigation(marker.slug);
 	await navigateTo('/');
 }
-
-const listContainerRef = ref<HTMLDivElement>();
-const containerMaxHeight = ref('auto');
-
-function updateHeight() {
-	if (!listContainerRef.value)
-		return;
-
-	const viewportHeight = window.visualViewport?.height ?? window.innerHeight;
-	const rect = listContainerRef.value.getBoundingClientRect();
-	const topOffset = rect.top;
-	const bottomPadding = 38;
-
-	const availableHeight = viewportHeight - topOffset - bottomPadding;
-	containerMaxHeight.value = `${Math.max(availableHeight, 200)}px`;
+async function handleRemove() {
+	// TODO: implement remove functionality
 }
 
-const containerStyle = computed(() => ({
-	maxHeight: containerMaxHeight.value,
-	overflowY: 'auto' as const,
-}));
-
-onMounted(async () => {
-	updateHeight();
-	window.addEventListener('resize', updateHeight);
-	window.visualViewport?.addEventListener('resize', updateHeight);
-});
-
-onUnmounted(() => {
-	window.removeEventListener('resize', updateHeight);
-	window.visualViewport?.removeEventListener('resize', updateHeight);
-});
+const listContainerRef = ref<HTMLDivElement>();
+const { containerStyle } = useContainerHeight(listContainerRef);
 </script>
 
 <template>
@@ -67,40 +44,24 @@ onUnmounted(() => {
 				</h3>
 			</div>
 
-			<div
-				ref="listContainerRef"
-				class="flex flex-col"
-				:style="containerStyle"
-			>
+			<div ref="listContainerRef" class="flex flex-col" :style="containerStyle">
 				<div class="grid gap-2">
 					<div
 						v-for="marker in userMarkers"
 						:key="marker.id"
-						class="group p-2 mr-1 border rounded-lg hover:bg-accent/50 transition-colors cursor-pointer focus-visible:border-ring focus-visible:ring-ring/60 focus-visible:ring-[3.5px] outline-none"
+						class="group mr-1 p-2 border rounded-lg hover:bg-accent/50 transition-colors cursor-pointer focus-visible:border-ring focus-visible:ring-ring/60 focus-visible:ring-[3.5px] outline-none min-w-0"
 						tabindex="0"
 						role="button"
 						:aria-label="`Локация: ${marker.name}${marker.description ? `, ${marker.description}` : ''}`"
 						@click="handleLocationClick(marker)"
 						@keydown.enter="handleLocationClick(marker)"
 					>
-						<div class="flex items-center gap-1">
-							<div class="flex shrink-0">
-								<Icon name="tabler:map-pin" size="40" class="text-primary" />
-							</div>
-							<div class="flex-1 min-w-0">
-								<h4
-									class="font-medium truncate group-hover:text-primary transition-colors"
-								>
-									{{ marker.name }}
-								</h4>
-								<p
-									v-if="marker.description"
-									class="text-sm text-muted-foreground mt-1 line-clamp-2"
-								>
-									{{ marker.description }}
-								</p>
-							</div>
-						</div>
+						<LocationItemCard
+							:marker="marker"
+							icon="map-pin"
+							@onclick="handleLocationClick"
+							@on-remove="handleRemove"
+						/>
 					</div>
 				</div>
 			</div>
