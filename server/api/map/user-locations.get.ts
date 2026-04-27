@@ -31,16 +31,19 @@ import { createError, defineEventHandler } from 'h3';
 
 export default defineEventHandler(async (event) => {
 	try {
-		const { user } = await validateRequest(event);
-		if (!user) {
-			throw new Error('Вы не авторизованы');
+		const { user: loggedInUser } = await validateRequest(event);
+		if (!loggedInUser) {
+			throw createError({
+				status: 401,
+				message: 'Вы не авторизованы',
+			});
 		}
 
 		const locations = await prisma.location.findMany({
 			where: {
-				userId: user.id,
+				userId: loggedInUser.id,
 			},
-			include: getLocationDataInclude(),
+			include: getLocationDataInclude(loggedInUser.id),
 			orderBy: {
 				createdAt: 'desc',
 			},

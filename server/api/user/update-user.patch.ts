@@ -37,13 +37,16 @@ export default defineEventHandler(async (event: H3Event) => {
 
 		const validateValues = updateUserProfileSchema.parse(credentials);
 
-		const { user } = await validateRequest(event);
-		if (!user) {
-			throw new Error('Вы не авторизованы');
+		const { user: loggedInUser } = await validateRequest(event);
+		if (!loggedInUser) {
+			throw createError({
+				status: 401,
+				message: 'Вы не авторизованы',
+			});
 		}
 
 		const updateUser = await prisma.user.update({
-			where: { id: user.id },
+			where: { id: loggedInUser.id },
 			data: validateValues,
 			select: getUserDataSelect(),
 		});
