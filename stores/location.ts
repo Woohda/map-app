@@ -5,25 +5,35 @@
  * ## Функциональность:
  * - 📍 Загрузка всех локаций с сервера
  * - 👤 Загрузка локаций текущего пользователя
+ * - ⭐ Загрузка избранных локаций пользователя
  * - ➕ Добавление новых локаций
+ * - ❤️ Добавление/удаление локаций в избранное
  * - 🎯 Выбор маркера на карте
  * - 🔄 Инициализация при первом запуске
  * - 📊 Управление состоянием загрузки
  *
  * ## Состояние:
  * - `markers` - массив всех маркеров на карте
- * - `selectedMarker` - текущий выбранный маркер
+ * - `selectedMarkerSlug` - slug выбранного маркера
  * - `loading` - статус загрузки всех локаций
  * - `userMarkers` - массив локаций текущего пользователя
  * - `userLoading` - статус загрузки локаций пользователя
+ * - `favorites` - массив избранных локаций
+ * - `favoritesLoading` - статус загрузки избранных локаций
+ * - `pendingNavigationSlug` - slug для навигации
  *
  * ## Функции:
  * - `loadLocations()` - загрузка всех локаций с сервера
  * - `loadUserLocations()` - загрузка локаций пользователя
+ * - `loadFavorites()` - загрузка избранных локаций
  * - `addLocation(locationData)` - добавление новой локации (добавляет в оба массива)
+ * - `addToFavorites(locationId)` - добавление локации в избранное
+ * - `removeFromFavorites(locationId)` - удаление локации из избранного
  * - `initializeLocations()` - инициализация всех локаций при первом запуске
  * - `initializeUserLocations()` - инициализация локаций пользователя в профиле
- * - `selectMapMarker(marker)` - выбор маркера на карте
+ * - `initializeFavorites()` - инициализация избранных локаций
+ * - `selectMapMarker(slug)` - выбор маркера на карте
+ * - `setPendingNavigation(slug)` - установка slug для навигации
  *
  * ## Использование:
  * ```typescript
@@ -32,6 +42,8 @@
  * await locationStore.initializeLocations();
  * // Загрузить локации пользователя для профиля
  * await locationStore.initializeUserLocations();
+ * // Загрузить избранные локации
+ * await locationStore.initializeFavorites();
  * ```
  */
 
@@ -51,6 +63,8 @@ export const useLocationStore = defineStore('location', () => {
 	const loading = ref(false);
 	const userMarkers = ref<MapMarker[]>([]);
 	const userLoading = ref(false);
+	const favorites = ref<MapMarker[]>([]);
+	const favoritesLoading = ref(false);
 	const pendingNavigationSlug = ref<string | null>(null);
 
 	async function loadLocations() {
@@ -70,6 +84,7 @@ export const useLocationStore = defineStore('location', () => {
 				description: location.description,
 				userName: location.user.name,
 				username: location.user.username,
+				isFavorite: location.FavoriteLocation && location.FavoriteLocation.length > 0,
 			}));
 		}
 		catch (err) {
@@ -101,6 +116,7 @@ export const useLocationStore = defineStore('location', () => {
 				description: location.description,
 				userName: location.user.name,
 				username: location.user.username,
+				isFavorite: location.FavoriteLocation && location.FavoriteLocation.length > 0,
 			}));
 		}
 		catch (err) {
@@ -131,6 +147,7 @@ export const useLocationStore = defineStore('location', () => {
 			description: newLocation.description,
 			userName: newLocation.user.name,
 			username: newLocation.user.username,
+			isFavorite: newLocation.FavoriteLocation && newLocation.FavoriteLocation.length > 0,
 		};
 
 		markers.value.push(newMarker);
@@ -141,6 +158,103 @@ export const useLocationStore = defineStore('location', () => {
 		});
 		return newMarker;
 	}
+
+	async function loadFavorites() {
+		favoritesLoading.value = true;
+		try {
+			const response = await $fetch<Array<{ id: string; createdAt: Date; location: LocationData }>>('/api/favorites', {
+				credentials: 'include',
+				method: 'GET',
+				cache: 'no-store',
+			});
+
+			favorites.value = response.map(fav => ({
+				id: fav.location.id,
+				slug: fav.location.slug,
+				coordinates: [fav.location.longitude, fav.location.latitude] as [number, number],
+				name: fav.location.name,
+				description: fav.location.description,
+				userName: fav.location.user.name,
+				username: fav.location.user.username,
+				isFavorite: true,
+			}));
+		}
+		catch (err) {
+			toast({
+				description: `Избранные локации не загрузились, попробуйте еще раз!`,
+				variant: 'destructive',
+			});
+			console.error('Error loading favorites:', err);
+		}
+		finally {
+			favoritesLoading.value = false;
+		}
+	}
+
+	async function addToFavorites(locationId: string) {
+		try {
+			await $fetch('/api/favorites', {
+				credentials: 'include',
+				method: 'POST',
+				body: { locationId },
+			});
+
+			const marker = markers.value.find(m => m.id === locationId);
+			if (marker) {
+				marker.isFavorite = true;
+			}
+			const userMarker = userMarkers.value.find(m => m.id === locationId);
+			if (userMarker) {
+				userMarker.isFavorite = true;
+			}
+
+			toast({
+				description: `Локация добавлена в избранное!`,
+				variant: 'success',
+			});
+		}
+		catch (err) {
+			toast({
+				description: `Не удалось добавить в избранное, попробуйте еще раз!`,
+				variant: 'destructive',
+			});
+			console.error('Error adding to favorites:', err);
+			throw err;
+		}
+	}
+
+	async function removeFromFavorites(locationId: string) {
+		try {
+			await $fetch(`/api/favorites/${locationId}`, {
+				credentials: 'include',
+				method: 'DELETE',
+			});
+
+			const marker = markers.value.find(m => m.id === locationId);
+			if (marker) {
+				marker.isFavorite = false;
+			}
+			const userMarker = userMarkers.value.find(m => m.id === locationId);
+			if (userMarker) {
+				userMarker.isFavorite = false;
+			}
+			favorites.value = favorites.value.filter(m => m.id !== locationId);
+
+			toast({
+				description: `Локация удалена из избранного!`,
+				variant: 'success',
+			});
+		}
+		catch (err) {
+			toast({
+				description: `Не удалось удалить из избранного, попробуйте еще раз!`,
+				variant: 'destructive',
+			});
+			console.error('Error removing from favorites:', err);
+			throw err;
+		}
+	}
+
 	async function initializeLocations() {
 		if (markers.value.length === 0 && !loading.value) {
 			await loadLocations();
@@ -150,6 +264,12 @@ export const useLocationStore = defineStore('location', () => {
 	async function initializeUserLocations() {
 		if (userMarkers.value.length === 0 && !userLoading.value) {
 			await loadUserLocations();
+		}
+	}
+
+	async function initializeFavorites() {
+		if (favorites.value.length === 0 && !favoritesLoading.value) {
+			await loadFavorites();
 		}
 	}
 
@@ -167,11 +287,17 @@ export const useLocationStore = defineStore('location', () => {
 		loading,
 		userMarkers,
 		userLoading,
+		favorites,
+		favoritesLoading,
 		pendingNavigationSlug,
 		addLocation,
+		loadFavorites,
+		addToFavorites,
+		removeFromFavorites,
 		selectMapMarker,
 		setPendingNavigation,
 		initializeLocations,
 		initializeUserLocations,
+		initializeFavorites,
 	};
 });

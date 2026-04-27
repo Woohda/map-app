@@ -9,16 +9,19 @@ import ProfileCard from '~/components/profile/ProfileCard.vue';
 import UserLocations from '~/components/profile/UserLocations.vue';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '~/components/ui/tabs';
 
+import UserFavoriteLocations from '../../../components/profile/UserFavoriteLocations.vue';
+
 definePageMeta({
 	layout: 'main',
 });
 
 const { currentUser } = storeToRefs(useAuthUserStore());
 const { userMarkers } = storeToRefs(useLocationStore());
-const { initializeUserLocations } = useLocationStore();
+const { initializeUserLocations, initializeFavorites } = useLocationStore();
 
 onMounted(async () => {
 	await initializeUserLocations();
+	await initializeFavorites();
 });
 </script>
 
@@ -32,11 +35,14 @@ onMounted(async () => {
 		>
 			<Tabs default-value="Профиль">
 				<TabsList>
-					<TabsTrigger value="Профиль">
+					<TabsTrigger value="Профиль" class="cursor-pointer">
 						Профиль
 					</TabsTrigger>
-					<TabsTrigger value="Локации">
+					<TabsTrigger value="Локации" class="cursor-pointer">
 						Мои локации
+					</TabsTrigger>
+					<TabsTrigger value="Избранное" class="cursor-pointer">
+						Избранное
 					</TabsTrigger>
 				</TabsList>
 				<TabsContent value="Профиль">
@@ -44,6 +50,9 @@ onMounted(async () => {
 				</TabsContent>
 				<TabsContent value="Локации">
 					<UserLocations />
+				</TabsContent>
+				<TabsContent value="Избранное">
+					<UserFavoriteLocations />
 				</TabsContent>
 			</Tabs>
 		</div>
