@@ -10,9 +10,10 @@ import type { LngLat, YMapMarkerProps } from '@yandex/ymaps3-types';
  * @interface {MapClickHandler} - Интерфейс обработчика клика по карте
  */
 
-type BaseMapMarker = Pick<YMapMarkerProps, 'coordinates' | 'id'>;
+type BaseMapMarker = Pick<YMapMarkerProps, 'coordinates'>;
 
 export interface MapMarker extends BaseMapMarker {
+	id: string;
 	name: string;
 	slug: string;
 	description: string | null;

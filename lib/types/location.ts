@@ -35,6 +35,11 @@ export function getLocationDataInclude(userId?: string) {
 		user: {
 			select: getUserDataSelect(),
 		},
+		_count: {
+			select: {
+				FavoriteLocation: true,
+			},
+		},
 		...(userId
 			? {
 					FavoriteLocation: {
