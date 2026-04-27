@@ -6,12 +6,14 @@
  * Он использует Prisma для работы с базой данных и возвращает данные пользователя с его локациями.
  * ---
  * ### Логика работы:
- * 1. Получение username из параметров маршрута.
- * 2. Поиск пользователя в базе данных по username (без учёта регистра).
- * 3. Если пользователь не найден — возврат 404 ошибки.
- * 4. Получение локаций пользователя с включением данных о создателе.
- * 5. Возврат объекта пользователя с полями:
- *    - `id`, `name`, `username`, `avatarUrl`, `bio`
+ * 1. Валидация сессии пользователя через `validateRequest` (опционально).
+ * 2. Получение username из параметров маршрута.
+ * 3. Поиск пользователя в базе данных по username (без учёта регистра).
+ * 4. Если пользователь не найден — возврат 404 ошибки.
+ * 5. Получение локаций пользователя с включением данных о создателе.
+ * 6. Если пользователь авторизован, включение данных о статусе избранного для локаций.
+ * 7. Возврат объекта пользователя с полями:
+ *    - `id`, `name`, `username`, `avatarUrl`, `bio`, `email`, `_count`
  *    - `locations` - массив локаций пользователя
  *
  * ### Ошибки:
@@ -19,14 +21,17 @@
  * - 500 Internal Server Error — если произошла ошибка при получении данных.
  *
  * ### Примечания:
- * - Endpoint не требует авторизации (публичный профиль).
- * - Возвращаются только публичные данные пользователя.
+ * - Endpoint работает как для авторизованных, так и для неавторизованных пользователей.
+ * - Возвращаются публичные данные пользователя с email и _count.
  * - Локации сортируются по дате создания (новые сначала).
  */
 
 import type { H3Event } from 'h3';
 
 import prisma from '~lib/prisma';
+import { getLocationDataInclude } from '~lib/types/location';
+import { getUserDataSelect } from '~lib/types/user';
+import { validateRequest } from '~server/utils/auth';
 import { createError, defineEventHandler, getRouterParam } from 'h3';
 
 export default defineEventHandler(async (event: H3Event) => {
@@ -39,6 +44,9 @@ export default defineEventHandler(async (event: H3Event) => {
 			});
 		}
 
+		const { user: currentUser } = await validateRequest(event);
+		const currentUserId = currentUser?.id;
+
 		const user = await prisma.user.findFirst({
 			where: {
 				username: {
@@ -46,13 +54,7 @@ export default defineEventHandler(async (event: H3Event) => {
 					mode: 'insensitive',
 				},
 			},
-			select: {
-				id: true,
-				name: true,
-				username: true,
-				avatarUrl: true,
-				bio: true,
-			},
+			select: getUserDataSelect(),
 		});
 
 		if (!user) {
@@ -66,15 +68,7 @@ export default defineEventHandler(async (event: H3Event) => {
 			where: {
 				userId: user.id,
 			},
-			include: {
-				user: {
-					select: {
-						id: true,
-						name: true,
-						username: true,
-					},
-				},
-			},
+			include: getLocationDataInclude(currentUserId),
 			orderBy: {
 				createdAt: 'desc',
 			},
