@@ -8,9 +8,9 @@ import { getUserDataSelect } from './user';
  * а также типы для данных локации и связанных сущностей.
  *
  * @function getLocationDataSelect - Функция для получения селекта данных локации
- * @function getLocationDataInclude - Функция для получения включения данных локации
+ * @function getLocationDataInclude - Функция для получения включения данных локации с опциональным фильтром избранного
  * @function getLocationLogDataInclude - Функция для получения включения данных лога локации
- * @type {LocationData} - Тип данных локации с включением информации о пользователе
+ * @type {LocationData} - Тип данных локации с включением информации о пользователе и FavoriteLocation
  * @type {LocationLogData} - Тип данных лога локации с включением информации о пользователе и локации
  * @interface LocationsPage - Интерфейс для страницы локаций, содержащий массив локаций
  * @interface LocationLogsPage - Интерфейс для страницы логов локаций, содержащий массив логов
@@ -30,11 +30,23 @@ export function getLocationDataSelect() {
 	} satisfies Prisma.LocationSelect;
 }
 
-export function getLocationDataInclude() {
+export function getLocationDataInclude(userId?: string) {
 	return {
 		user: {
 			select: getUserDataSelect(),
 		},
+		...(userId
+			? {
+					FavoriteLocation: {
+						where: {
+							userId,
+						},
+						select: {
+							userId: true,
+						},
+					},
+				}
+			: {}),
 	} satisfies Prisma.LocationInclude;
 }
 

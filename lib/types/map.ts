@@ -1,5 +1,15 @@
 import type { LngLat, YMapMarkerProps } from '@yandex/ymaps3-types';
 
+/**
+ * Модуль содержит типы для работы с картой Яндекс.
+ * Он предоставляет интерфейсы для маркеров, событий и обработчиков кликов.
+ *
+ * @interface {MapMarker} - Интерфейс маркера на карте с дополнительными полями
+ * @interface {MapLocation} - Интерфейс для определения центра карты и масштаба
+ * @interface {MapClickEvent} - Интерфейс события клика по карте
+ * @interface {MapClickHandler} - Интерфейс обработчика клика по карте
+ */
+
 type BaseMapMarker = Pick<YMapMarkerProps, 'coordinates' | 'id'>;
 
 export interface MapMarker extends BaseMapMarker {
@@ -8,6 +18,7 @@ export interface MapMarker extends BaseMapMarker {
 	description: string | null;
 	userName: string;
 	username: string;
+	isFavorite?: boolean;
 }
 
 export interface MapLocation {
@@ -17,8 +28,4 @@ export interface MapLocation {
 
 export interface MapClickEvent {
 	coordinates: LngLat;
-}
-
-export interface MapClickHandler {
-	(object: unknown, event: MapClickEvent): void;
 }
