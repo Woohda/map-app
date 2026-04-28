@@ -29,7 +29,6 @@ import PopupWrapper from '~/components/popup/PopupWrapper.vue';
 import { Spinner } from '~/components/ui/loader';
 import { useMapController } from '~/composables/useMapController';
 
-const GRID_SIZE = 10;
 let unsubscribeGeolocationError: (() => void) | null = null;
 
 const route = useRoute();
@@ -116,6 +115,7 @@ watch(
 
 function handleMarkerClick(marker: MapMarker): void {
 	locationStore.selectMapMarker(marker.slug);
+	locationStore.forceRefreshClusterer();
 	popupStore.showMarkerInfo(marker);
 	if (route.query.location !== marker.slug) {
 		router.replace({ query: { location: marker.slug } });
@@ -148,6 +148,7 @@ async function closePopup(): Promise<void> {
 		await router.replace({ query: {} });
 	}
 	locationStore.selectMapMarker(null);
+	locationStore.forceRefreshClusterer();
 }
 </script>
 
@@ -194,8 +195,9 @@ async function closePopup(): Promise<void> {
 			/>
 
 			<YandexMapClusterer
+				:key="locationStore.refreshKeyClusterer"
 				v-model="clusterer"
-				:grid-size="10 * GRID_SIZE"
+				:grid-size="88"
 				:zoom-on-cluster-click="{ duration: 1000, easing: 'ease-in-out' }"
 			>
 				<YandexMapMarker
@@ -209,7 +211,8 @@ async function closePopup(): Promise<void> {
 					<Icon
 						name="tabler:map-pin"
 						size="40"
-						class="text-primary transition-transform duration-300 hover:scale-125 cursor-pointer"
+						class="text-primary transition-transform duration-200 hover:scale-125 cursor-pointer"
+						:class="marker.slug === locationStore.selectedMarkerSlug ? 'scale-125' : 'scale-100'"
 					/>
 				</YandexMapMarker>
 				<template #cluster="{ length }">

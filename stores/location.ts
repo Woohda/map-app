@@ -6,12 +6,13 @@
  * - 📍 Загрузка всех локаций с сервера
  * - 👤 Загрузка локаций текущего пользователя
  * - ⭐ Загрузка избранных локаций пользователя
- * - ➕ Добавление новых локаций
+ * - ➕ Добавление новых локаций (с откатом при ошибке)
  * - 🗑️ Удаление локаций пользователя
  * - ❤️ Добавление/удаление локаций в избранное
  * - 🎯 Выбор маркера на карте
  * - 🔄 Инициализация при первом запуске
  * - 📊 Управление состоянием загрузки
+ * - 🔄 Принудительное обновление кластерера карты (UX)
  *
  * ## Состояние:
  * - `markers` - массив всех маркеров на карте
@@ -22,12 +23,14 @@
  * - `favorites` - массив избранных локаций
  * - `favoritesLoading` - статус загрузки избранных локаций
  * - `pendingNavigationSlug` - slug для навигации
+ * - `removingIds` - Set ID локаций в процессе удаления
+ * - `refreshKeyClusterer` - ключ для принудительного обновления кластерера карты
  *
  * ## Функции:
  * - `loadLocations()` - загрузка всех локаций с сервера
  * - `loadUserLocations()` - загрузка локаций пользователя
  * - `loadFavorites()` - загрузка избранных локаций
- * - `addLocation(locationData)` - добавление новой локации (добавляет в оба массива)
+ * - `addLocation(locationData)` - добавление новой локации (с откатом при ошибке)
  * - `removeLocation(locationId)` - удаление локации пользователя
  * - `addToFavorites(locationId)` - добавление локации в избранное
  * - `removeFromFavorites(locationId)` - удаление локации из избранного
@@ -36,6 +39,7 @@
  * - `initializeFavorites()` - инициализация избранных локаций
  * - `selectMapMarker(slug)` - выбор маркера на карте
  * - `setPendingNavigation(slug)` - установка slug для навигации
+ * - `forceRefreshClusterer()` - принудительное обновление кластерера карты (UX)
  *
  * ## Использование:
  * ```typescript
@@ -48,6 +52,8 @@
  * await locationStore.initializeFavorites();
  * // Удалить локацию
  * await locationStore.removeLocation(locationId);
+ * // Принудительно обновить кластерер после UX операций
+ * locationStore.forceRefreshClusterer();
  * ```
  */
 
@@ -71,6 +77,7 @@ export const useLocationStore = defineStore('location', () => {
 	const favoritesLoading = ref(false);
 	const pendingNavigationSlug = ref<string | null>(null);
 	const removingIds = ref<Set<string>>(new Set());
+	const refreshKeyClusterer = ref(Date.now());
 
 	async function loadLocations() {
 		loading.value = true;
@@ -138,30 +145,48 @@ export const useLocationStore = defineStore('location', () => {
 
 	async function addLocation(locationData: AddLocationValues,
 	): Promise<MapMarker> {
-		const newLocation = await $fetch<LocationData>('/api/locations', {
-			credentials: 'include',
-			method: 'POST',
-			body: locationData,
-		});
+		let newMarker: MapMarker | null = null;
+		try {
+			const newLocation = await $fetch<LocationData>('/api/locations', {
+				credentials: 'include',
+				method: 'POST',
+				body: locationData,
+			});
 
-		const newMarker: MapMarker = {
-			id: newLocation.id,
-			slug: newLocation.slug,
-			coordinates: [newLocation.longitude, newLocation.latitude] as [number, number],
-			name: newLocation.name,
-			description: newLocation.description,
-			userName: newLocation.user.name,
-			username: newLocation.user.username,
-			isFavorite: newLocation.FavoriteLocation && newLocation.FavoriteLocation.length > 0,
-		};
+			newMarker = {
+				id: newLocation.id,
+				slug: newLocation.slug,
+				coordinates: [newLocation.longitude, newLocation.latitude] as [number, number],
+				name: newLocation.name,
+				description: newLocation.description,
+				userName: newLocation.user.name,
+				username: newLocation.user.username,
+				isFavorite: newLocation.FavoriteLocation && newLocation.FavoriteLocation.length > 0,
+			};
 
-		markers.value.push(newMarker);
-		userMarkers.value.push(newMarker);
-		toast({
-			description: `Локация "${newLocation.name}" сохранена!`,
-			variant: 'success',
-		});
-		return newMarker;
+			userMarkers.value.push(newMarker);
+			markers.value.push(newMarker);
+
+			forceRefreshClusterer();
+
+			toast({
+				description: `Локация "${newLocation.name}" добавлена!`,
+				variant: 'success',
+			});
+			return newMarker;
+		}
+		catch (err: any) {
+			if (newMarker) {
+				userMarkers.value = userMarkers.value.filter(m => m.id !== newMarker!.id);
+				markers.value = markers.value.filter(m => m.id !== newMarker!.id);
+				forceRefreshClusterer();
+			}
+			toast({
+				description: err?.response._data?.message || 'Ошибка добавления локации. Попробуйте еще раз',
+				variant: 'destructive',
+			});
+			throw err;
+		}
 	}
 
 	async function loadFavorites() {
@@ -320,6 +345,10 @@ export const useLocationStore = defineStore('location', () => {
 		pendingNavigationSlug.value = slug;
 	}
 
+	function forceRefreshClusterer() {
+		refreshKeyClusterer.value = Date.now();
+	}
+
 	return {
 		markers,
 		selectedMarkerSlug,
@@ -330,9 +359,12 @@ export const useLocationStore = defineStore('location', () => {
 		favoritesLoading,
 		pendingNavigationSlug,
 		removingIds,
+		refreshKeyClusterer,
+		forceRefreshClusterer,
 		addLocation,
-		loadFavorites,
+		loadLocations,
 		addToFavorites,
+		loadFavorites,
 		removeFromFavorites,
 		removeLocation,
 		selectMapMarker,
