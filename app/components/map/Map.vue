@@ -27,6 +27,7 @@ import AddLocation from '~/components/map/AddLocation.vue';
 import MarkerInfo from '~/components/map/MarkerInfo.vue';
 import PopupWrapper from '~/components/popup/PopupWrapper.vue';
 import { Spinner } from '~/components/ui/loader';
+import { useLongPress } from '~/composables/useLongPress';
 import { useMapController } from '~/composables/useMapController';
 
 const GRID_SIZE = 10;
@@ -55,6 +56,31 @@ const selectedMarker = computed(() =>
 	markers.value.find(m => m.slug === locationStore.selectedMarkerSlug),
 );
 
+// Long press / double tap handling for mobile
+const { handleTouchStart, handleTouchMove, handleTouchEnd, cancelLongPress }
+	= useLongPress({
+		duration: 800,
+		moveThreshold: 20,
+		onLongPress: (coordinates) => {
+			if (!authStore.isAuthenticated) {
+				return;
+			}
+			clickedCoordinates.value = coordinates;
+			popupStore.showAddLocation(coordinates);
+		},
+		onDoubleTap: () => {
+			// Double tap zooms in
+			if (map.value) {
+				map.value.setLocation({
+					center: [...map.value.center] as [number, number],
+					zoom: Math.min(map.value.zoom + 1, 21),
+					duration: 300,
+					easing: 'ease-out',
+				});
+			}
+		},
+	});
+
 onMounted(async () => {
 	unsubscribeGeolocationError = watchEffect(() => {
 		const err = userGeolocationStore.error;
@@ -77,7 +103,36 @@ onMounted(async () => {
 
 onUnmounted(() => {
 	unsubscribeGeolocationError?.();
+	cancelLongPress();
 });
+
+// Wrapper to check auth before processing touch events
+function onTouchStart(
+	object: DomEventHandlerObject,
+	event: MapClickEvent,
+): void {
+	handleFirstInteraction();
+	if (!authStore.isAuthenticated) {
+		return;
+	}
+	const type = object?.type;
+	if (type === 'feature' || type === 'marker') {
+		return;
+	}
+	handleTouchStart(object, event);
+}
+
+function onTouchMove(
+	object: DomEventHandlerObject,
+	event: MapClickEvent,
+): void {
+	handleFirstInteraction();
+	handleTouchMove(object, event);
+}
+
+function onTouchEnd(): void {
+	handleTouchEnd();
+}
 
 watch(map, (newMap) => {
 	if (newMap) {
@@ -188,8 +243,9 @@ async function closePopup(): Promise<void> {
 				:settings="{
 					onDblClick: handleMapDoubleClick,
 					onMouseDown: handleFirstInteraction,
-					onTouchStart: handleFirstInteraction,
-					onTouchMove: handleFirstInteraction,
+					onTouchStart,
+					onTouchMove,
+					onTouchEnd,
 				}"
 			/>
 
@@ -264,8 +320,13 @@ async function closePopup(): Promise<void> {
 				<p class="text-xs text-muted-foreground">
 					Нажмите на маркер для деталей.
 				</p>
+				<p class="text-xs text-muted-foreground sm:hidden">
+					Двойной нажатие для приближения карты
+				</p>
 				<p class="text-xs text-muted-foreground">
-					Двойное нажатие для добавления новой локации.
+					<span class="hidden sm:inline">Двойное нажатие</span>
+					<span class="sm:hidden">Долгое нажатие</span>
+					для добавления новой локации.
 				</p>
 			</div>
 		</div>
