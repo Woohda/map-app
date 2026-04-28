@@ -6,10 +6,11 @@ import { storeToRefs } from 'pinia';
 import { ref } from 'vue';
 
 import LocationItemCard from '~/components/shared/LocationItemCard.vue';
+import LocationListSkeleton from '~/components/shared/LocationListSkeleton.vue';
 import { useContainerHeight } from '~/composables/useContainerHeight';
 
 const locationStore = useLocationStore();
-const { userMarkers, userLoading } = storeToRefs(locationStore);
+const { userMarkers, userLoading, removingIds } = storeToRefs(locationStore);
 
 async function handleLocationClick(marker: MapMarker) {
 	locationStore.setPendingNavigation(marker.slug);
@@ -25,10 +26,7 @@ const { containerStyle } = useContainerHeight(listContainerRef);
 
 <template>
 	<div class="flex flex-col">
-		<div v-if="userLoading" class="flex items-center justify-center py-8">
-			<Spinner size="lg" />
-		</div>
-
+		<LocationListSkeleton v-if="userLoading" />
 		<div
 			v-else-if="userMarkers.length === 0"
 			class="flex flex-col items-center gap-1 text-muted-foreground"
@@ -50,6 +48,7 @@ const { containerStyle } = useContainerHeight(listContainerRef);
 						v-for="marker in userMarkers"
 						:key="marker.id"
 						class="group mr-1 p-2 border rounded-lg hover:bg-accent/50 transition-colors cursor-pointer focus-visible:border-ring focus-visible:ring-ring/60 focus-visible:ring-[3.5px] outline-none min-w-0"
+						:class="{ 'pointer-events-none opacity-50': removingIds.has(marker.id) }"
 						tabindex="0"
 						role="button"
 						:aria-label="`Локация: ${marker.name}${marker.description ? `, ${marker.description}` : ''}`"
@@ -60,6 +59,7 @@ const { containerStyle } = useContainerHeight(listContainerRef);
 							:marker="marker"
 							icon="map-pin"
 							:on-remove="handleRemoveLocation"
+							:is-removing="removingIds.has(marker.id)"
 						/>
 					</div>
 				</div>
