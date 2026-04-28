@@ -6,10 +6,11 @@ import { storeToRefs } from 'pinia';
 import { ref } from 'vue';
 
 import LocationItemCard from '~/components/shared/LocationItemCard.vue';
+import LocationListSkeleton from '~/components/shared/LocationListSkeleton.vue';
 import { useContainerHeight } from '~/composables/useContainerHeight';
 
 const locationStore = useLocationStore();
-const { favorites, favoritesLoading } = storeToRefs(locationStore);
+const { favorites, favoritesLoading, removingIds } = storeToRefs(locationStore);
 
 const error = ref<string | null>(null);
 
@@ -33,9 +34,7 @@ const { containerStyle } = useContainerHeight(listContainerRef);
 
 <template>
 	<div class="flex flex-col">
-		<div v-if="favoritesLoading" class="flex items-center justify-center py-8">
-			<Spinner size="lg" />
-		</div>
+		<LocationListSkeleton v-if="favoritesLoading" />
 
 		<div
 			v-else-if="error"
@@ -66,6 +65,7 @@ const { containerStyle } = useContainerHeight(listContainerRef);
 						v-for="marker in favorites"
 						:key="marker.id"
 						class="group mr-1 p-2 border rounded-lg hover:bg-accent/50 transition-colors cursor-pointer focus-visible:border-ring focus-visible:ring-ring/60 focus-visible:ring-[3.5px] outline-none min-w-0"
+						:class="{ 'pointer-events-none opacity-50': removingIds.has(marker.id) }"
 						tabindex="0"
 						role="button"
 						:aria-label="`Локация: ${marker.name}${marker.description ? `, ${marker.description}` : ''}`"
@@ -76,6 +76,7 @@ const { containerStyle } = useContainerHeight(listContainerRef);
 							:marker="marker"
 							icon="heart-filled"
 							:on-remove="handleRemoveFavorite"
+							:is-removing="removingIds.has(marker.id)"
 						/>
 					</div>
 				</div>

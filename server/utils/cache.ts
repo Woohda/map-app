@@ -11,9 +11,9 @@
  * - Подходит для временного хранения данных (например, из БД или API).
  */
 
-export function cache<T extends (...args: any[]) => Promise<any>>(fn: T, ttl = 40) {
-	const map = new Map<string, { value: any; expires: number }>();
-	return async (...args: Parameters<T>): Promise<ReturnType<T>> => {
+export function cache<Args extends unknown[], Return>(fn: (...args: Args) => Promise<Return>, ttl = 40) {
+	const map = new Map<string, { value: Return; expires: number }>();
+	return async (...args: Args): Promise<Return> => {
 		const now = Date.now();
 		// Очистка устаревших записей
 		for (const [key, { expires }] of map.entries()) {

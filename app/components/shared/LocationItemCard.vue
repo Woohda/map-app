@@ -8,6 +8,7 @@ const props = defineProps<{
 	marker: MapMarker;
 	icon: 'map-pin' | 'heart-filled';
 	onRemove?: (marker: MapMarker) => void | Promise<void>;
+	isRemoving?: boolean;
 }>();
 
 const { currentUser } = storeToRefs(useAuthUserStore());
@@ -55,9 +56,14 @@ async function handleRemoveClick(marker: MapMarker, event: Event) {
 			size="lg"
 			variant="ghost"
 			class="w-7 h-7 p-0 shrink-0 border hover:border-primary transition-colors duration-200"
+			:disabled="isRemoving"
 			@click="handleRemoveClick(marker, $event)"
 		>
-			<Icon name="tabler:x" size="16" />
+			<Icon
+				name="tabler:x"
+				size="16"
+				:class="{ 'animate-spin text-primary': isRemoving }"
+			/>
 		</Button>
 	</div>
 </template>

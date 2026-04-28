@@ -1,8 +1,11 @@
 <script setup lang="ts">
+import { useAuthUserStore } from '~stores/auth';
 import { usePopupStore } from '~stores/popup';
+import { storeToRefs } from 'pinia';
 
 const isPageLoading = ref(false);
 const popupStore = usePopupStore();
+const { isLoggingOut } = storeToRefs(useAuthUserStore());
 
 const nuxtApp = useNuxtApp();
 
@@ -25,7 +28,7 @@ nuxtApp.hook('page:finish', () => {
 	</NuxtLayout>
 	<Transition name="page" mode="out-in">
 		<div
-			v-if="isPageLoading"
+			v-if="isPageLoading || isLoggingOut"
 			class="absolute inset-0 flex items-center justify-center bg-background/80 backdrop-blur supports-backdrop-filter:bg-background/70 z-50"
 		>
 			<Spinner size="xl" />

@@ -70,6 +70,7 @@ export const useLocationStore = defineStore('location', () => {
 	const favorites = ref<MapMarker[]>([]);
 	const favoritesLoading = ref(false);
 	const pendingNavigationSlug = ref<string | null>(null);
+	const removingIds = ref<Set<string>>(new Set());
 
 	async function loadLocations() {
 		loading.value = true;
@@ -229,6 +230,7 @@ export const useLocationStore = defineStore('location', () => {
 
 	async function removeFromFavorites(locationId: string) {
 		try {
+			removingIds.value.add(locationId);
 			await $fetch(`/api/favorites/${locationId}`, {
 				credentials: 'include',
 				method: 'DELETE',
@@ -257,10 +259,14 @@ export const useLocationStore = defineStore('location', () => {
 			console.error('Error removing from favorites:', err);
 			throw err;
 		}
+		finally {
+			removingIds.value.delete(locationId);
+		}
 	}
 
 	async function removeLocation(locationId: string) {
 		try {
+			removingIds.value.add(locationId);
 			await $fetch(`/api/locations/${locationId}`, {
 				credentials: 'include',
 				method: 'DELETE',
@@ -282,6 +288,9 @@ export const useLocationStore = defineStore('location', () => {
 			});
 			console.error('Error removing location:', err);
 			throw err;
+		}
+		finally {
+			removingIds.value.delete(locationId);
 		}
 	}
 
@@ -320,6 +329,7 @@ export const useLocationStore = defineStore('location', () => {
 		favorites,
 		favoritesLoading,
 		pendingNavigationSlug,
+		removingIds,
 		addLocation,
 		loadFavorites,
 		addToFavorites,
