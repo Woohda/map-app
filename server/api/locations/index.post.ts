@@ -1,5 +1,5 @@
 /**
- * @module server/api/map/add-location.post
+ * @module server/api/locations/index.post
  * @fileoverview Серверный обработчик маршрута для добавления новой локации.
  * @description
  * Этот модуль реализует серверный endpoint для создания новой локации с привязкой к авторизованному пользователю.
@@ -28,6 +28,7 @@
 import type { H3Event } from 'h3';
 
 import prisma from '~lib/prisma';
+import { getLocationDataInclude } from '~lib/types/location';
 import { addLocationSchema } from '~lib/types/validation';
 import { validateRequest } from '~server/utils/auth';
 import { createError, defineEventHandler, readBody } from 'h3';
@@ -37,8 +38,8 @@ import { generateSlug } from '~/utils/utils';
 
 export default defineEventHandler(async (event: H3Event) => {
 	try {
-		const { user } = await validateRequest(event);
-		if (!user) {
+		const { user: loggedInUser } = await validateRequest(event);
+		if (!loggedInUser) {
 			throw createError({
 				status: 401,
 				message: 'Требуется авторизация для добавления локации',
@@ -66,13 +67,14 @@ export default defineEventHandler(async (event: H3Event) => {
 		const location = await prisma.location.create({
 			data: {
 				id: locationId,
-				userId: user.id,
+				userId: loggedInUser.id,
 				name: validatedData.name,
 				slug: slugName,
 				description: validatedData.description,
 				latitude: validatedData.latitude,
 				longitude: validatedData.longitude,
 			},
+			include: getLocationDataInclude(loggedInUser.id),
 		});
 
 		return location;

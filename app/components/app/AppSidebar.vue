@@ -49,7 +49,7 @@ const nearestLocations = computed(() => {
 });
 
 function handleLocationSelect(marker: MapMarker) {
-	locationStore.selectMapMarker(marker);
+	locationStore.selectMapMarker(marker.slug);
 	popupStore.showMarkerInfo(marker);
 	mapController.navigateTo(marker.coordinates);
 }
@@ -121,7 +121,7 @@ const items = [
 					<SidebarMenu>
 						<SidebarMenuItem>
 							<SidebarMenuButton as-child size="lg" class="px-1">
-								<NuxtLink class="flex items-center cursor-pointer">
+								<NuxtLink to="/profile" class="flex items-center cursor-pointer">
 									<Icon name="tabler:user" size="22" class="shrink-0" />
 									<span
 										class="flex items-center transition-[width,opacity,margin] duration-300 ease-linear group-data-[collapsible=icon]:w-0 group-data-[collapsible=icon]:opacity-0 group-data-[collapsible=icon]:ml-0 w-full opacity-100 ml-1 overflow-hidden whitespace-nowrap"

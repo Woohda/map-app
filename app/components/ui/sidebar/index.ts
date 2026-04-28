@@ -43,7 +43,7 @@ export const sidebarMenuButtonVariants = cva(
 			variant: {
 				default: 'hover:bg-sidebar-accent hover:text-primary',
 				outline:
-					'bg-background shadow-[0_0_0_1px_hsl(var(--sidebar-border))] hover:bg-sidebar-accent hover:text-primary hover:shadow-[0_0_0_1px_hsl(var(--sidebar-accent))]',
+					'shadow-[0_0_0_1px_hsl(var(--sidebar-border))] hover:bg-sidebar-accent hover:text-primary hover:shadow-[0_0_0_1px_hsl(var(--sidebar-accent))]',
 			},
 			size: {
 				default: 'h-6 text-sm',

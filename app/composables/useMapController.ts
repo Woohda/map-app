@@ -17,8 +17,8 @@ export function useMapController() {
 		if (globalMapInstance) {
 			globalMapInstance.setLocation({
 				center: coords,
-				zoom: 16,
-				duration: 1200,
+				zoom: 17,
+				duration: 1300,
 				easing: 'ease-in-out',
 				...options,
 			});

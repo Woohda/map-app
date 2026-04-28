@@ -7,7 +7,6 @@
  * - 🔐 Вход существующих пользователей
  * - 🚪 Выход из системы
  * - 👤 Хранение данных текущего пользователя
- * - 🔍 Проверка статуса аутентификации
  *
  * ## Состояние:
  * - `currentUser` - данные текущего пользователя (User | null)
@@ -25,8 +24,8 @@
  * ```
  */
 
+import type { UserData } from '~lib/types/user';
 import type { SignInValues, SignUpValues } from '~lib/types/validation';
-import type { User } from 'lucia';
 
 import { navigateTo } from 'nuxt/app';
 import { defineStore } from 'pinia';
@@ -35,11 +34,11 @@ import { computed, ref } from 'vue';
 import { toast } from '~/composables/use-toast';
 
 export const useAuthUserStore = defineStore('authUser', () => {
-	const currentUser = ref<User | null>(null);
+	const currentUser = ref<UserData | null>(null);
 	const isAuthenticated = computed(() => currentUser.value !== null);
 
 	async function signIn(formData: SignInValues) {
-		const user = await $fetch<User>('/api/auth/sign-in', {
+		const user = await $fetch<UserData>('/api/auth/sign-in', {
 			method: 'POST',
 			body: formData,
 		});
@@ -48,11 +47,11 @@ export const useAuthUserStore = defineStore('authUser', () => {
 			description: `Добро пожаловать, ${currentUser.value?.name}!`,
 			variant: 'success',
 		});
-		await navigateTo('/profile');
+		await navigateTo('/');
 	}
 
 	async function signUp(formData: SignUpValues) {
-		const user = await $fetch<User>('/api/auth/sign-up', {
+		const user = await $fetch<UserData>('/api/auth/sign-up', {
 			method: 'POST',
 			body: formData,
 		});
@@ -61,12 +60,12 @@ export const useAuthUserStore = defineStore('authUser', () => {
 			description: `${currentUser.value?.name}, Вы успешно зарегистрировались!`,
 			variant: 'success',
 		});
-		await navigateTo('/profile');
+		await navigateTo('/');
 	}
 
 	async function logout() {
 		try {
-			await $fetch<User>('/api/auth/logout', {
+			await $fetch<UserData>('/api/auth/logout', {
 				method: 'POST',
 				credentials: 'include',
 			});
@@ -81,6 +80,7 @@ export const useAuthUserStore = defineStore('authUser', () => {
 			});
 		}
 	}
+
 	return {
 		currentUser,
 		isAuthenticated,

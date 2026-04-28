@@ -32,11 +32,11 @@ const isTheme = computed({
 		label="Кнопка переключения темы"
 		variant="outline"
 		size="sm"
-		class="px-0 text-lg data-[state=on]:bg-transparent hover:border-primary transition-colors duration-200"
+		class="group/themeToggle px-0 text-lg data-[state=on]:bg-transparent hover:border-primary transition-colors duration-200"
 	>
 		<Icon
 			:name="isTheme ? 'tabler:moon' : 'tabler:sun-high'"
-			class="w-full transition-transform duration-450"
+			class="w-full group-hover/themeToggle:text-primary transition-transform duration-450"
 			:class="isTheme ? 'rotate-0' : 'text-primary rotate-90'"
 		/>
 	</Toggle>

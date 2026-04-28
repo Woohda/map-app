@@ -18,7 +18,7 @@ definePageMeta({
 			У тебя нет аккаунта?
 			<NuxtLink
 				to="/sign-up"
-				class="hover:text-primary transition-colors duration-200 rounded-sm hover:underline focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3.5px] outline-none"
+				class="text-primary hover:text-primary transition-colors duration-200 rounded-sm hover:underline focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3.5px] outline-none"
 			>
 				Зарегистрироваться.
 			</NuxtLink>

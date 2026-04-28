@@ -1,19 +1,20 @@
 <script setup lang="ts">
-import type { HTMLAttributes } from 'vue';
+interface Props {
+	size?: 'sm' | 'md' | 'lg' | 'xl';
+}
 
-import { Loader2Icon } from 'lucide-vue-next';
+const props = withDefaults(defineProps<Props>(), {
+	size: 'md',
+});
 
-import { cn } from '~/utils/utils';
-
-const props = defineProps<{
-	class?: HTMLAttributes['class'];
-}>();
+const sizeClasses = {
+	sm: 'h-4 w-4',
+	md: 'h-6 w-6',
+	lg: 'h-8 w-8',
+	xl: 'h-12 w-12',
+};
 </script>
 
 <template>
-	<Loader2Icon
-		role="status"
-		aria-label="Loading"
-		:class="cn('size-4 animate-spin', props.class)"
-	/>
+	<div :class="`animate-spin rounded-full ${sizeClasses[props.size]} border-b-2 border-primary`" />
 </template>

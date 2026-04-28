@@ -10,6 +10,7 @@
  * 1. Определение схемы `EnvSchema` с обязательными переменными:
  *    - `NODE_ENV`: среда выполнения (например, "development" или "production").
  *    - `PRISMA_DATABASE_URL`: URL базы данных для Prisma.
+ *    - `YANDEX_MAPS_API_KEY`: API ключ для Яндекс Карт.
  * 2. Вызов `tryParseEnv(EnvSchema)` для проверки наличия всех обязательных переменных.
  * 3. Парсинг `process.env` через `EnvSchema.parse()` и экспорт результата.
  *

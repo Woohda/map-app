@@ -36,7 +36,6 @@ import type { MapMarker } from '~lib/types/map';
 import type { PopupState } from '~lib/types/popup';
 
 import { PopupType } from '~lib/types/popup';
-import { useLocationStore } from '~stores/location';
 import { defineStore } from 'pinia';
 
 interface PopupStoreState {
@@ -66,10 +65,6 @@ export const usePopupStore = defineStore('popup', {
 		},
 
 		clearPopup() {
-			if (this.popup.type === PopupType.MARKER_INFO) {
-				const locationStore = useLocationStore();
-				locationStore.selectedMarker = null;
-			}
 			this.popup = { type: null, data: null };
 		},
 	},

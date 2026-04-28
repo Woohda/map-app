@@ -2,6 +2,8 @@
   setup
   lang="ts"
 >
+import Button from '~/components/ui/button/Button.vue';
+
 interface Props {
 	show: boolean;
 }
@@ -47,7 +49,7 @@ function closePopup(): void {
 				class="absolute top-20 left-1/2 w-full max-w-sm -translate-x-1/2 z-50"
 			>
 				<div
-					class="relative rounded-2xl p-3 border bg-card shadow-2xl backdrop-blur-md"
+					class="relative rounded-2xl p-3 shadow-2xl border-b bg-background/90 backdrop-blur supports-backdrop-filter:bg-background/65"
 					@click.stop
 				>
 					<Button

@@ -21,6 +21,7 @@ model User {
   LocationLog      LocationLog[]
   Location         Location[]
   Session          Session[]
+  FavoriteLocation FavoriteLocation[]
 
   @@map("users")
 }
@@ -36,17 +37,18 @@ model Session {
 }
 
 model Location {
-  id          String        @id
-  userId      String
-  name        String
-  slug        String        @unique
-  description String?
-  latitude    Float
-  longitude   Float
-  createdAt   DateTime      @default(now())
-  updatedAt   DateTime      @updatedAt
-  LocationLog LocationLog[]
-  user        User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id               String             @id
+  userId           String
+  name             String
+  slug             String             @unique
+  description      String?
+  latitude         Float
+  longitude        Float
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+  LocationLog      LocationLog[]
+  FavoriteLocation FavoriteLocation[]
+  user             User               @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("locations")
 }
@@ -81,4 +83,16 @@ model LocationLogImage {
   user          User        @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("location_log_images")
+}
+
+model FavoriteLocation {
+  id        String   @id @default(cuid())
+  userId    String
+  locationId String
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  location  Location @relation(fields: [locationId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, locationId])
+  @@map("favorite_locations")
 }
