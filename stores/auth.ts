@@ -36,6 +36,7 @@ import { toast } from '~/composables/use-toast';
 export const useAuthUserStore = defineStore('authUser', () => {
 	const currentUser = ref<UserData | null>(null);
 	const isAuthenticated = computed(() => currentUser.value !== null);
+	const isLoggingOut = ref(false);
 
 	async function signIn(formData: SignInValues) {
 		const user = await $fetch<UserData>('/api/auth/sign-in', {
@@ -65,6 +66,7 @@ export const useAuthUserStore = defineStore('authUser', () => {
 
 	async function logout() {
 		try {
+			isLoggingOut.value = true;
 			await $fetch<UserData>('/api/auth/logout', {
 				method: 'POST',
 				credentials: 'include',
@@ -79,11 +81,15 @@ export const useAuthUserStore = defineStore('authUser', () => {
 				variant: 'destructive',
 			});
 		}
+		finally {
+			isLoggingOut.value = false;
+		}
 	}
 
 	return {
 		currentUser,
 		isAuthenticated,
+		isLoggingOut,
 		signIn,
 		signUp,
 		logout,
