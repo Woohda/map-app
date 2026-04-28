@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import AppSidebar from '~/components/app/AppSidebar.vue';
 import Header from '~/components/app/Header.vue';
 </script>
 
@@ -7,6 +8,7 @@ import Header from '~/components/app/Header.vue';
 		:default-open="true"
 		class="min-h-screen w-full"
 	>
+		<AppSidebar />
 		<SidebarInset class="min-h-screen">
 			<Header />
 			<main

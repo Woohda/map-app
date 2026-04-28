@@ -23,15 +23,19 @@ import { useMapController } from '~/composables/useMapController';
 import { calculateDistance } from '~/utils/utils';
 
 const route = useRoute();
-const { isMobile, state } = useSidebar();
+const { isMobile, state, setOpenMobile } = useSidebar();
+const authStore = useAuthUserStore();
+const { isAuthenticated } = storeToRefs(authStore);
 const locationStore = useLocationStore();
 const popupStore = usePopupStore();
 const userGeolocationStore = useGeolocationStore();
 const mapController = useMapController();
-const authStore = useAuthUserStore();
 
 const nearestLocations = computed(() => {
-	if (!userGeolocationStore.location.center || locationStore.markers.length === 0) {
+	if (
+		!userGeolocationStore.location.center
+		|| locationStore.markers.length === 0
+	) {
 		return [];
 	}
 
@@ -40,18 +44,26 @@ const nearestLocations = computed(() => {
 	return locationStore.markers
 		.map((marker) => {
 			const [markerLon, markerLat] = marker.coordinates;
-			const distance = calculateDistance(userLat, userLon, markerLat, markerLon);
+			const distance = calculateDistance(
+				userLat,
+				userLon,
+				markerLat,
+				markerLon,
+			);
 			return { ...marker, distance };
 		})
-		.filter(location => location.distance <= 10) // Только в радиусе 10 км
+		.filter(location => location.distance <= 10)
 		.sort((a, b) => a.distance - b.distance)
-		.slice(0, 5); // Максимум 5 ближайших
+		.slice(0, 5);
 });
 
 function handleLocationSelect(marker: MapMarker) {
 	locationStore.selectMapMarker(marker.slug);
 	popupStore.showMarkerInfo(marker);
 	mapController.navigateTo(marker.coordinates);
+	if (isMobile) {
+		setOpenMobile(false);
+	}
 }
 
 const items = [
@@ -69,7 +81,14 @@ const items = [
 </script>
 
 <template>
-	<Sidebar v-if="['/'].includes(route.path) || (isMobile && ['/profile'].includes(route.path))" variant="floating" collapsible="icon">
+	<Sidebar
+		v-if="
+			['/'].includes(route.path)
+				|| (isMobile && ['/profile'].includes(route.path))
+		"
+		variant="floating"
+		collapsible="icon"
+	>
 		<SidebarContent>
 			<SidebarTrigger v-if="!isMobile" />
 			<SidebarGroup>
@@ -101,9 +120,7 @@ const items = [
 						: 'opacity-0 max-h-0 pointer-events-none',
 				]"
 			>
-				<SidebarGroupLabel>
-					Ближайшие локации:
-				</SidebarGroupLabel>
+				<SidebarGroupLabel> Ближайшие локации: </SidebarGroupLabel>
 				<SidebarGroupContent>
 					<SidebarMenu>
 						<SidebarLocationItem
@@ -115,13 +132,16 @@ const items = [
 					</SidebarMenu>
 				</SidebarGroupContent>
 			</SidebarGroup>
-			<Separator v-if="authStore.isAuthenticated && isMobile" />
-			<SidebarGroup v-if="authStore.isAuthenticated && isMobile">
+			<Separator v-if="isAuthenticated && isMobile" />
+			<SidebarGroup v-if="isAuthenticated && isMobile">
 				<SidebarGroupContent>
 					<SidebarMenu>
 						<SidebarMenuItem>
 							<SidebarMenuButton as-child size="lg" class="px-1">
-								<NuxtLink to="/profile" class="flex items-center cursor-pointer">
+								<NuxtLink
+									to="/profile"
+									class="flex items-center cursor-pointer"
+								>
 									<Icon name="tabler:user" size="22" class="shrink-0" />
 									<span
 										class="flex items-center transition-[width,opacity,margin] duration-300 ease-linear group-data-[collapsible=icon]:w-0 group-data-[collapsible=icon]:opacity-0 group-data-[collapsible=icon]:ml-0 w-full opacity-100 ml-1 overflow-hidden whitespace-nowrap"
@@ -132,7 +152,11 @@ const items = [
 							</SidebarMenuButton>
 						</SidebarMenuItem>
 						<SidebarMenuItem>
-							<SidebarMenuButton size="lg" class="px-1" @click="authStore.logout">
+							<SidebarMenuButton
+								size="lg"
+								class="px-1"
+								@click="authStore.logout"
+							>
 								<Icon name="tabler:logout" size="22" class="shrink-0" />
 								<span
 									class="flex items-center transition-[width,opacity,margin] duration-300 ease-linear group-data-[collapsible=icon]:w-0 group-data-[collapsible=icon]:opacity-0 group-data-[collapsible=icon]:ml-0 w-full opacity-100 ml-1 overflow-hidden whitespace-nowrap"

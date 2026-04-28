@@ -6,7 +6,14 @@ import { signUpSchema } from '~lib/types/validation';
 import { useAuthUserStore } from '~stores/auth';
 
 import { Button } from '~/components/ui/button';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '~/components/ui/form';
+import {
+	Form,
+	FormControl,
+	FormField,
+	FormItem,
+	FormLabel,
+	FormMessage,
+} from '~/components/ui/form';
 import { Input } from '~/components/ui/input';
 import DotsLoader from '~/components/ui/loader/DotsLoader.vue';
 
@@ -32,7 +39,6 @@ async function onSubmit(
 			setFieldValue(error?.response?._data?.data?.field, '');
 			setFieldValue('password', '');
 		}
-		// универсально достаём сообщение из разных версий Nuxt/$fetch
 		formError.value
 			= error?.response?._data?.message
 				|| 'Ошибка регистрации. Попробуйте еще раз';
@@ -59,7 +65,7 @@ function toggleShowPassword() {
 						<Input
 							v-bind="field"
 							type="text"
-							placeholder="Напишите ваше имя"
+							placeholder="Напиши свое имя"
 						/>
 					</FormControl>
 					<Transition name="fade-slide" appear>
@@ -79,7 +85,7 @@ function toggleShowPassword() {
 						<Input
 							v-bind="field"
 							type="email"
-							placeholder="Напишите адрес вашей почты"
+							placeholder="Напиши адрес своей почты"
 							autocomplete="email"
 						/>
 					</FormControl>
@@ -100,7 +106,7 @@ function toggleShowPassword() {
 						<Input
 							v-bind="field"
 							type="text"
-							placeholder="Придумайте имя пользователя"
+							placeholder="Придумай имя пользователя"
 							autocomplete="username"
 						/>
 					</FormControl>
@@ -122,7 +128,7 @@ function toggleShowPassword() {
 							<Input
 								v-bind="field"
 								:type="showPassword ? 'text' : 'password'"
-								placeholder="Придумайте пароль"
+								placeholder="Придумай пароль и забудь (шутка)"
 								autocomplete="new-password"
 							/>
 							<Toggle

@@ -8,7 +8,7 @@ definePageMeta({
 
 <template>
 	<div
-		class="flex gap-4 w-full max-w-120 p-10 flex-col items-center justify-center border-e border-solid rounded-3xl bg-card shadow-2xl"
+		class="flex gap-4 w-full max-w-120 p-10 flex-col items-center justify-center border-e border-solid rounded-3xl bg-background/90 backdrop-blur supports-backdrop-filter:bg-background/65 shadow-2xl"
 	>
 		<h1 class="text-3xl font-bold max-md:text-2xl">
 			Войти в аккаунт.

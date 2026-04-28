@@ -34,7 +34,6 @@ async function onSubmit(
 		await signIn(formData);
 	}
 	catch (error: any) {
-		// универсально достаём сообщение из разных версий Nuxt/$fetch
 		formError.value
 			= error?.response?._data?.message || 'Ошибка входа. Попробуйте еще раз';
 	}
@@ -66,7 +65,7 @@ function toggleShowPassword() {
 						<Input
 							v-bind="field"
 							type="text"
-							placeholder="Введите адрес почты или имя пользователя"
+							placeholder="Напиши что то одно"
 							autocomplete="email"
 						/>
 					</FormControl>
@@ -88,7 +87,7 @@ function toggleShowPassword() {
 							<Input
 								v-bind="field"
 								:type="showPassword ? 'text' : 'password'"
-								placeholder="Введите пароль от аккаунта"
+								placeholder="Напиши пароль, если помнишь"
 								autocomplete="current-password"
 							/>
 							<Toggle
