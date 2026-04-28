@@ -95,18 +95,19 @@ export const useGeolocationStore = defineStore('geolocation', () => {
 			return location.value;
 		}
 
-		catch (err: any) {
+		catch (err: unknown) {
 			const errorMessage = 'Не удалось определить ваше местоположение.';
 			console.warn(errorMessage, err);
-			if (err.cause === 'denied') {
+			const errorInstance = err instanceof Error ? err : new Error(errorMessage);
+			if ((err as { cause?: string }).cause === 'denied') {
 				if (!sessionStorage.getItem(GEOLOCATION_ERROR_SESSION_KEY)) {
-					error.value = err.message;
+					error.value = errorInstance.message;
 					sessionStorage.setItem(GEOLOCATION_ERROR_SESSION_KEY, 'true');
 				}
 			}
 			else {
 				toast({
-					description: err.message || errorMessage,
+					description: errorInstance.message || errorMessage,
 					variant: 'destructive',
 				});
 			}
