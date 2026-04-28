@@ -34,7 +34,7 @@ import { PrismaAdapter } from '@lucia-auth/adapter-prisma';
 import env from '~lib/env/env';
 import prisma from '~lib/prisma';
 import { argon2id } from 'argon2';
-import { setCookie } from 'h3';
+import { getCookie, setCookie } from 'h3';
 import { Lucia } from 'lucia';
 
 import { cache } from './cache';
@@ -136,7 +136,9 @@ export const validateRequest = cache(
 				await createNewSessionCookie(event);
 			}
 		}
-		catch {}
+		catch (err: unknown) {
+			console.error('Ошибка при обновлении сессионной cookie:', err);
+		}
 		return result;
 	},
 );
