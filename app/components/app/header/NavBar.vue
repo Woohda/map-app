@@ -5,7 +5,7 @@
 import { useAuthUserStore } from '~stores/auth';
 import { storeToRefs } from 'pinia';
 
-import LogoutButton from '~/components/button/LogoutButton.vue';
+import LogoutButton from '~/components/auth/LogoutButton.vue';
 
 const { isAuthenticated } = storeToRefs(useAuthUserStore());
 </script>

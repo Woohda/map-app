@@ -4,12 +4,11 @@ import { useLocationStore } from '~stores/location';
 import { storeToRefs } from 'pinia';
 import { onMounted } from 'vue';
 
-import EditProfileForm from '~/components/form/EditProfileForm.vue';
-import ProfileCard from '~/components/profile/ProfileCard.vue';
-import UserLocations from '~/components/profile/UserLocations.vue';
+import Profile from '~/components/profile/card/Profile.vue';
+import EditProfileForm from '~/components/profile/form/EditProfileForm.vue';
+import FavoriteLocation from '~/components/profile/sections/FavoriteLocation.vue';
+import MyLocations from '~/components/profile/sections/MyLocations.vue';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '~/components/ui/tabs';
-
-import UserFavoriteLocations from '../../../components/profile/UserFavoriteLocations.vue';
 
 definePageMeta({
 	layout: 'main',
@@ -29,7 +28,7 @@ onMounted(async () => {
 	<div
 		class="flex gap-8 w-full items-start justify-center max-xl:gap-5 max-md:flex-col max-md:items-center max-md:justify-start"
 	>
-		<ProfileCard :user="currentUser" :locations-count="userMarkers.length" />
+		<Profile :user="currentUser" :locations-count="userMarkers.length" />
 		<div
 			class="w-full max-w-xl min-w-80 p-4 rounded-xl border-r border-b bg-background/90 backdrop-blur supports-backdrop-filter:bg-background/65 shadow-2xl"
 		>
@@ -49,10 +48,10 @@ onMounted(async () => {
 					<EditProfileForm />
 				</TabsContent>
 				<TabsContent value="Локации">
-					<UserLocations />
+					<MyLocations />
 				</TabsContent>
 				<TabsContent value="Избранное">
-					<UserFavoriteLocations />
+					<FavoriteLocation />
 				</TabsContent>
 			</Tabs>
 		</div>

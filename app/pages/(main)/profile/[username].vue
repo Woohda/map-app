@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { PublicUserProfile } from '~lib/types/user';
 
-import ProfileCard from '~/components/profile/ProfileCard.vue';
+import Profile from '~/components/profile/card/Profile.vue';
 
 definePageMeta({
 	layout: 'main',
@@ -33,7 +33,7 @@ async function handleLocationClick(locationSlug: string) {
 	<div
 		class="flex gap-8 w-full items-start justify-center max-xl:gap-5 max-md:flex-col max-md:items-center max-md:justify-start"
 	>
-		<ProfileCard :user="user" :locations-count="locations.length" />
+		<Profile :user="user" :locations-count="locations.length" />
 		<div
 			class="w-full max-w-xl min-w-80 p-4 rounded-xl border-r border-b bg-background/90 backdrop-blur supports-backdrop-filter:bg-background/65 shadow-2xl"
 		>

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import SignUpForm from '~/components/form/SignUpForm.vue';
+import SignUp from '~/components/auth/form/SignUp.vue';
 
 definePageMeta({
 	layout: 'auth',
@@ -13,7 +13,7 @@ definePageMeta({
 		<h1 class="text-3xl font-bold max-md:text-2xl">
 			Регистрация нового профиля.
 		</h1>
-		<SignUpForm />
+		<SignUp />
 		<span class="text-xs text-muted-foreground text-center">
 			Уже есть аккаунт?
 			<NuxtLink

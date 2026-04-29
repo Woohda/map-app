@@ -3,7 +3,7 @@
     lang="ts"
 >
 const colorMode = useColorMode();
-const isReady = ref(false); // локальный флаг для готовности клиента
+const isReady = ref(false);
 
 onMounted(() => {
 	const mq = window.matchMedia('(prefers-color-scheme: dark)');

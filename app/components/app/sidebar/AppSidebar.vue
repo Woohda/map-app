@@ -17,18 +17,20 @@ import {
 	SidebarMenuButton,
 	SidebarMenuItem,
 	useSidebar,
-} from '@/components/ui/sidebar';
+} from '~/components/ui/sidebar';
 import SidebarLocationItem from '~/components/ui/sidebar/SidebarLocationItem.vue';
 import { useMapController } from '~/composables/useMapController';
 import { calculateDistance } from '~/utils/utils';
 
 const route = useRoute();
 const { isMobile, state, setOpenMobile } = useSidebar();
+
 const authStore = useAuthUserStore();
 const { isAuthenticated } = storeToRefs(authStore);
 const locationStore = useLocationStore();
 const popupStore = usePopupStore();
 const userGeolocationStore = useGeolocationStore();
+
 const mapController = useMapController();
 
 const nearestLocations = computed(() => {
@@ -72,12 +74,21 @@ const items = [
 		url: '#',
 		icon: 'tabler:map',
 	},
-	{
-		title: 'Добавить локацию',
-		url: '#',
-		icon: 'tabler:map-pin',
-	},
 ];
+
+function handleAddLocation() {
+	const center = mapController.getCenter();
+	if (center) {
+		locationStore.startAddingLocation(center);
+	}
+	else {
+		const [lon, lat] = userGeolocationStore.location.center;
+		locationStore.startAddingLocation([lon, lat]);
+	}
+	if (isMobile) {
+		setOpenMobile(false);
+	}
+}
 </script>
 
 <template>
@@ -104,6 +115,20 @@ const items = [
 										{{ item.title }}
 									</span>
 								</NuxtLink>
+							</SidebarMenuButton>
+						</SidebarMenuItem>
+						<SidebarMenuItem v-if="isAuthenticated">
+							<SidebarMenuButton
+								size="lg"
+								class="px-1"
+								@click="handleAddLocation"
+							>
+								<Icon name="tabler:map-pin-plus" size="22" class="shrink-0" />
+								<span
+									class="flex items-center transition-[width,opacity,margin] duration-300 ease-linear group-data-[collapsible=icon]:w-0 group-data-[collapsible=icon]:opacity-0 group-data-[collapsible=icon]:ml-0 w-full opacity-100 ml-1 overflow-hidden whitespace-nowrap"
+								>
+									Добавить локацию
+								</span>
 							</SidebarMenuButton>
 						</SidebarMenuItem>
 					</SidebarMenu>

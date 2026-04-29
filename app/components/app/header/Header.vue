@@ -2,13 +2,14 @@
 import { useMediaQuery } from '@vueuse/core';
 import { useAuthUserStore } from '~stores/auth';
 
-import NavBar from '~/components/app/NavBar.vue';
-import ThemeToggle from '~/components/button/ThemeToggle.vue';
+import NavBar from '~/components/app/header/NavBar.vue';
 import SidebarTriggerMobile from '~/components/ui/sidebar/SidebarTriggerMobile.vue';
 
+import ThemeToggle from './ThemeToggle.vue';
+
+const route = useRoute();
 const authStore = useAuthUserStore();
 const { isAuthenticated } = storeToRefs(authStore);
-const route = useRoute();
 
 const isMobile = useMediaQuery('(max-width: 768px)');
 </script>
@@ -22,7 +23,7 @@ const isMobile = useMediaQuery('(max-width: 768px)');
 		>
 			<SidebarTriggerMobile v-if="['/', '/profile'].includes(route.path)" />
 			<NuxtLink
-				to="/"
+				to="/public"
 				class="px-1 text-lg visited:text-current hover:text-primary transition-colors duration-200 focus-visible:border-ring focus-visible:ring-ring/60 focus-visible:ring-[3.5px] rounded-sm outline-none"
 			>
 				MAP_APP

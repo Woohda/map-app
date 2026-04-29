@@ -25,8 +25,16 @@ export function useMapController() {
 		}
 	};
 
+	const getCenter = (): LngLat | null => {
+		const center = globalMapInstance?.center;
+		if (!center)
+			return null;
+		return [center[0], center[1]];
+	};
+
 	return {
 		setMap,
 		navigateTo,
+		getCenter,
 	};
 }

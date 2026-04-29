@@ -13,6 +13,7 @@
  * - 🔄 Инициализация при первом запуске
  * - 📊 Управление состоянием загрузки
  * - 🔄 Принудительное обновление кластерера карты (UX)
+ * - 📍 Режим добавления локации с draggable маркером
  *
  * ## Состояние:
  * - `markers` - массив всех маркеров на карте
@@ -25,6 +26,8 @@
  * - `pendingNavigationSlug` - slug для навигации
  * - `removingIds` - Set ID локаций в процессе удаления
  * - `refreshKeyClusterer` - ключ для принудительного обновления кластерера карты
+ * - `isAddingLocation` - флаг активного режима добавления локации
+ * - `draftMarkerCoordinates` - координаты draft маркера при добавлении
  *
  * ## Функции:
  * - `loadLocations()` - загрузка всех локаций с сервера
@@ -40,6 +43,9 @@
  * - `selectMapMarker(slug)` - выбор маркера на карте
  * - `setPendingNavigation(slug)` - установка slug для навигации
  * - `forceRefreshClusterer()` - принудительное обновление кластерера карты (UX)
+ * - `startAddingLocation(center)` - активация режима добавления с draggable маркером
+ * - `cancelAddingLocation()` - отмена режима добавления
+ * - `confirmDraftLocation()` - подтверждение позиции draft маркера
  *
  * ## Использование:
  * ```typescript
@@ -54,9 +60,16 @@
  * await locationStore.removeLocation(locationId);
  * // Принудительно обновить кластерер после UX операций
  * locationStore.forceRefreshClusterer();
+ * // Начать добавление локации с draggable маркером (LngLat: [lon, lat])
+ * locationStore.startAddingLocation([37.6176, 55.7558] as LngLat);
+ * // Отменить добавление
+ * locationStore.cancelAddingLocation();
+ * // Подтвердить позицию draft маркера
+ * const coords = locationStore.confirmDraftLocation();
  * ```
  */
 
+import type { LngLat } from '@yandex/ymaps3-types';
 import type { LocationData } from '~lib/types/location';
 import type { MapMarker } from '~lib/types/map';
 import type { AddLocationValues } from '~lib/types/validation';
@@ -78,6 +91,8 @@ export const useLocationStore = defineStore('location', () => {
 	const pendingNavigationSlug = ref<string | null>(null);
 	const removingIds = ref<Set<string>>(new Set());
 	const refreshKeyClusterer = ref(Date.now());
+	const isAddingLocation = ref(false);
+	const draftMarkerCoordinates = ref<[number, number] | null>(null);
 
 	async function loadLocations() {
 		loading.value = true;
@@ -349,6 +364,21 @@ export const useLocationStore = defineStore('location', () => {
 		refreshKeyClusterer.value = Date.now();
 	}
 
+	function startAddingLocation(center: LngLat) {
+		isAddingLocation.value = true;
+		draftMarkerCoordinates.value = [center[0], center[1]];
+	}
+
+	function cancelAddingLocation() {
+		isAddingLocation.value = false;
+		draftMarkerCoordinates.value = null;
+	}
+
+	function confirmDraftLocation() {
+		isAddingLocation.value = false;
+		return draftMarkerCoordinates.value;
+	}
+
 	return {
 		markers,
 		selectedMarkerSlug,
@@ -361,6 +391,11 @@ export const useLocationStore = defineStore('location', () => {
 		removingIds,
 		refreshKeyClusterer,
 		forceRefreshClusterer,
+		isAddingLocation,
+		draftMarkerCoordinates,
+		startAddingLocation,
+		cancelAddingLocation,
+		confirmDraftLocation,
 		addLocation,
 		loadLocations,
 		addToFavorites,

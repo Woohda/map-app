@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import SignInForm from '~/components/form/SignInForm.vue';
+import SignIn from '~/components/auth/form/SignIn.vue';
 
 definePageMeta({
 	layout: 'auth',
@@ -13,7 +13,7 @@ definePageMeta({
 		<h1 class="text-3xl font-bold max-md:text-2xl">
 			Войти в аккаунт.
 		</h1>
-		<SignInForm />
+		<SignIn />
 		<span class="text-xs text-muted-foreground text-center">
 			У тебя нет аккаунта?
 			<NuxtLink

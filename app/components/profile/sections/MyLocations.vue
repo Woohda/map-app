@@ -5,27 +5,20 @@ import { useLocationStore } from '~stores/location';
 import { storeToRefs } from 'pinia';
 import { ref } from 'vue';
 
-import LocationItemCard from '~/components/shared/LocationItemCard.vue';
 import LocationListSkeleton from '~/components/shared/LocationListSkeleton.vue';
 import { useContainerHeight } from '~/composables/useContainerHeight';
 
-const locationStore = useLocationStore();
-const { favorites, favoritesLoading, removingIds } = storeToRefs(locationStore);
+import LocationItem from '../card/LocationItem.vue';
 
-const error = ref<string | null>(null);
+const locationStore = useLocationStore();
+const { userMarkers, userLoading, removingIds } = storeToRefs(locationStore);
 
 async function handleLocationClick(marker: MapMarker) {
 	locationStore.setPendingNavigation(marker.slug);
 	await navigateTo('/');
 }
-
-async function handleRemoveFavorite(marker: MapMarker) {
-	try {
-		await locationStore.removeFromFavorites(marker.id);
-	}
-	catch (err: unknown) {
-		console.error('Error removing favorite:', err);
-	}
+async function handleRemoveLocation(marker: MapMarker) {
+	await locationStore.removeLocation(marker.id);
 }
 
 const listContainerRef = ref<HTMLDivElement>();
@@ -34,35 +27,26 @@ const { containerStyle } = useContainerHeight(listContainerRef);
 
 <template>
 	<div class="flex flex-col">
-		<LocationListSkeleton v-if="favoritesLoading" />
-
+		<LocationListSkeleton v-if="userLoading" />
 		<div
-			v-else-if="error"
+			v-else-if="userMarkers.length === 0"
 			class="flex flex-col items-center gap-1 text-muted-foreground"
 		>
-			<Icon name="tabler:alert-circle" size="48" class="opacity-50" />
-			<p>{{ error }}</p>
-		</div>
-
-		<div
-			v-else-if="favorites.length === 0"
-			class="flex flex-col items-center gap-1 text-muted-foreground"
-		>
-			<Icon name="tabler:heart" size="48" class="opacity-50" />
-			<p>У вас пока нет избранных локаций</p>
+			<Icon name="tabler:map-pin" size="48" class="opacity-50" />
+			<p>У вас пока нет сохраненных локаций</p>
 		</div>
 
 		<div v-else class="flex flex-col h-full gap-2">
 			<div class="flex items-center justify-between shrink-0">
 				<h3 class="text-lg font-semibold">
-					Избранное ({{ favorites.length }}):
+					Мои локации ({{ userMarkers.length }}):
 				</h3>
 			</div>
 
 			<div ref="listContainerRef" class="flex flex-col" :style="containerStyle">
 				<div class="grid gap-2">
 					<div
-						v-for="marker in favorites"
+						v-for="marker in userMarkers"
 						:key="marker.id"
 						class="group mr-1 p-2 border rounded-lg hover:bg-accent/50 transition-colors cursor-pointer focus-visible:border-ring focus-visible:ring-ring/60 focus-visible:ring-[3.5px] outline-none min-w-0"
 						:class="{ 'pointer-events-none opacity-50': removingIds.has(marker.id) }"
@@ -72,10 +56,10 @@ const { containerStyle } = useContainerHeight(listContainerRef);
 						@click="handleLocationClick(marker)"
 						@keydown.enter="handleLocationClick(marker)"
 					>
-						<LocationItemCard
+						<LocationItem
 							:marker="marker"
-							icon="heart-filled"
-							:on-remove="handleRemoveFavorite"
+							icon="map-pin"
+							:on-remove="handleRemoveLocation"
 							:is-removing="removingIds.has(marker.id)"
 						/>
 					</div>

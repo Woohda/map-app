@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { LngLat } from '@yandex/ymaps3-types';
 
-import AddLocationForm from '~/components/form/AddLocationForm.vue';
+import AddLocationForm from '~/components/location/form/AddLocationForm.vue';
 
 interface Props {
 	coordinates: LngLat | null;

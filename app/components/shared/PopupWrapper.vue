@@ -1,7 +1,4 @@
-<script
-  setup
-  lang="ts"
->
+<script setup lang="ts">
 import Button from '~/components/ui/button/Button.vue';
 
 interface Props {
@@ -53,9 +50,9 @@ function closePopup(): void {
 					@click.stop
 				>
 					<Button
-						variant="outline"
+						variant="ghost"
 						size="s"
-						class="absolute top-3 right-3 p-1 hover:bg-muted"
+						class="absolute top-3 right-3 p-1 rounded-md border bg-background hover:bg-muted transition-colors"
 						@click="closePopup"
 					>
 						<Icon name="tabler:x" size="18" />

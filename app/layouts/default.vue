@@ -2,8 +2,8 @@
     setup
     lang="ts"
 >
-import AppSidebar from '~/components/app/AppSidebar.vue';
-import Header from '~/components/app/Header.vue';
+import Header from '~/components/app/header/Header.vue';
+import AppSidebar from '~/components/app/sidebar/AppSidebar.vue';
 </script>
 
 <template>

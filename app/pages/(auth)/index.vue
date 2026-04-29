@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import Map from '~/components/map/Map.vue';
+import Map from '~/components/location/map/Map.vue';
 </script>
 
 <template>
