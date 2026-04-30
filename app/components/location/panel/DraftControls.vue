@@ -11,8 +11,14 @@ import Button from '~/components/ui/button/Button.vue';
 const locationStore = useLocationStore();
 const popupStore = usePopupStore();
 
-const draftMarker = inject<ReturnType<typeof import('vue').shallowRef<YMapDefaultMarker | null>>>('draftMarker');
-const clickedCoordinates = inject<ReturnType<typeof import('vue').ref<Coordinates | null>>>('clickedCoordinates');
+const draftMarker
+	= inject<ReturnType<typeof import('vue').shallowRef<YMapDefaultMarker | null>>>(
+		'draftMarker',
+	);
+const clickedCoordinates
+	= inject<ReturnType<typeof import('vue').ref<Coordinates | null>>>(
+		'clickedCoordinates',
+	);
 
 function handleDraftMarkerConfirm(): void {
 	if (!draftMarker?.value)
@@ -36,19 +42,13 @@ function cancelAddingLocation(): void {
 		class="pointer-events-none absolute top-20 left-1/2 -translate-x-1/2 z-50"
 	>
 		<div
-			class="flex items-center gap-3 pointer-events-auto rounded-xl border bg-background/90 p-3 shadow-lg backdrop-blur-sm"
+			class="flex items-center gap-3 pointer-events-auto rounded-2xl p-3 shadow-2xl border-b bg-background/90 backdrop-blur supports-backdrop-filter:bg-background/65"
 		>
 			<span class="text-sm text-muted-foreground">Перетащите маркер, затем нажмите</span>
-			<Button
-				variant="default"
-				@click="handleDraftMarkerConfirm"
-			>
+			<Button variant="default" @click="handleDraftMarkerConfirm">
 				Добавить
 			</Button>
-			<Button
-				variant="outline"
-				@click="cancelAddingLocation"
-			>
+			<Button variant="outline" @click="cancelAddingLocation">
 				Отмена
 			</Button>
 		</div>

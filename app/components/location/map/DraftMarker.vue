@@ -9,7 +9,9 @@ import { YandexMapDefaultMarker } from 'vue-yandex-maps';
 const locationStore = useLocationStore();
 const userGeolocationStore = useGeolocationStore();
 
-const draftMarker = inject<ReturnType<typeof shallowRef<YMapDefaultMarker | null>>>('draftMarker', shallowRef<YMapDefaultMarker | null>(null));
+const draftMarker = inject<
+	ReturnType<typeof shallowRef<YMapDefaultMarker | null>>
+>('draftMarker', shallowRef<YMapDefaultMarker | null>(null));
 
 function onDraftMarkerDragMove() {
 	triggerRef(draftMarker);
@@ -17,15 +19,20 @@ function onDraftMarkerDragMove() {
 </script>
 
 <template>
-	<!-- @vue-ignore -->
 	<YandexMapDefaultMarker
 		v-if="locationStore.isAddingLocation"
 		v-model="draftMarker"
 		:settings="{
-			coordinates: draftMarker ? draftMarker.coordinates : locationStore.draftMarkerCoordinates || userGeolocationStore.location.center,
-			title: draftMarker ? `${draftMarker.coordinates[0].toFixed(4)}, ${draftMarker.coordinates[1].toFixed(4)}` : 'Перетащите маркер',
+			coordinates: draftMarker
+				? draftMarker.coordinates
+				: locationStore.draftMarkerCoordinates
+					|| userGeolocationStore.location.center,
+			title: draftMarker
+				? `${draftMarker.coordinates[0].toFixed(4)}, ${draftMarker.coordinates[1].toFixed(4)}`
+				: 'Перетащите маркер',
 			draggable: true,
 			onDragMove: onDraftMarkerDragMove,
+			zIndex: 10,
 		}"
 	/>
 </template>
