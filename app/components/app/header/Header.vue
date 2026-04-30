@@ -23,7 +23,7 @@ const isMobile = useMediaQuery('(max-width: 768px)');
 		>
 			<SidebarTriggerMobile v-if="['/', '/profile'].includes(route.path)" />
 			<NuxtLink
-				to="/public"
+				to="/"
 				class="px-1 text-lg visited:text-current hover:text-primary transition-colors duration-200 focus-visible:border-ring focus-visible:ring-ring/60 focus-visible:ring-[3.5px] rounded-sm outline-none"
 			>
 				MAP_APP
