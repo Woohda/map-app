@@ -5,7 +5,7 @@ import { yandexMapIsLoaded } from 'vue-yandex-maps';
 
 export function useMapInitialization(options: {
 	locationStore: {
-		initializeLocations: () => Promise<void>;
+		loadLocations: () => Promise<void>;
 	};
 	userGeolocationStore: {
 		getUserLocation: () => Promise<{ center: Coordinates; zoom: number } | undefined>;
@@ -32,7 +32,7 @@ export function useMapInitialization(options: {
 
 		const unwatch = watch(yandexMapIsLoaded, async (loaded) => {
 			if (loaded) {
-				await locationStore.initializeLocations();
+				await locationStore.loadLocations();
 				const userLocation = await userGeolocationStore.getUserLocation();
 				if (userLocation) {
 					mapController.navigateTo(userLocation.center);

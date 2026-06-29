@@ -16,11 +16,11 @@ definePageMeta({
 
 const { currentUser } = storeToRefs(useAuthUserStore());
 const { userMarkers } = storeToRefs(useLocationStore());
-const { initializeUserLocations, initializeFavorites } = useLocationStore();
+const { loadUserLocations, loadFavorites } = useLocationStore();
 
 onMounted(async () => {
-	await initializeUserLocations();
-	await initializeFavorites();
+	await loadUserLocations();
+	await loadFavorites();
 });
 </script>
 

@@ -10,7 +10,6 @@
  * - 🗑️ Удаление локаций пользователя
  * - ❤️ Добавление/удаление локаций в избранное
  * - 🎯 Выбор маркера на карте
- * - 🔄 Инициализация при первом запуске
  * - 📊 Управление состоянием загрузки
  * - 🔄 Принудительное обновление кластерера карты (UX)
  * - 📍 Режим добавления локации с draggable маркером
@@ -28,6 +27,9 @@
  * - `refreshKeyClusterer` - ключ для принудительного обновления кластерера карты
  * - `isAddingLocation` - флаг активного режима добавления локации
  * - `draftMarkerCoordinates` - координаты draft маркера при добавлении
+ * - `loadedMarkerIds` - Set ID загруженных маркеров (для оптимизации)
+ * - `loadedUserMarkerIds` - Set ID загруженных маркеров пользователя (для оптимизации)
+ * - `loadedFavoriteIds` - Set ID загруженных избранных маркеров (для оптимизации)
  *
  * ## Функции:
  * - `loadLocations()` - загрузка всех локаций с сервера
@@ -37,9 +39,6 @@
  * - `removeLocation(locationId)` - удаление локации пользователя
  * - `addToFavorites(locationId)` - добавление локации в избранное
  * - `removeFromFavorites(locationId)` - удаление локации из избранного
- * - `initializeLocations()` - инициализация всех локаций при первом запуске
- * - `initializeUserLocations()` - инициализация локаций пользователя в профиле
- * - `initializeFavorites()` - инициализация избранных локаций
  * - `selectMapMarker(slug)` - выбор маркера на карте
  * - `setPendingNavigation(slug)` - установка slug для навигации
  * - `forceRefreshClusterer()` - принудительное обновление кластерера карты (UX)
@@ -51,11 +50,9 @@
  * ```typescript
  * const locationStore = useLocationStore();
  * // Загрузить все локации для карты
- * await locationStore.initializeLocations();
+ * await locationStore.loadLocations();
  * // Загрузить локации пользователя для профиля
- * await locationStore.initializeUserLocations();
- * // Загрузить избранные локации
- * await locationStore.initializeFavorites();
+ * await locationStore.loadUserLocations();
  * // Удалить локацию
  * await locationStore.removeLocation(locationId);
  * // Принудительно обновить кластерер после UX операций
@@ -93,6 +90,9 @@ export const useLocationStore = defineStore('location', () => {
 	const refreshKeyClusterer = ref(Date.now());
 	const isAddingLocation = ref(false);
 	const draftMarkerCoordinates = ref<[number, number] | null>(null);
+	const loadedMarkerIds = ref<Set<string>>(new Set());
+	const loadedUserMarkerIds = ref<Set<string>>(new Set());
+	const loadedFavoriteIds = ref<Set<string>>(new Set());
 
 	async function loadLocations() {
 		loading.value = true;
@@ -102,6 +102,14 @@ export const useLocationStore = defineStore('location', () => {
 				method: 'GET',
 				cache: 'no-store',
 			});
+
+			const newIds = new Set(locations.map(l => l.id));
+
+			// Skip update if count and IDs are the same
+			if (newIds.size === loadedMarkerIds.value.size
+				&& [...newIds].every(id => loadedMarkerIds.value.has(id))) {
+				return;
+			}
 
 			markers.value = locations.map(location => ({
 				id: location.id,
@@ -113,6 +121,8 @@ export const useLocationStore = defineStore('location', () => {
 				username: location.user.username,
 				isFavorite: location.FavoriteLocation && location.FavoriteLocation.length > 0,
 			}));
+
+			loadedMarkerIds.value = newIds;
 		}
 		catch (err) {
 			toast({
@@ -135,6 +145,13 @@ export const useLocationStore = defineStore('location', () => {
 				cache: 'no-store',
 			});
 
+			const newIds = new Set(locations.map(l => l.id));
+
+			if (newIds.size === loadedUserMarkerIds.value.size
+				&& [...newIds].every(id => loadedUserMarkerIds.value.has(id))) {
+				return;
+			}
+
 			userMarkers.value = locations.map(location => ({
 				id: location.id,
 				slug: location.slug,
@@ -145,6 +162,8 @@ export const useLocationStore = defineStore('location', () => {
 				username: location.user.username,
 				isFavorite: location.FavoriteLocation && location.FavoriteLocation.length > 0,
 			}));
+
+			loadedUserMarkerIds.value = newIds;
 		}
 		catch (err) {
 			toast({
@@ -179,8 +198,10 @@ export const useLocationStore = defineStore('location', () => {
 				isFavorite: newLocation.FavoriteLocation && newLocation.FavoriteLocation.length > 0,
 			};
 
-			userMarkers.value.push(newMarker);
-			markers.value.push(newMarker);
+			userMarkers.value.unshift(newMarker);
+			markers.value.unshift(newMarker);
+			loadedUserMarkerIds.value.add(newMarker.id);
+			loadedMarkerIds.value.add(newMarker.id);
 
 			forceRefreshClusterer();
 
@@ -194,6 +215,8 @@ export const useLocationStore = defineStore('location', () => {
 			if (newMarker) {
 				userMarkers.value = userMarkers.value.filter(m => m.id !== newMarker!.id);
 				markers.value = markers.value.filter(m => m.id !== newMarker!.id);
+				loadedUserMarkerIds.value.delete(newMarker!.id);
+				loadedMarkerIds.value.delete(newMarker!.id);
 				forceRefreshClusterer();
 			}
 			toast({
@@ -213,6 +236,13 @@ export const useLocationStore = defineStore('location', () => {
 				cache: 'no-store',
 			});
 
+			const newIds = new Set(response.map(fav => fav.location.id));
+
+			if (newIds.size === loadedFavoriteIds.value.size
+				&& [...newIds].every(id => loadedFavoriteIds.value.has(id))) {
+				return;
+			}
+
 			favorites.value = response.map(fav => ({
 				id: fav.location.id,
 				slug: fav.location.slug,
@@ -223,6 +253,8 @@ export const useLocationStore = defineStore('location', () => {
 				username: fav.location.user.username,
 				isFavorite: true,
 			}));
+
+			loadedFavoriteIds.value = newIds;
 		}
 		catch (err) {
 			toast({
@@ -247,6 +279,8 @@ export const useLocationStore = defineStore('location', () => {
 			const marker = markers.value.find(m => m.id === locationId);
 			if (marker) {
 				marker.isFavorite = true;
+				favorites.value.unshift({ ...marker, isFavorite: true });
+				loadedFavoriteIds.value.add(locationId);
 			}
 			const userMarker = userMarkers.value.find(m => m.id === locationId);
 			if (userMarker) {
@@ -285,6 +319,7 @@ export const useLocationStore = defineStore('location', () => {
 				userMarker.isFavorite = false;
 			}
 			favorites.value = favorites.value.filter(m => m.id !== locationId);
+			loadedFavoriteIds.value.delete(locationId);
 
 			toast({
 				description: `Локация удалена из избранного!`,
@@ -315,6 +350,9 @@ export const useLocationStore = defineStore('location', () => {
 			markers.value = markers.value.filter(m => m.id !== locationId);
 			userMarkers.value = userMarkers.value.filter(m => m.id !== locationId);
 			favorites.value = favorites.value.filter(m => m.id !== locationId);
+			loadedUserMarkerIds.value.delete(locationId);
+			loadedMarkerIds.value.delete(locationId);
+			loadedFavoriteIds.value.delete(locationId);
 
 			toast({
 				description: `Локация удалена!`,
@@ -331,24 +369,6 @@ export const useLocationStore = defineStore('location', () => {
 		}
 		finally {
 			removingIds.value.delete(locationId);
-		}
-	}
-
-	async function initializeLocations() {
-		if (markers.value.length === 0 && !loading.value) {
-			await loadLocations();
-		}
-	}
-
-	async function initializeUserLocations() {
-		if (userMarkers.value.length === 0 && !userLoading.value) {
-			await loadUserLocations();
-		}
-	}
-
-	async function initializeFavorites() {
-		if (favorites.value.length === 0 && !favoritesLoading.value) {
-			await loadFavorites();
 		}
 	}
 
@@ -399,13 +419,11 @@ export const useLocationStore = defineStore('location', () => {
 		addLocation,
 		loadLocations,
 		addToFavorites,
-		loadFavorites,
 		removeFromFavorites,
 		removeLocation,
 		selectMapMarker,
 		setPendingNavigation,
-		initializeLocations,
-		initializeUserLocations,
-		initializeFavorites,
+		loadFavorites,
+		loadUserLocations,
 	};
 });
