@@ -3,9 +3,12 @@ import Button from '~/components/ui/button/Button.vue';
 
 interface Props {
 	show: boolean;
+	size?: 'default' | 'wide';
 }
 
-defineProps<Props>();
+const props = withDefaults(defineProps<Props>(), {
+	size: 'default',
+});
 
 const emit = defineEmits<{
 	close: [];
@@ -43,7 +46,10 @@ function closePopup(): void {
 		>
 			<div
 				v-if="show"
-				class="absolute top-20 left-1/2 w-full max-w-sm -translate-x-1/2 z-50 max-[430px]:max-w-[90%]"
+				class="absolute top-20 left-1/2 w-full -translate-x-1/2 z-50 max-[430px]:max-w-[90%]"
+				:class="[
+					props.size === 'wide' ? 'max-w-xl' : 'max-w-sm',
+				]"
 			>
 				<div
 					class="relative rounded-2xl p-3 shadow-2xl border-b bg-background/90 backdrop-blur supports-backdrop-filter:bg-background/65"

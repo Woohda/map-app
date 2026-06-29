@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { MapMarker } from '~lib/types/map';
 
+import { useMediaQuery } from '@vueuse/core';
 import { useAuthUserStore } from '~stores/auth';
 import { useLocationStore } from '~stores/location';
 import { usePopupStore } from '~stores/popup';
@@ -23,7 +24,8 @@ import { useMapController } from '~/composables/useMapController';
 import { calculateDistance } from '~/utils/utils';
 
 const route = useRoute();
-const { isMobile, state, setOpenMobile } = useSidebar();
+const { isMobile, state, setOpenMobile, toggleSidebar } = useSidebar();
+const isSmallScreen = useMediaQuery('(max-width: 768px)');
 
 const authStore = useAuthUserStore();
 const { isAuthenticated } = storeToRefs(authStore);
@@ -32,6 +34,8 @@ const popupStore = usePopupStore();
 const userGeolocationStore = useGeolocationStore();
 
 const mapController = useMapController();
+
+const COLLAPSED_TEXT_CLASS = 'flex items-center transition-[width,opacity,margin] duration-300 ease-linear group-data-[collapsible=icon]:w-0 group-data-[collapsible=icon]:opacity-0 group-data-[collapsible=icon]:ml-0 w-full opacity-100 ml-1 overflow-hidden whitespace-nowrap';
 
 const nearestLocations = computed(() => {
 	if (
@@ -63,32 +67,54 @@ function handleLocationSelect(marker: MapMarker) {
 	locationStore.selectMapMarker(marker.slug);
 	popupStore.showMarkerInfo(marker);
 	mapController.navigateTo(marker.coordinates);
+	closeSidebarOnMobile();
+}
+
+function handleLocationsClick() {
+	popupStore.showLocationsList();
+	if (isMobile) {
+		setOpenMobile(false);
+	}
+	else {
+		toggleSidebar();
+	}
+}
+
+function handleAddLocation() {
+	const center = mapController.getCenter() || userGeolocationStore.location.center;
+	locationStore.startAddingLocation(center);
+	closeSidebarOnMobile();
+}
+
+function closeSidebarOnMobile() {
 	if (isMobile) {
 		setOpenMobile(false);
 	}
 }
 
-const items = [
+const navItems = [
 	{
 		title: 'Локации',
 		url: '#',
 		icon: 'tabler:map',
+		onClick: handleLocationsClick,
+	},
+	{
+		title: 'Добавить локацию',
+		icon: 'tabler:map-pin-plus',
+		onClick: handleAddLocation,
+		requiresAuth: true,
 	},
 ];
 
-function handleAddLocation() {
-	const center = mapController.getCenter();
-	if (center) {
-		locationStore.startAddingLocation(center);
-	}
-	else {
-		const [lon, lat] = userGeolocationStore.location.center;
-		locationStore.startAddingLocation([lon, lat]);
-	}
-	if (isMobile) {
-		setOpenMobile(false);
-	}
-}
+const filteredNavItems = computed(() =>
+	navItems.filter(item => !item.requiresAuth || isAuthenticated.value),
+);
+
+const mobileMenuItems = [
+	{ title: 'Профиль', to: '/profile', icon: 'tabler:user' },
+	{ title: 'Выйти', onClick: () => authStore.logout(), icon: 'tabler:logout' },
+];
 </script>
 
 <template>
@@ -105,30 +131,33 @@ function handleAddLocation() {
 			<SidebarGroup>
 				<SidebarGroupContent>
 					<SidebarMenu>
-						<SidebarMenuItem v-for="item in items" :key="item.title">
-							<SidebarMenuButton as-child size="lg" class="px-1">
-								<NuxtLink>
+						<SidebarMenuItem
+							v-for="item in filteredNavItems"
+							:key="item.title"
+						>
+							<SidebarMenuButton
+								v-if="item.onClick"
+								size="lg"
+								class="px-1"
+								@click="item.onClick"
+							>
+								<Icon :name="item.icon" size="22" class="shrink-0" />
+								<span :class="COLLAPSED_TEXT_CLASS">
+									{{ item.title }}
+								</span>
+							</SidebarMenuButton>
+							<SidebarMenuButton
+								v-else
+								as-child
+								size="lg"
+								class="px-1"
+							>
+								<NuxtLink :to="item.url">
 									<Icon :name="item.icon" size="22" class="shrink-0" />
-									<span
-										class="flex items-center transition-[width,opacity,margin] duration-300 ease-linear group-data-[collapsible=icon]:w-0 group-data-[collapsible=icon]:opacity-0 group-data-[collapsible=icon]:ml-0 w-full opacity-100 ml-1 overflow-hidden whitespace-nowrap"
-									>
+									<span :class="COLLAPSED_TEXT_CLASS">
 										{{ item.title }}
 									</span>
 								</NuxtLink>
-							</SidebarMenuButton>
-						</SidebarMenuItem>
-						<SidebarMenuItem v-if="isAuthenticated">
-							<SidebarMenuButton
-								size="lg"
-								class="px-1"
-								@click="handleAddLocation"
-							>
-								<Icon name="tabler:map-pin-plus" size="22" class="shrink-0" />
-								<span
-									class="flex items-center transition-[width,opacity,margin] duration-300 ease-linear group-data-[collapsible=icon]:w-0 group-data-[collapsible=icon]:opacity-0 group-data-[collapsible=icon]:ml-0 w-full opacity-100 ml-1 overflow-hidden whitespace-nowrap"
-								>
-									Добавить локацию
-								</span>
 							</SidebarMenuButton>
 						</SidebarMenuItem>
 					</SidebarMenu>
@@ -157,36 +186,33 @@ function handleAddLocation() {
 					</SidebarMenu>
 				</SidebarGroupContent>
 			</SidebarGroup>
-			<Separator v-if="isAuthenticated && isMobile" />
-			<SidebarGroup v-if="isAuthenticated && isMobile">
+			<Separator v-if="isAuthenticated && isSmallScreen" />
+			<SidebarGroup v-if="isAuthenticated && isSmallScreen">
 				<SidebarGroupContent>
 					<SidebarMenu>
-						<SidebarMenuItem>
-							<SidebarMenuButton as-child size="lg" class="px-1">
-								<NuxtLink
-									to="/profile"
-									class="flex items-center cursor-pointer"
-								>
-									<Icon name="tabler:user" size="22" class="shrink-0" />
-									<span
-										class="flex items-center transition-[width,opacity,margin] duration-300 ease-linear group-data-[collapsible=icon]:w-0 group-data-[collapsible=icon]:opacity-0 group-data-[collapsible=icon]:ml-0 w-full opacity-100 ml-1 overflow-hidden whitespace-nowrap"
-									>
-										Профиль
+						<SidebarMenuItem v-for="item in mobileMenuItems" :key="item.title">
+							<SidebarMenuButton
+								v-if="item.to"
+								as-child
+								size="lg"
+								class="px-1"
+							>
+								<NuxtLink :to="item.to" class="flex items-center cursor-pointer">
+									<Icon :name="item.icon" size="22" class="shrink-0" />
+									<span :class="COLLAPSED_TEXT_CLASS">
+										{{ item.title }}
 									</span>
 								</NuxtLink>
 							</SidebarMenuButton>
-						</SidebarMenuItem>
-						<SidebarMenuItem>
 							<SidebarMenuButton
+								v-else
 								size="lg"
 								class="px-1"
-								@click="authStore.logout"
+								@click="item.onClick"
 							>
-								<Icon name="tabler:logout" size="22" class="shrink-0" />
-								<span
-									class="flex items-center transition-[width,opacity,margin] duration-300 ease-linear group-data-[collapsible=icon]:w-0 group-data-[collapsible=icon]:opacity-0 group-data-[collapsible=icon]:ml-0 w-full opacity-100 ml-1 overflow-hidden whitespace-nowrap"
-								>
-									Выйти
+								<Icon :name="item.icon" size="22" class="shrink-0" />
+								<span :class="COLLAPSED_TEXT_CLASS">
+									{{ item.title }}
 								</span>
 							</SidebarMenuButton>
 						</SidebarMenuItem>

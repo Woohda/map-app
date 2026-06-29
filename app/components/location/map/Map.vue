@@ -29,6 +29,7 @@ import StandardMarker from '~/components/location/map/markers/Standard.vue';
 import DraftControls from '~/components/location/panel/DraftControls.vue';
 import AddLocation from '~/components/location/popup/AddLocation.vue';
 import ErrorDetails from '~/components/location/popup/ErrorDetails.vue';
+import LocationsList from '~/components/location/popup/LocationsList.vue';
 import MarkerDetails from '~/components/location/popup/MarkerDetails.vue';
 import LoadingIndicator from '~/components/shared/LoadingIndicator.vue';
 import PopupWrapper from '~/components/shared/PopupWrapper.vue';
@@ -187,7 +188,11 @@ async function closePopup(): Promise<void> {
 
 		<DraftControls />
 
-		<PopupWrapper :show="!!popupStore.popup.type" @close="closePopup">
+		<PopupWrapper
+			:show="!!popupStore.popup.type"
+			:size="popupStore.popup.type === 'locationsList' ? 'wide' : 'default'"
+			@close="closePopup"
+		>
 			<MarkerDetails
 				v-if="popupStore.popup.type === 'markerInfo' && selectedMarker"
 				:marker="selectedMarker"
@@ -196,6 +201,9 @@ async function closePopup(): Promise<void> {
 				v-if="popupStore.popup.type === 'addLocation'"
 				:coordinates="clickedCoordinates"
 				:on-close="closePopup"
+			/>
+			<LocationsList
+				v-if="popupStore.popup.type === 'locationsList'"
 			/>
 			<ErrorDetails />
 		</PopupWrapper>
