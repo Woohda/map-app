@@ -6,6 +6,7 @@
  * - 📋 Управление отображением popup окон
  * - 📍 Показ информации о маркере
  * - ➕ Форма добавления локации
+ * - 📋 Список всех локаций с поиском
  * - ⚠️ Отображение ошибок
  * - 🔄 Сброс состояния popup
  *
@@ -16,18 +17,21 @@
  * - `openPopup(type, data)` - открытие popup с указанным типом
  * - `showMarkerInfo(marker)` - показ информации о маркере
  * - `showAddLocation(coords)` - показ формы добавления локации
+ * - `showLocationsList()` - показ списка всех локаций с поиском
  * - `showErrorInfo(message)` - показ ошибки
  * - `clearPopup()` - закрытие текущего popup
  *
  * ## Типы popup:
  * - `MARKER_INFO` - информация о маркере
  * - `ADD_LOCATION` - форма добавления локации
+ * - `LOCATIONS_LIST` - список всех локаций с поиском
  * - `ERROR_INFO` - сообщение об ошибке
  *
  * ## Использование:
  * ```typescript
  * const popupStore = usePopupStore();
  * popupStore.showMarkerInfo(marker);
+ * popupStore.showLocationsList();
  * ```
  */
 
@@ -62,6 +66,10 @@ export const usePopupStore = defineStore('popup', {
 
 		showErrorInfo(str: string) {
 			this.openPopup(PopupType.ERROR_INFO, str);
+		},
+
+		showLocationsList() {
+			this.openPopup(PopupType.LOCATIONS_LIST);
 		},
 
 		clearPopup() {
