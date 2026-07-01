@@ -18,6 +18,12 @@ const { currentUser } = storeToRefs(useAuthUserStore());
 const { userMarkers } = storeToRefs(useLocationStore());
 const { loadUserLocations, loadFavorites } = useLocationStore();
 
+useSeo({
+	title: 'Мой профиль - Map App',
+	description: 'Управляйте своим профилем, локациями и избранным в Map App.',
+	noIndex: true,
+});
+
 onMounted(async () => {
 	await loadUserLocations();
 	await loadFavorites();

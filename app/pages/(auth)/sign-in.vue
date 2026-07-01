@@ -4,6 +4,12 @@ import SignIn from '~/components/auth/form/SignIn.vue';
 definePageMeta({
 	layout: 'auth',
 });
+
+useSeo({
+	title: 'Вход в аккаунт - Map App',
+	description: 'Войдите в свой аккаунт Map App для доступа к вашим локациям и профилю.',
+	noIndex: true,
+});
 </script>
 
 <template>

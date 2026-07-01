@@ -4,6 +4,12 @@ import SignUp from '~/components/auth/form/SignUp.vue';
 definePageMeta({
 	layout: 'auth',
 });
+
+useSeo({
+	title: 'Регистрация - Map App',
+	description: 'Зарегистрируйтесь в Map App, чтобы добавлять локации на карту и делиться ими с другими пользователями.',
+	noIndex: true,
+});
 </script>
 
 <template>

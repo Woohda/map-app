@@ -10,9 +10,12 @@ definePageMeta({
 const route = useRoute();
 const username = route.params.username as string;
 
-const { data: userProfile, error } = await useFetch<PublicUserProfile>(`/api/user/${username}`, {
-	credentials: 'include',
-});
+const { data: userProfile, error } = await useFetch<PublicUserProfile>(
+	`/api/user/${username}`,
+	{
+		credentials: 'include',
+	},
+);
 
 if (error.value || !userProfile.value) {
 	throw createError({
@@ -23,6 +26,12 @@ if (error.value || !userProfile.value) {
 
 const user = computed(() => userProfile.value);
 const locations = computed(() => userProfile.value?.locations || []);
+
+useSeo({
+	title: `Профиль пользователя - ${user.value?.name || username} - Map App`,
+	description: `Посмотрите локации пользователя ${user.value?.name || username} на карте. ${locations.value.length} сохраненных мест.`,
+	type: 'profile',
+});
 
 async function handleLocationClick(locationSlug: string) {
 	await navigateTo(`/?location=${locationSlug}`);

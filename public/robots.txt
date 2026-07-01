@@ -1,2 +1,5 @@
 User-Agent: *
-Disallow:
+Disallow: /sign-in
+Disallow: /sign-up
+Disallow: /profile
+Disallow: /api
