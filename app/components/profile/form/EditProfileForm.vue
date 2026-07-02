@@ -19,7 +19,9 @@ import {
 import { Input } from '~/components/ui/input';
 import DotsLoader from '~/components/ui/loader/DotsLoader.vue';
 import { Textarea } from '~/components/ui/textarea';
+import { useToast } from '~/composables/use-toast';
 
+const { toast } = useToast();
 const formError = ref('');
 const loading = ref(false);
 const { currentUser } = storeToRefs(useAuthUserStore());
@@ -86,7 +88,7 @@ async function onSubmit(
 		});
 
 		toast({
-			description: 'Профиль успешно обновлен!',
+			title: 'Профиль успешно обновлен!',
 			variant: 'success',
 		});
 	}

@@ -3,6 +3,8 @@ import { useAuthUserStore } from '~stores/auth';
 import { usePopupStore } from '~stores/popup';
 import { storeToRefs } from 'pinia';
 
+import Toaster from '~/components/ui/toast/Toaster.vue';
+
 const isPageLoading = ref(false);
 const popupStore = usePopupStore();
 const { isLoggingOut } = storeToRefs(useAuthUserStore());

@@ -31,12 +31,13 @@ import { navigateTo } from 'nuxt/app';
 import { defineStore } from 'pinia';
 import { computed, ref } from 'vue';
 
-import { toast } from '~/composables/use-toast';
+import { useToast } from '~/composables/use-toast';
 
 export const useAuthUserStore = defineStore('authUser', () => {
 	const currentUser = ref<UserData | null>(null);
 	const isAuthenticated = computed(() => currentUser.value !== null);
 	const isLoggingOut = ref(false);
+	const { toast } = useToast();
 
 	async function signIn(formData: SignInValues) {
 		const user = await $fetch<UserData>('/api/auth/sign-in', {
@@ -45,7 +46,7 @@ export const useAuthUserStore = defineStore('authUser', () => {
 		});
 		currentUser.value = user ?? null;
 		toast({
-			description: `Добро пожаловать, ${currentUser.value?.name}!`,
+			title: `Добро пожаловать, ${currentUser.value?.name}!`,
 			variant: 'success',
 		});
 		await navigateTo('/');
@@ -58,7 +59,7 @@ export const useAuthUserStore = defineStore('authUser', () => {
 		});
 		currentUser.value = user ?? null;
 		toast({
-			description: `${currentUser.value?.name}, Вы успешно зарегистрировались!`,
+			title: `${currentUser.value?.name}, Вы успешно зарегистрировались!`,
 			variant: 'success',
 		});
 		await navigateTo('/');
@@ -77,7 +78,7 @@ export const useAuthUserStore = defineStore('authUser', () => {
 		catch (error: unknown) {
 			console.error('Ошибка выхода из аккаунта', error);
 			toast({
-				description: 'Произошла ошибка, попробуйте еще раз',
+				title: 'Произошла ошибка, попробуйте еще раз',
 				variant: 'destructive',
 			});
 		}

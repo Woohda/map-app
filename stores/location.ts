@@ -105,7 +105,6 @@ export const useLocationStore = defineStore('location', () => {
 
 			const newIds = new Set(locations.map(l => l.id));
 
-			// Skip update if count and IDs are the same
 			if (newIds.size === loadedMarkerIds.value.size
 				&& [...newIds].every(id => loadedMarkerIds.value.has(id))) {
 				return;
@@ -126,7 +125,7 @@ export const useLocationStore = defineStore('location', () => {
 		}
 		catch (err) {
 			toast({
-				description: `Локации не загрузились, попробуйте еще раз!`,
+				title: `Локации не загрузились, попробуйте еще раз!`,
 				variant: 'destructive',
 			});
 			console.error('Error loading locations:', err);
@@ -167,7 +166,7 @@ export const useLocationStore = defineStore('location', () => {
 		}
 		catch (err) {
 			toast({
-				description: `Локации пользователя не загрузились, попробуйте еще раз!`,
+				title: `Локации пользователя не загрузились, попробуйте еще раз!`,
 				variant: 'destructive',
 			});
 			console.error('Error loading user locations:', err);
@@ -206,7 +205,7 @@ export const useLocationStore = defineStore('location', () => {
 			forceRefreshClusterer();
 
 			toast({
-				description: `Локация "${newLocation.name}" добавлена!`,
+				title: `Локация "${newLocation.name}" добавлена!`,
 				variant: 'success',
 			});
 			return newMarker;
@@ -220,7 +219,7 @@ export const useLocationStore = defineStore('location', () => {
 				forceRefreshClusterer();
 			}
 			toast({
-				description: err?.response._data?.message || 'Ошибка добавления локации. Попробуйте еще раз',
+				title: err?.response._data?.message || 'Ошибка добавления локации. Попробуйте еще раз',
 				variant: 'destructive',
 			});
 			throw err;
@@ -258,7 +257,7 @@ export const useLocationStore = defineStore('location', () => {
 		}
 		catch (err) {
 			toast({
-				description: `Избранные локации не загрузились, попробуйте еще раз!`,
+				title: `Избранные локации не загрузились, попробуйте еще раз!`,
 				variant: 'destructive',
 			});
 			console.error('Error loading favorites:', err);
@@ -288,13 +287,13 @@ export const useLocationStore = defineStore('location', () => {
 			}
 
 			toast({
-				description: `Локация добавлена в избранное!`,
+				title: `Локация добавлена в избранное!`,
 				variant: 'success',
 			});
 		}
 		catch (err) {
 			toast({
-				description: `Не удалось добавить в избранное, попробуйте еще раз!`,
+				title: `Не удалось добавить в избранное, попробуйте еще раз!`,
 				variant: 'destructive',
 			});
 			console.error('Error adding to favorites:', err);
@@ -322,13 +321,13 @@ export const useLocationStore = defineStore('location', () => {
 			loadedFavoriteIds.value.delete(locationId);
 
 			toast({
-				description: `Локация удалена из избранного!`,
+				title: `Локация удалена из избранного!`,
 				variant: 'success',
 			});
 		}
 		catch (err) {
 			toast({
-				description: `Не удалось удалить из избранного, попробуйте еще раз!`,
+				title: `Не удалось удалить из избранного, попробуйте еще раз!`,
 				variant: 'destructive',
 			});
 			console.error('Error removing from favorites:', err);
@@ -355,13 +354,13 @@ export const useLocationStore = defineStore('location', () => {
 			loadedFavoriteIds.value.delete(locationId);
 
 			toast({
-				description: `Локация удалена!`,
+				title: `Локация удалена!`,
 				variant: 'success',
 			});
 		}
 		catch (err) {
 			toast({
-				description: `Не удалось удалить локацию, попробуйте еще раз!`,
+				title: `Не удалось удалить локацию, попробуйте еще раз!`,
 				variant: 'destructive',
 			});
 			console.error('Error removing location:', err);
