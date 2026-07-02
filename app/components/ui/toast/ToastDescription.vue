@@ -7,13 +7,23 @@ import { ToastDescription } from 'reka-ui';
 
 import { cn } from '~/utils/utils';
 
-const props = defineProps<ToastDescriptionProps & { class?: HTMLAttributes['class'] }>();
+const props = defineProps<
+  ToastDescriptionProps & { class?: HTMLAttributes['class'] }
+>();
 
 const delegatedProps = reactiveOmit(props, 'class');
 </script>
 
 <template>
-	<ToastDescription :class="cn('text-xs opacity-90', props.class)" v-bind="delegatedProps">
+	<ToastDescription
+		:class="
+			cn(
+				'text-xs opacity-90 break-words hyphens-auto line-clamp-2',
+				props.class,
+			)
+		"
+		v-bind="delegatedProps"
+	>
 		<slot />
 	</ToastDescription>
 </template>
