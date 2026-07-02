@@ -39,6 +39,9 @@ export default defineNuxtConfig({
 	},
 	yandexMaps: {
 		apikey: env.YANDEX_MAPS_API_KEY,
+		servicesApikeys: {
+			router: env.YANDEX_MAPS_API_KEY,
+		},
 	},
 	colorMode: {
 		preference: 'system',

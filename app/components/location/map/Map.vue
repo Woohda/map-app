@@ -7,6 +7,7 @@ import type { Coordinates } from '~lib/types/map';
 import { useAuthUserStore } from '~stores/auth';
 import { useLocationStore } from '~stores/location';
 import { usePopupStore } from '~stores/popup';
+import { useRouteStore } from '~stores/route';
 import { useGeolocationStore } from '~stores/userGeolocation';
 import { computed, provide, ref, shallowRef, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
@@ -16,6 +17,7 @@ import {
 	YandexMapControls,
 	YandexMapDefaultFeaturesLayer,
 	YandexMapDefaultSchemeLayer,
+	YandexMapFeature,
 	YandexMapGeolocationControl,
 	yandexMapIsLoaded,
 	YandexMapListener,
@@ -37,6 +39,7 @@ import { useMapController } from '~/composables/useMapController';
 import { useMapEvents } from '~/composables/useMapEvents';
 import { useMapInitialization } from '~/composables/useMapInitialization';
 import { useMapMarkers } from '~/composables/useMapMarkers';
+import { useRouteBuilder } from '~/composables/useRouteBuilder';
 
 const route = useRoute();
 const router = useRouter();
@@ -57,7 +60,9 @@ const popupStore = usePopupStore();
 const authStore = useAuthUserStore();
 const locationStore = useLocationStore();
 const userGeolocationStore = useGeolocationStore();
+const routeStore = useRouteStore();
 const mapController = useMapController();
+const { lineStyle } = useRouteBuilder();
 
 const markers = computed(() => {
 	return locationStore.markers;
@@ -118,6 +123,7 @@ async function closePopup(): Promise<void> {
 	}
 	locationStore.selectMapMarker(null);
 	locationStore.forceRefreshClusterer();
+	routeStore.clearRoute();
 	if (locationStore.isAddingLocation) {
 		locationStore.cancelAddingLocation();
 	}
@@ -177,6 +183,11 @@ async function closePopup(): Promise<void> {
 					<ClusterMarker :length="length" />
 				</template>
 			</YandexMapClusterer>
+
+			<YandexMapFeature
+				v-if="routeStore.route"
+				:settings="{ ...routeStore.route, style: lineStyle }"
+			/>
 
 			<YandexMapControls :settings="{ position: 'right' }">
 				<YandexMapZoomControl />

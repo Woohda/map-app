@@ -18,6 +18,7 @@
  * ## Функции:
  * - `getUserLocation()` - получение геолокации пользователя
  * - `checkGeolocationPermission()` - проверка разрешений
+ * - `checkPermissionStatus()` - проверка статуса разрешений (granted/denied/prompt)
  * - `resetErrorFlag()` - сброс флага ошибки
  *
  * ## Использование:
@@ -107,7 +108,7 @@ export const useGeolocationStore = defineStore('geolocation', () => {
 			}
 			else {
 				toast({
-					description: errorInstance.message || errorMessage,
+					title: errorInstance.message || errorMessage,
 					variant: 'destructive',
 				});
 			}
@@ -117,10 +118,16 @@ export const useGeolocationStore = defineStore('geolocation', () => {
 		}
 	}
 
+	async function checkPermissionStatus(): Promise<boolean> {
+		const permission = await checkGeolocationPermission();
+		return permission === 'granted';
+	}
+
 	return {
 		location,
 		loading,
 		error,
 		getUserLocation,
+		checkPermissionStatus,
 	};
 });

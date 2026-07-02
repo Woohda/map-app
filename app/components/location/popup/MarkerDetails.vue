@@ -3,9 +3,13 @@ import type { MapMarker } from '~lib/types/map';
 
 import { useAuthUserStore } from '~stores/auth';
 import { useLocationStore } from '~stores/location';
+import { useRouteStore } from '~stores/route';
+import { useGeolocationStore } from '~stores/userGeolocation';
 import { storeToRefs } from 'pinia';
 
 import Button from '~/components/ui/button/Button.vue';
+import { useToast } from '~/composables/use-toast';
+import { useRouteBuilder } from '~/composables/useRouteBuilder';
 
 interface Props {
 	marker: MapMarker;
@@ -13,9 +17,12 @@ interface Props {
 
 const props = defineProps<Props>();
 
+const { toast } = useToast();
 const { currentUser } = storeToRefs(useAuthUserStore());
 const locationStore = useLocationStore();
 const { markers } = storeToRefs(locationStore);
+const userGeolocationStore = useGeolocationStore();
+const routeStore = useRouteStore();
 
 const isCurrentUser = computed(() => {
 	return currentUser.value?.username === props.marker.username;
@@ -27,6 +34,8 @@ const isFavorite = computed(() => {
 });
 const isLoading = ref(false);
 const isDescriptionExpanded = ref(false);
+
+const { loading: routeLoading, buildRoute } = useRouteBuilder();
 
 async function toggleFavorite() {
 	if (!currentUser.value)
@@ -45,6 +54,49 @@ async function toggleFavorite() {
 	}
 	finally {
 		isLoading.value = false;
+	}
+}
+
+async function handleRouteClick() {
+	try {
+		const hasPermission = await userGeolocationStore.checkPermissionStatus();
+
+		if (!hasPermission) {
+			toast({
+				title: 'Геолокация недоступна',
+				description: 'Разрешите трансляцию своей геолокации для построения маршрута',
+				variant: 'destructive',
+			});
+			return;
+		}
+
+		if (!userGeolocationStore.location.center) {
+			toast({
+				title: 'Геолокация недоступна',
+				description: 'Не удалось определить ваше местоположение',
+				variant: 'destructive',
+			});
+			return;
+		}
+
+		routeStore.clearRoute();
+		const newRoute = await buildRoute(userGeolocationStore.location.center, props.marker.coordinates);
+
+		if (newRoute) {
+			routeStore.setRoute(newRoute);
+			toast({
+				title: 'Маршрут построен',
+				description: 'Маршрут от вашего местоположения до выбранной метки',
+			});
+		}
+	}
+	catch (error) {
+		console.error('Error building route:', error);
+		toast({
+			title: 'Ошибка построения маршрута',
+			description: error instanceof Error ? error.message : 'Не удалось построить маршрут',
+			variant: 'destructive',
+		});
 	}
 }
 </script>
@@ -87,9 +139,19 @@ async function toggleFavorite() {
 			</NuxtLink>
 		</div>
 		<div class="flex justify-center gap-2">
-			<Button size="sm" variant="outline" class="w-1/2">
-				<Icon name="tabler:route" class="mr-2 h-4 w-4" />
-				Маршрут
+			<Button
+				size="sm"
+				variant="outline"
+				class="w-1/2"
+				:disabled="routeLoading"
+				@click="handleRouteClick"
+			>
+				<Icon
+					:name="routeLoading ? 'tabler:loader-2' : 'tabler:route'"
+					:class="routeLoading ? 'animate-spin' : ''"
+					class="mr-2 h-4 w-4"
+				/>
+				{{ routeLoading ? 'Построение...' : 'Маршрут' }}
 			</Button>
 			<Button
 				v-if="currentUser"
