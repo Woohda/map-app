@@ -32,31 +32,31 @@ import { validateRequest } from '~server/utils/auth';
 import { createError, defineEventHandler, readBody } from 'h3';
 
 export default defineEventHandler(async (event: H3Event) => {
-	try {
-		const credentials = await readBody(event);
+  try {
+    const credentials = await readBody(event);
 
-		const validateValues = updateUserProfileSchema.parse(credentials);
+    const validateValues = updateUserProfileSchema.parse(credentials);
 
-		const { user: loggedInUser } = await validateRequest(event);
-		if (!loggedInUser) {
-			throw createError({
-				status: 401,
-				message: 'Вы не авторизованы',
-			});
-		}
+    const { user: loggedInUser } = await validateRequest(event);
+    if (!loggedInUser) {
+      throw createError({
+        status: 401,
+        message: 'Вы не авторизованы',
+      });
+    }
 
-		const updateUser = await prisma.user.update({
-			where: { id: loggedInUser.id },
-			data: validateValues,
-			select: getUserDataSelect(),
-		});
+    const updateUser = await prisma.user.update({
+      where: { id: loggedInUser.id },
+      data: validateValues,
+      select: getUserDataSelect(),
+    });
 
-		return updateUser;
-	}
-	catch (err: unknown) {
-		if (err instanceof Error) {
-			throw err;
-		}
-		throw createError({ status: 500, message: 'Ошибка обновления профиля. Попробуйте снова или позже.' });
-	}
+    return updateUser;
+  }
+  catch (err: unknown) {
+    if (err instanceof Error) {
+      throw err;
+    }
+    throw createError({ status: 500, message: 'Ошибка обновления профиля. Попробуйте снова или позже.' });
+  }
 });

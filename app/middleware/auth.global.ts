@@ -39,48 +39,48 @@ import { useRequestEvent } from 'nuxt/app';
 import { storeToRefs } from 'pinia';
 
 export default defineNuxtRouteMiddleware(async (to) => {
-	const { currentUser, isAuthenticated } = storeToRefs(useAuthUserStore());
-	const publicPages = ['/', '/sign-in', '/sign-up'];
+  const { currentUser, isAuthenticated } = storeToRefs(useAuthUserStore());
+  const publicPages = ['/', '/sign-in', '/sign-up'];
 
-	if (isAuthenticated.value) {
-		if (['/sign-in', '/sign-up'].includes(to.path)) {
-			return navigateTo('/');
-		}
-		return;
-	}
+  if (isAuthenticated.value) {
+    if (['/sign-in', '/sign-up'].includes(to.path)) {
+      return navigateTo('/');
+    }
+    return;
+  }
 
-	if (import.meta.server) {
-		const event = useRequestEvent();
-		const cookies = event?.node.req?.headers.cookie || '';
-		const hasSessionCookie = cookies.includes('auth-session');
-		if (!hasSessionCookie) {
-			currentUser.value = null;
-			if (!publicPages.includes(to.path))
-				return navigateTo('/sign-in');
-			return;
-		}
+  if (import.meta.server) {
+    const event = useRequestEvent();
+    const cookies = event?.node.req?.headers.cookie || '';
+    const hasSessionCookie = cookies.includes('auth-session');
+    if (!hasSessionCookie) {
+      currentUser.value = null;
+      if (!publicPages.includes(to.path))
+        return navigateTo('/sign-in');
+      return;
+    }
 
-		try {
-			const timestamp = Date.now();
-			const user = await $fetch<UserData | null>(`/api/user/me?t=${timestamp}`, {
-				credentials: 'include',
-				method: 'GET',
-				cache: 'no-store',
-				headers: { cookie: cookies },
-			});
+    try {
+      const timestamp = Date.now();
+      const user = await $fetch<UserData | null>(`/api/user/me?t=${timestamp}`, {
+        credentials: 'include',
+        method: 'GET',
+        cache: 'no-store',
+        headers: { cookie: cookies },
+      });
 
-			currentUser.value = user ?? null;
-		}
-		catch {
-			currentUser.value = null;
-		}
+      currentUser.value = user ?? null;
+    }
+    catch {
+      currentUser.value = null;
+    }
 
-		if (currentUser.value && ['/sign-in', '/sign-up'].includes(to.path)) {
-			return navigateTo('/');
-		}
+    if (currentUser.value && ['/sign-in', '/sign-up'].includes(to.path)) {
+      return navigateTo('/');
+    }
 
-		if (!currentUser.value && !publicPages.includes(to.path)) {
-			return navigateTo('/sign-in');
-		}
-	}
+    if (!currentUser.value && !publicPages.includes(to.path)) {
+      return navigateTo('/sign-in');
+    }
+  }
 });

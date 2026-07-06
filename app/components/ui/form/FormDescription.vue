@@ -6,18 +6,18 @@ import { cn } from '~/utils/utils';
 import { useFormField } from './useFormField';
 
 const props = defineProps<{
-	class?: HTMLAttributes['class'];
+  class?: HTMLAttributes['class'];
 }>();
 
 const { formDescriptionId } = useFormField();
 </script>
 
 <template>
-	<p
-		:id="formDescriptionId"
-		data-slot="form-description"
-		:class="cn('text-muted-foreground text-sm', props.class)"
-	>
-		<slot />
-	</p>
+  <p
+    :id="formDescriptionId"
+    data-slot="form-description"
+    :class="cn('text-muted-foreground text-sm', props.class)"
+  >
+    <slot />
+  </p>
 </template>

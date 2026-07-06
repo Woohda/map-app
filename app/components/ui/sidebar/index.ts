@@ -4,10 +4,10 @@ import type { HTMLAttributes } from 'vue';
 import { cva } from 'class-variance-authority';
 
 export interface SidebarProps {
-	side?: 'left' | 'right';
-	variant?: 'sidebar' | 'floating' | 'inset';
-	collapsible?: 'offcanvas' | 'icon' | 'none';
-	class?: HTMLAttributes['class'];
+  side?: 'left' | 'right';
+  variant?: 'sidebar' | 'floating' | 'inset';
+  collapsible?: 'offcanvas' | 'icon' | 'none';
+  class?: HTMLAttributes['class'];
 }
 
 export { default as Sidebar } from './Sidebar.vue';
@@ -37,26 +37,24 @@ export { default as SidebarTrigger } from './SidebarTrigger.vue';
 export { useSidebar } from './utils';
 
 export const sidebarMenuButtonVariants = cva(
-	'peer/menu-button flex w-full items-center overflow-hidden rounded-md text-left text-sm outline-hidden ring-sidebar-ring transition-[width,height,padding] hover:bg-sidebar-accent focus-visible:border-ring focus-visible:ring-ring/60 focus-visible:ring-[3.5px] rounded-sm outline-none transition-colors duration-200 active:bg-sidebar-accent active:text-sidebar-accent-foreground disabled:pointer-events-none disabled:opacity-50 group-has-data-[sidebar=menu-action]/menu-item:pr-8 aria-disabled:pointer-events-none aria-disabled:opacity-50 data-[active=true]:bg-sidebar-accent data-[active=true]:font-medium data-[active=true]:text-sidebar-accent-foreground data-[state=open]:hover:bg-sidebar-accent data-[state=open]:hover:text-sidebar-accent-foreground [&>span:last-child]:truncate [&>svg]:size-4 [&>svg]:shrink-0 cursor-pointer',
-	{
-		variants: {
-			variant: {
-				default: 'hover:bg-sidebar-accent hover:text-primary',
-				outline:
-					'shadow-[0_0_0_1px_hsl(var(--sidebar-border))] hover:bg-sidebar-accent hover:text-primary hover:shadow-[0_0_0_1px_hsl(var(--sidebar-accent))]',
-			},
-			size: {
-				default: 'h-6 text-sm',
-				lg: 'h-8 text-base',
-			},
-		},
-		defaultVariants: {
-			variant: 'default',
-			size: 'default',
-		},
-	},
+  'peer/menu-button flex w-full items-center overflow-hidden rounded-md text-left text-sm outline-hidden ring-sidebar-ring transition-[width,height,padding] hover:bg-sidebar-accent focus-visible:border-ring focus-visible:ring-ring/60 focus-visible:ring-[3.5px] rounded-sm outline-none transition-colors duration-200 active:bg-sidebar-accent active:text-sidebar-accent-foreground disabled:pointer-events-none disabled:opacity-50 group-has-data-[sidebar=menu-action]/menu-item:pr-8 aria-disabled:pointer-events-none aria-disabled:opacity-50 data-[active=true]:bg-sidebar-accent data-[active=true]:font-medium data-[active=true]:text-sidebar-accent-foreground data-[state=open]:hover:bg-sidebar-accent data-[state=open]:hover:text-sidebar-accent-foreground [&>span:last-child]:truncate [&>svg]:size-4 [&>svg]:shrink-0 cursor-pointer',
+  {
+    variants: {
+      variant: {
+        default: 'hover:bg-sidebar-accent hover:text-primary',
+        outline:
+          'shadow-[0_0_0_1px_hsl(var(--sidebar-border))] hover:bg-sidebar-accent hover:text-primary hover:shadow-[0_0_0_1px_hsl(var(--sidebar-accent))]',
+      },
+      size: {
+        default: 'h-6 text-sm',
+        lg: 'h-8 text-base',
+      },
+    },
+    defaultVariants: {
+      variant: 'default',
+      size: 'default',
+    },
+  },
 );
 
-export type SidebarMenuButtonVariants = VariantProps<
-	typeof sidebarMenuButtonVariants
->;
+export type SidebarMenuButtonVariants = VariantProps<typeof sidebarMenuButtonVariants>;

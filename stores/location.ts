@@ -6,12 +6,13 @@
  * - 📍 Загрузка всех локаций с сервера
  * - 👤 Загрузка локаций текущего пользователя
  * - ⭐ Загрузка избранных локаций пользователя
- * - ➕ Добавление новых локаций
+ * - ➕ Добавление новых локаций (с откатом при ошибке)
  * - 🗑️ Удаление локаций пользователя
  * - ❤️ Добавление/удаление локаций в избранное
  * - 🎯 Выбор маркера на карте
- * - 🔄 Инициализация при первом запуске
  * - 📊 Управление состоянием загрузки
+ * - 🔄 Принудительное обновление кластерера карты (UX)
+ * - 📍 Режим добавления локации с draggable маркером
  *
  * ## Состояние:
  * - `markers` - массив всех маркеров на карте
@@ -22,35 +23,50 @@
  * - `favorites` - массив избранных локаций
  * - `favoritesLoading` - статус загрузки избранных локаций
  * - `pendingNavigationSlug` - slug для навигации
+ * - `removingIds` - Set ID локаций в процессе удаления
+ * - `refreshKeyClusterer` - ключ для принудительного обновления кластерера карты
+ * - `isAddingLocation` - флаг активного режима добавления локации
+ * - `draftMarkerCoordinates` - координаты draft маркера при добавлении
+ * - `loadedMarkerIds` - Set ID загруженных маркеров (для оптимизации)
+ * - `loadedUserMarkerIds` - Set ID загруженных маркеров пользователя (для оптимизации)
+ * - `loadedFavoriteIds` - Set ID загруженных избранных маркеров (для оптимизации)
  *
  * ## Функции:
  * - `loadLocations()` - загрузка всех локаций с сервера
  * - `loadUserLocations()` - загрузка локаций пользователя
  * - `loadFavorites()` - загрузка избранных локаций
- * - `addLocation(locationData)` - добавление новой локации (добавляет в оба массива)
+ * - `addLocation(locationData)` - добавление новой локации (с откатом при ошибке)
  * - `removeLocation(locationId)` - удаление локации пользователя
  * - `addToFavorites(locationId)` - добавление локации в избранное
  * - `removeFromFavorites(locationId)` - удаление локации из избранного
- * - `initializeLocations()` - инициализация всех локаций при первом запуске
- * - `initializeUserLocations()` - инициализация локаций пользователя в профиле
- * - `initializeFavorites()` - инициализация избранных локаций
  * - `selectMapMarker(slug)` - выбор маркера на карте
  * - `setPendingNavigation(slug)` - установка slug для навигации
+ * - `forceRefreshClusterer()` - принудительное обновление кластерера карты (UX)
+ * - `startAddingLocation(center)` - активация режима добавления с draggable маркером
+ * - `cancelAddingLocation()` - отмена режима добавления
+ * - `confirmDraftLocation()` - подтверждение позиции draft маркера
  *
  * ## Использование:
  * ```typescript
  * const locationStore = useLocationStore();
  * // Загрузить все локации для карты
- * await locationStore.initializeLocations();
+ * await locationStore.loadLocations();
  * // Загрузить локации пользователя для профиля
- * await locationStore.initializeUserLocations();
- * // Загрузить избранные локации
- * await locationStore.initializeFavorites();
+ * await locationStore.loadUserLocations();
  * // Удалить локацию
  * await locationStore.removeLocation(locationId);
+ * // Принудительно обновить кластерер после UX операций
+ * locationStore.forceRefreshClusterer();
+ * // Начать добавление локации с draggable маркером (LngLat: [lon, lat])
+ * locationStore.startAddingLocation([37.6176, 55.7558] as LngLat);
+ * // Отменить добавление
+ * locationStore.cancelAddingLocation();
+ * // Подтвердить позицию draft маркера
+ * const coords = locationStore.confirmDraftLocation();
  * ```
  */
 
+import type { LngLat } from '@yandex/ymaps3-types';
 import type { LocationData } from '~lib/types/location';
 import type { MapMarker } from '~lib/types/map';
 import type { AddLocationValues } from '~lib/types/validation';
@@ -61,284 +77,352 @@ import { ref } from 'vue';
 import { useToast } from '~/composables/use-toast';
 
 export const useLocationStore = defineStore('location', () => {
-	const { toast } = useToast();
-	const markers = ref<MapMarker[]>([]);
-	const selectedMarkerSlug = ref<string | null>(null);
-	const loading = ref(false);
-	const userMarkers = ref<MapMarker[]>([]);
-	const userLoading = ref(false);
-	const favorites = ref<MapMarker[]>([]);
-	const favoritesLoading = ref(false);
-	const pendingNavigationSlug = ref<string | null>(null);
-	const removingIds = ref<Set<string>>(new Set());
+  const { toast } = useToast();
+  const markers = ref<MapMarker[]>([]);
+  const selectedMarkerSlug = ref<string | null>(null);
+  const loading = ref(false);
+  const userMarkers = ref<MapMarker[]>([]);
+  const userLoading = ref(false);
+  const favorites = ref<MapMarker[]>([]);
+  const favoritesLoading = ref(false);
+  const pendingNavigationSlug = ref<string | null>(null);
+  const removingIds = ref<Set<string>>(new Set());
+  const refreshKeyClusterer = ref(Date.now());
+  const isAddingLocation = ref(false);
+  const draftMarkerCoordinates = ref<[number, number] | null>(null);
+  const loadedMarkerIds = ref<Set<string>>(new Set());
+  const loadedUserMarkerIds = ref<Set<string>>(new Set());
+  const loadedFavoriteIds = ref<Set<string>>(new Set());
 
-	async function loadLocations() {
-		loading.value = true;
-		try {
-			const locations = await $fetch<LocationData[]>('/api/locations', {
-				credentials: 'include',
-				method: 'GET',
-				cache: 'no-store',
-			});
+  async function loadLocations() {
+    loading.value = true;
+    try {
+      const locations = await $fetch<LocationData[]>('/api/locations', {
+        credentials: 'include',
+        method: 'GET',
+        cache: 'no-store',
+      });
 
-			markers.value = locations.map(location => ({
-				id: location.id,
-				slug: location.slug,
-				coordinates: [location.longitude, location.latitude] as [number, number],
-				name: location.name,
-				description: location.description,
-				userName: location.user.name,
-				username: location.user.username,
-				isFavorite: location.FavoriteLocation && location.FavoriteLocation.length > 0,
-			}));
-		}
-		catch (err) {
-			toast({
-				description: `Локации не загрузились, попробуйте еще раз!`,
-				variant: 'destructive',
-			});
-			console.error('Error loading locations:', err);
-		}
-		finally {
-			loading.value = false;
-		}
-	}
+      const newIds = new Set(locations.map(l => l.id));
 
-	async function loadUserLocations() {
-		userLoading.value = true;
-		try {
-			const locations = await $fetch<LocationData[]>('/api/locations/user', {
-				credentials: 'include',
-				method: 'GET',
-				cache: 'no-store',
-			});
+      if (newIds.size === loadedMarkerIds.value.size
+        && [...newIds].every(id => loadedMarkerIds.value.has(id))) {
+        return;
+      }
 
-			userMarkers.value = locations.map(location => ({
-				id: location.id,
-				slug: location.slug,
-				coordinates: [location.longitude, location.latitude] as [number, number],
-				name: location.name,
-				description: location.description,
-				userName: location.user.name,
-				username: location.user.username,
-				isFavorite: location.FavoriteLocation && location.FavoriteLocation.length > 0,
-			}));
-		}
-		catch (err) {
-			toast({
-				description: `Локации пользователя не загрузились, попробуйте еще раз!`,
-				variant: 'destructive',
-			});
-			console.error('Error loading user locations:', err);
-		}
-		finally {
-			userLoading.value = false;
-		}
-	}
+      markers.value = locations.map(location => ({
+        id: location.id,
+        slug: location.slug,
+        coordinates: [location.longitude, location.latitude] as [number, number],
+        name: location.name,
+        description: location.description,
+        userName: location.user.name,
+        username: location.user.username,
+        isFavorite: location.FavoriteLocation && location.FavoriteLocation.length > 0,
+      }));
 
-	async function addLocation(locationData: AddLocationValues,
-	): Promise<MapMarker> {
-		const newLocation = await $fetch<LocationData>('/api/locations', {
-			credentials: 'include',
-			method: 'POST',
-			body: locationData,
-		});
+      loadedMarkerIds.value = newIds;
+    }
+    catch (err) {
+      toast({
+        title: `Локации не загрузились, попробуйте еще раз!`,
+        variant: 'destructive',
+      });
+      console.error('Error loading locations:', err);
+    }
+    finally {
+      loading.value = false;
+    }
+  }
 
-		const newMarker: MapMarker = {
-			id: newLocation.id,
-			slug: newLocation.slug,
-			coordinates: [newLocation.longitude, newLocation.latitude] as [number, number],
-			name: newLocation.name,
-			description: newLocation.description,
-			userName: newLocation.user.name,
-			username: newLocation.user.username,
-			isFavorite: newLocation.FavoriteLocation && newLocation.FavoriteLocation.length > 0,
-		};
+  async function loadUserLocations() {
+    userLoading.value = true;
+    try {
+      const locations = await $fetch<LocationData[]>('/api/locations/user', {
+        credentials: 'include',
+        method: 'GET',
+        cache: 'no-store',
+      });
 
-		markers.value.push(newMarker);
-		userMarkers.value.push(newMarker);
-		toast({
-			description: `Локация "${newLocation.name}" сохранена!`,
-			variant: 'success',
-		});
-		return newMarker;
-	}
+      const newIds = new Set(locations.map(l => l.id));
 
-	async function loadFavorites() {
-		favoritesLoading.value = true;
-		try {
-			const response = await $fetch<Array<{ id: string; createdAt: Date; location: LocationData }>>('/api/favorites', {
-				credentials: 'include',
-				method: 'GET',
-				cache: 'no-store',
-			});
+      if (newIds.size === loadedUserMarkerIds.value.size
+        && [...newIds].every(id => loadedUserMarkerIds.value.has(id))) {
+        return;
+      }
 
-			favorites.value = response.map(fav => ({
-				id: fav.location.id,
-				slug: fav.location.slug,
-				coordinates: [fav.location.longitude, fav.location.latitude] as [number, number],
-				name: fav.location.name,
-				description: fav.location.description,
-				userName: fav.location.user.name,
-				username: fav.location.user.username,
-				isFavorite: true,
-			}));
-		}
-		catch (err) {
-			toast({
-				description: `Избранные локации не загрузились, попробуйте еще раз!`,
-				variant: 'destructive',
-			});
-			console.error('Error loading favorites:', err);
-		}
-		finally {
-			favoritesLoading.value = false;
-		}
-	}
+      userMarkers.value = locations.map(location => ({
+        id: location.id,
+        slug: location.slug,
+        coordinates: [location.longitude, location.latitude] as [number, number],
+        name: location.name,
+        description: location.description,
+        userName: location.user.name,
+        username: location.user.username,
+        isFavorite: location.FavoriteLocation && location.FavoriteLocation.length > 0,
+      }));
 
-	async function addToFavorites(locationId: string) {
-		try {
-			await $fetch('/api/favorites', {
-				credentials: 'include',
-				method: 'POST',
-				body: { locationId },
-			});
+      loadedUserMarkerIds.value = newIds;
+    }
+    catch (err) {
+      toast({
+        title: `Локации пользователя не загрузились, попробуйте еще раз!`,
+        variant: 'destructive',
+      });
+      console.error('Error loading user locations:', err);
+    }
+    finally {
+      userLoading.value = false;
+    }
+  }
 
-			const marker = markers.value.find(m => m.id === locationId);
-			if (marker) {
-				marker.isFavorite = true;
-			}
-			const userMarker = userMarkers.value.find(m => m.id === locationId);
-			if (userMarker) {
-				userMarker.isFavorite = true;
-			}
+  async function addLocation(locationData: AddLocationValues,
+  ): Promise<MapMarker> {
+    let newMarker: MapMarker | null = null;
+    try {
+      const newLocation = await $fetch<LocationData>('/api/locations', {
+        credentials: 'include',
+        method: 'POST',
+        body: locationData,
+      });
 
-			toast({
-				description: `Локация добавлена в избранное!`,
-				variant: 'success',
-			});
-		}
-		catch (err) {
-			toast({
-				description: `Не удалось добавить в избранное, попробуйте еще раз!`,
-				variant: 'destructive',
-			});
-			console.error('Error adding to favorites:', err);
-			throw err;
-		}
-	}
+      newMarker = {
+        id: newLocation.id,
+        slug: newLocation.slug,
+        coordinates: [newLocation.longitude, newLocation.latitude] as [number, number],
+        name: newLocation.name,
+        description: newLocation.description,
+        userName: newLocation.user.name,
+        username: newLocation.user.username,
+        isFavorite: newLocation.FavoriteLocation && newLocation.FavoriteLocation.length > 0,
+      };
 
-	async function removeFromFavorites(locationId: string) {
-		try {
-			removingIds.value.add(locationId);
-			await $fetch(`/api/favorites/${locationId}`, {
-				credentials: 'include',
-				method: 'DELETE',
-			});
+      userMarkers.value.unshift(newMarker);
+      markers.value.unshift(newMarker);
+      loadedUserMarkerIds.value.add(newMarker.id);
+      loadedMarkerIds.value.add(newMarker.id);
 
-			const marker = markers.value.find(m => m.id === locationId);
-			if (marker) {
-				marker.isFavorite = false;
-			}
-			const userMarker = userMarkers.value.find(m => m.id === locationId);
-			if (userMarker) {
-				userMarker.isFavorite = false;
-			}
-			favorites.value = favorites.value.filter(m => m.id !== locationId);
+      forceRefreshClusterer();
 
-			toast({
-				description: `Локация удалена из избранного!`,
-				variant: 'success',
-			});
-		}
-		catch (err) {
-			toast({
-				description: `Не удалось удалить из избранного, попробуйте еще раз!`,
-				variant: 'destructive',
-			});
-			console.error('Error removing from favorites:', err);
-			throw err;
-		}
-		finally {
-			removingIds.value.delete(locationId);
-		}
-	}
+      toast({
+        title: `Локация "${newLocation.name}" добавлена!`,
+        variant: 'success',
+      });
+      return newMarker;
+    }
+    catch (err: any) {
+      if (newMarker) {
+        userMarkers.value = userMarkers.value.filter(m => m.id !== newMarker!.id);
+        markers.value = markers.value.filter(m => m.id !== newMarker!.id);
+        loadedUserMarkerIds.value.delete(newMarker!.id);
+        loadedMarkerIds.value.delete(newMarker!.id);
+        forceRefreshClusterer();
+      }
+      toast({
+        title: err?.response._data?.message || 'Ошибка добавления локации. Попробуйте еще раз',
+        variant: 'destructive',
+      });
+      throw err;
+    }
+  }
 
-	async function removeLocation(locationId: string) {
-		try {
-			removingIds.value.add(locationId);
-			await $fetch(`/api/locations/${locationId}`, {
-				credentials: 'include',
-				method: 'DELETE',
-			});
+  async function loadFavorites() {
+    favoritesLoading.value = true;
+    try {
+      const response = await $fetch<Array<{ id: string; createdAt: Date; location: LocationData }>>('/api/favorites', {
+        credentials: 'include',
+        method: 'GET',
+        cache: 'no-store',
+      });
 
-			markers.value = markers.value.filter(m => m.id !== locationId);
-			userMarkers.value = userMarkers.value.filter(m => m.id !== locationId);
-			favorites.value = favorites.value.filter(m => m.id !== locationId);
+      const newIds = new Set(response.map(fav => fav.location.id));
 
-			toast({
-				description: `Локация удалена!`,
-				variant: 'success',
-			});
-		}
-		catch (err) {
-			toast({
-				description: `Не удалось удалить локацию, попробуйте еще раз!`,
-				variant: 'destructive',
-			});
-			console.error('Error removing location:', err);
-			throw err;
-		}
-		finally {
-			removingIds.value.delete(locationId);
-		}
-	}
+      if (newIds.size === loadedFavoriteIds.value.size
+        && [...newIds].every(id => loadedFavoriteIds.value.has(id))) {
+        return;
+      }
 
-	async function initializeLocations() {
-		if (markers.value.length === 0 && !loading.value) {
-			await loadLocations();
-		}
-	}
+      favorites.value = response.map(fav => ({
+        id: fav.location.id,
+        slug: fav.location.slug,
+        coordinates: [fav.location.longitude, fav.location.latitude] as [number, number],
+        name: fav.location.name,
+        description: fav.location.description,
+        userName: fav.location.user.name,
+        username: fav.location.user.username,
+        isFavorite: true,
+      }));
 
-	async function initializeUserLocations() {
-		if (userMarkers.value.length === 0 && !userLoading.value) {
-			await loadUserLocations();
-		}
-	}
+      loadedFavoriteIds.value = newIds;
+    }
+    catch (err) {
+      toast({
+        title: `Избранные локации не загрузились, попробуйте еще раз!`,
+        variant: 'destructive',
+      });
+      console.error('Error loading favorites:', err);
+    }
+    finally {
+      favoritesLoading.value = false;
+    }
+  }
 
-	async function initializeFavorites() {
-		if (favorites.value.length === 0 && !favoritesLoading.value) {
-			await loadFavorites();
-		}
-	}
+  async function addToFavorites(locationId: string) {
+    try {
+      await $fetch('/api/favorites', {
+        credentials: 'include',
+        method: 'POST',
+        body: { locationId },
+      });
 
-	function selectMapMarker(slug: string | null): void {
-		selectedMarkerSlug.value = slug;
-	}
+      const marker = markers.value.find(m => m.id === locationId);
+      if (marker) {
+        marker.isFavorite = true;
+        favorites.value.unshift({ ...marker, isFavorite: true });
+        loadedFavoriteIds.value.add(locationId);
+      }
+      const userMarker = userMarkers.value.find(m => m.id === locationId);
+      if (userMarker) {
+        userMarker.isFavorite = true;
+      }
 
-	function setPendingNavigation(slug: string | null): void {
-		pendingNavigationSlug.value = slug;
-	}
+      toast({
+        title: `Локация добавлена в избранное!`,
+        variant: 'success',
+      });
+    }
+    catch (err) {
+      toast({
+        title: `Не удалось добавить в избранное, попробуйте еще раз!`,
+        variant: 'destructive',
+      });
+      console.error('Error adding to favorites:', err);
+      throw err;
+    }
+  }
 
-	return {
-		markers,
-		selectedMarkerSlug,
-		loading,
-		userMarkers,
-		userLoading,
-		favorites,
-		favoritesLoading,
-		pendingNavigationSlug,
-		removingIds,
-		addLocation,
-		loadFavorites,
-		addToFavorites,
-		removeFromFavorites,
-		removeLocation,
-		selectMapMarker,
-		setPendingNavigation,
-		initializeLocations,
-		initializeUserLocations,
-		initializeFavorites,
-	};
+  async function removeFromFavorites(locationId: string) {
+    try {
+      removingIds.value.add(locationId);
+      await $fetch(`/api/favorites/${locationId}`, {
+        credentials: 'include',
+        method: 'DELETE',
+      });
+
+      const marker = markers.value.find(m => m.id === locationId);
+      if (marker) {
+        marker.isFavorite = false;
+      }
+      const userMarker = userMarkers.value.find(m => m.id === locationId);
+      if (userMarker) {
+        userMarker.isFavorite = false;
+      }
+      favorites.value = favorites.value.filter(m => m.id !== locationId);
+      loadedFavoriteIds.value.delete(locationId);
+
+      toast({
+        title: `Локация удалена из избранного!`,
+        variant: 'success',
+      });
+    }
+    catch (err) {
+      toast({
+        title: `Не удалось удалить из избранного, попробуйте еще раз!`,
+        variant: 'destructive',
+      });
+      console.error('Error removing from favorites:', err);
+      throw err;
+    }
+    finally {
+      removingIds.value.delete(locationId);
+    }
+  }
+
+  async function removeLocation(locationId: string) {
+    try {
+      removingIds.value.add(locationId);
+      await $fetch(`/api/locations/${locationId}`, {
+        credentials: 'include',
+        method: 'DELETE',
+      });
+
+      markers.value = markers.value.filter(m => m.id !== locationId);
+      userMarkers.value = userMarkers.value.filter(m => m.id !== locationId);
+      favorites.value = favorites.value.filter(m => m.id !== locationId);
+      loadedUserMarkerIds.value.delete(locationId);
+      loadedMarkerIds.value.delete(locationId);
+      loadedFavoriteIds.value.delete(locationId);
+
+      toast({
+        title: `Локация удалена!`,
+        variant: 'success',
+      });
+    }
+    catch (err) {
+      toast({
+        title: `Не удалось удалить локацию, попробуйте еще раз!`,
+        variant: 'destructive',
+      });
+      console.error('Error removing location:', err);
+      throw err;
+    }
+    finally {
+      removingIds.value.delete(locationId);
+    }
+  }
+
+  function selectMapMarker(slug: string | null): void {
+    selectedMarkerSlug.value = slug;
+  }
+
+  function setPendingNavigation(slug: string | null): void {
+    pendingNavigationSlug.value = slug;
+  }
+
+  function forceRefreshClusterer() {
+    refreshKeyClusterer.value = Date.now();
+  }
+
+  function startAddingLocation(center: LngLat) {
+    isAddingLocation.value = true;
+    draftMarkerCoordinates.value = [center[0], center[1]];
+  }
+
+  function cancelAddingLocation() {
+    isAddingLocation.value = false;
+    draftMarkerCoordinates.value = null;
+  }
+
+  function confirmDraftLocation() {
+    isAddingLocation.value = false;
+    return draftMarkerCoordinates.value;
+  }
+
+  return {
+    markers,
+    selectedMarkerSlug,
+    loading,
+    userMarkers,
+    userLoading,
+    favorites,
+    favoritesLoading,
+    pendingNavigationSlug,
+    removingIds,
+    refreshKeyClusterer,
+    forceRefreshClusterer,
+    isAddingLocation,
+    draftMarkerCoordinates,
+    startAddingLocation,
+    cancelAddingLocation,
+    confirmDraftLocation,
+    addLocation,
+    loadLocations,
+    addToFavorites,
+    removeFromFavorites,
+    removeLocation,
+    selectMapMarker,
+    setPendingNavigation,
+    loadFavorites,
+    loadUserLocations,
+  };
 });

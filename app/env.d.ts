@@ -1,8 +1,8 @@
 /// <reference types="nuxt" />
 
 declare module '*.vue' {
-	import type { DefineComponent } from 'vue';
+  import type { DefineComponent } from 'vue';
 
-	const component: DefineComponent<Record<string, never>, Record<string, never>, never>;
-	export default component;
+  const component: DefineComponent<Record<string, never>, Record<string, never>, never>;
+  export default component;
 }

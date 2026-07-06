@@ -12,21 +12,21 @@
  */
 
 export function cache<Args extends unknown[], Return>(fn: (...args: Args) => Promise<Return>, ttl = 40) {
-	const map = new Map<string, { value: Return; expires: number }>();
-	return async (...args: Args): Promise<Return> => {
-		const now = Date.now();
-		// Очистка устаревших записей
-		for (const [key, { expires }] of map.entries()) {
-			if (expires <= now) {
-				map.delete(key);
-			}
-		}
-		const key = JSON.stringify(args);
-		const cached = map.get(key);
-		if (cached && cached.expires > now)
-			return cached.value;
-		const value = await fn(...args);
-		map.set(key, { value, expires: now + ttl * 1000 });
-		return value;
-	};
+  const map = new Map<string, { value: Return; expires: number }>();
+  return async (...args: Args): Promise<Return> => {
+    const now = Date.now();
+    // Очистка устаревших записей
+    for (const [key, { expires }] of map.entries()) {
+      if (expires <= now) {
+        map.delete(key);
+      }
+    }
+    const key = JSON.stringify(args);
+    const cached = map.get(key);
+    if (cached && cached.expires > now)
+      return cached.value;
+    const value = await fn(...args);
+    map.set(key, { value, expires: now + ttl * 1000 });
+    return value;
+  };
 }

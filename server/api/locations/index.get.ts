@@ -33,25 +33,25 @@ import { validateRequest } from '~server/utils/auth';
 import { createError, defineEventHandler } from 'h3';
 
 export default defineEventHandler(async (event: H3Event) => {
-	try {
-		const { user } = await validateRequest(event);
-		const userId = user?.id;
+  try {
+    const { user } = await validateRequest(event);
+    const userId = user?.id;
 
-		const locations = await prisma.location.findMany({
-			include: getLocationDataInclude(userId),
-			orderBy: {
-				createdAt: 'desc',
-			},
-		});
-		return locations;
-	}
-	catch (err: unknown) {
-		if (err instanceof Error) {
-			throw err;
-		}
-		throw createError({
-			status: 500,
-			message: 'Ошибка получения локаций. Попробуйте позже.',
-		});
-	}
+    const locations = await prisma.location.findMany({
+      include: getLocationDataInclude(userId),
+      orderBy: {
+        createdAt: 'desc',
+      },
+    });
+    return locations;
+  }
+  catch (err: unknown) {
+    if (err instanceof Error) {
+      throw err;
+    }
+    throw createError({
+      status: 500,
+      message: 'Ошибка получения локаций. Попробуйте позже.',
+    });
+  }
 });

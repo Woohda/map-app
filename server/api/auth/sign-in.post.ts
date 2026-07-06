@@ -34,46 +34,46 @@ import { verify } from 'argon2';
 import { createError, defineEventHandler, readBody } from 'h3';
 
 export default defineEventHandler(async (event: H3Event) => {
-	try {
-		const credentials = await readBody(event);
+  try {
+    const credentials = await readBody(event);
 
-		const { login, password } = signInSchema.parse(credentials);
+    const { login, password } = signInSchema.parse(credentials);
 
-		const existingUser = await checkUserExists(login);
-		if (!existingUser || !existingUser.passwordHash) {
-			throw createError({ status: 401, message: 'Неверный логин или пароль' });
-		}
+    const existingUser = await checkUserExists(login);
+    if (!existingUser || !existingUser.passwordHash) {
+      throw createError({ status: 401, message: 'Неверный логин или пароль' });
+    }
 
-		const isPasswordValid = await verify(
-			existingUser.passwordHash,
-			password,
-		);
-		if (!isPasswordValid) {
-			throw createError({ status: 401, message: 'Неверный логин или пароль' });
-		}
+    const isPasswordValid = await verify(
+      existingUser.passwordHash,
+      password,
+    );
+    if (!isPasswordValid) {
+      throw createError({ status: 401, message: 'Неверный логин или пароль' });
+    }
 
-		try {
-			const session = await createSession(existingUser.id);
-			await createSessionCookie(event, session);
-		}
-		catch (sessionErr: unknown) {
-			console.error('Ошибка при создании сессии:', sessionErr);
-			const message = sessionErr instanceof Error ? sessionErr.message : 'Ошибка при создании сессии. Попробуйте позже.';
-			throw createError({ status: 500, message });
-		}
-		const user: Pick<User, 'id' | 'name' | 'username' | 'email' | 'avatarUrl'> = {
-			id: existingUser.id,
-			name: existingUser.name,
-			username: existingUser.username,
-			email: existingUser.email,
-			avatarUrl: existingUser.avatarUrl,
-		};
-		return user;
-	}
-	catch (err: unknown) {
-		if (err instanceof Error) {
-			throw err;
-		}
-		throw createError({ status: 500, message: 'Ошибка входа. Попробуйте снова или позже.' });
-	}
+    try {
+      const session = await createSession(existingUser.id);
+      await createSessionCookie(event, session);
+    }
+    catch (sessionErr: unknown) {
+      console.error('Ошибка при создании сессии:', sessionErr);
+      const message = sessionErr instanceof Error ? sessionErr.message : 'Ошибка при создании сессии. Попробуйте позже.';
+      throw createError({ status: 500, message });
+    }
+    const user: Pick<User, 'id' | 'name' | 'username' | 'email' | 'avatarUrl'> = {
+      id: existingUser.id,
+      name: existingUser.name,
+      username: existingUser.username,
+      email: existingUser.email,
+      avatarUrl: existingUser.avatarUrl,
+    };
+    return user;
+  }
+  catch (err: unknown) {
+    if (err instanceof Error) {
+      throw err;
+    }
+    throw createError({ status: 500, message: 'Ошибка входа. Попробуйте снова или позже.' });
+  }
 });

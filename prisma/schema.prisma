@@ -7,8 +7,21 @@ datasource db {
   url      = env("PRISMA_DATABASE_URL")
 }
 
+enum LocationLogStatus {
+  CHECK_IN
+  CHECK_OUT
+  ABORTED
+}
+
+enum ReportStatus {
+  PENDING
+  REVIEWED
+  RESOLVED
+  REJECTED
+}
+
 model User {
-  id               String             @id
+  id               String             @id @default(uuid())
   email            String             @unique
   username         String             @unique
   passwordHash     String?
@@ -22,12 +35,14 @@ model User {
   Location         Location[]
   Session          Session[]
   FavoriteLocation FavoriteLocation[]
+  LocationImage    LocationImage[]
+  Comment          Comment[]
 
   @@map("users")
 }
 
 model Session {
-  id           String   @id
+  id           String   @id @default(uuid())
   userId       String
   expiresAt    DateTime
   activePeriod Int?
@@ -37,9 +52,9 @@ model Session {
 }
 
 model Location {
-  id               String             @id
+  id               String             @id @default(uuid())
   userId           String
-  name             String
+  name             String             @unique
   slug             String             @unique
   description      String?
   latitude         Float
@@ -48,32 +63,48 @@ model Location {
   updatedAt        DateTime           @updatedAt
   LocationLog      LocationLog[]
   FavoriteLocation FavoriteLocation[]
+  LocationImage    LocationImage[]
+  Comment          Comment[]
   user             User               @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("locations")
 }
 
+model LocationImage {
+  id         String   @id @default(uuid())
+  locationId String
+  userId     String
+  url        String
+  altText    String?
+  order      Int      @default(0)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  location   Location @relation(fields: [locationId], references: [id], onDelete: Cascade)
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("location_images")
+}
+
 model LocationLog {
-  id               String             @id
+  id               String             @id @default(uuid())
   userId           String
-  LocationId       String
-  name             String
-  description      String?
-  startedAt        Int
-  endedAt          Int
-  latitude         Float
-  longitude        Float
+  locationId       String
+  startedAt        DateTime
+  endedAt          DateTime?
+  status           LocationLogStatus  @default(CHECK_IN)
   createdAt        DateTime           @default(now())
   updatedAt        DateTime           @updatedAt
   LocationLogImage LocationLogImage[]
-  location         Location           @relation(fields: [LocationId], references: [id], onDelete: Cascade)
+  location         Location           @relation(fields: [locationId], references: [id], onDelete: Cascade)
   user             User               @relation(fields: [userId], references: [id], onDelete: Cascade)
 
+  @@unique([userId, locationId, startedAt, endedAt])
+  @@index([userId, locationId, startedAt])
   @@map("location_logs")
 }
 
 model LocationLogImage {
-  id            String      @id
+  id            String      @id @default(uuid())
   userId        String
   locationLogId String
   url           String
@@ -86,13 +117,34 @@ model LocationLogImage {
 }
 
 model FavoriteLocation {
-  id        String   @id @default(cuid())
-  userId    String
+  id         String   @id @default(uuid())
+  userId     String
   locationId String
-  createdAt DateTime @default(now())
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  location  Location @relation(fields: [locationId], references: [id], onDelete: Cascade)
+  createdAt  DateTime @default(now())
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  location   Location @relation(fields: [locationId], references: [id], onDelete: Cascade)
 
   @@unique([userId, locationId])
   @@map("favorite_locations")
+}
+
+model Comment {
+  id         String    @id @default(uuid())
+  userId     String
+  locationId String
+  parentId   String?
+  content    String    @db.Text
+  rating     Int?
+  isApproved Boolean   @default(false)
+  isDeleted  Boolean   @default(false)
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  location   Location  @relation(fields: [locationId], references: [id], onDelete: Cascade)
+  parent     Comment?  @relation("CommentReplies", fields: [parentId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  replies    Comment[] @relation("CommentReplies")
+
+  @@index([locationId, createdAt])
+  @@index([userId, createdAt])
+  @@map("comments")
 }

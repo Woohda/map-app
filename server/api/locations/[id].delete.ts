@@ -31,54 +31,54 @@ import { validateRequest } from '~server/utils/auth';
 import { createError, defineEventHandler, getRouterParam } from 'h3';
 
 export default defineEventHandler(async (event: H3Event) => {
-	try {
-		const { user: loggedInUser } = await validateRequest(event);
-		if (!loggedInUser) {
-			throw createError({
-				status: 401,
-				message: 'Требуется авторизация для удаления локации',
-			});
-		}
+  try {
+    const { user: loggedInUser } = await validateRequest(event);
+    if (!loggedInUser) {
+      throw createError({
+        status: 401,
+        message: 'Требуется авторизация для удаления локации',
+      });
+    }
 
-		const locationId = getRouterParam(event, 'id');
-		if (!locationId) {
-			throw createError({
-				status: 400,
-				message: 'Не указан ID локации',
-			});
-		}
+    const locationId = getRouterParam(event, 'id');
+    if (!locationId) {
+      throw createError({
+        status: 400,
+        message: 'Не указан ID локации',
+      });
+    }
 
-		const location = await prisma.location.findUnique({
-			where: { id: locationId },
-		});
+    const location = await prisma.location.findUnique({
+      where: { id: locationId },
+    });
 
-		if (!location) {
-			throw createError({
-				status: 404,
-				message: 'Локация не найдена',
-			});
-		}
+    if (!location) {
+      throw createError({
+        status: 404,
+        message: 'Локация не найдена',
+      });
+    }
 
-		if (location.userId !== loggedInUser.id) {
-			throw createError({
-				status: 403,
-				message: 'Вы можете удалять только свои локации',
-			});
-		}
+    if (location.userId !== loggedInUser.id) {
+      throw createError({
+        status: 403,
+        message: 'Вы можете удалять только свои локации',
+      });
+    }
 
-		await prisma.location.delete({
-			where: { id: locationId },
-		});
+    await prisma.location.delete({
+      where: { id: locationId },
+    });
 
-		return { success: true };
-	}
-	catch (err: unknown) {
-		if (err instanceof Error) {
-			throw err;
-		}
-		throw createError({
-			status: 500,
-			message: 'Ошибка удаления локации. Попробуйте позже.',
-		});
-	}
+    return { success: true };
+  }
+  catch (err: unknown) {
+    if (err instanceof Error) {
+      throw err;
+    }
+    throw createError({
+      status: 500,
+      message: 'Ошибка удаления локации. Попробуйте позже.',
+    });
+  }
 });

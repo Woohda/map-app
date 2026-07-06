@@ -23,39 +23,39 @@ import { validateRequest } from '~server/utils/auth';
 import { createError, defineEventHandler, getRouterParam, setResponseStatus } from 'h3';
 
 export default defineEventHandler(async (event: H3Event) => {
-	try {
-		const { user: loggedInUser } = await validateRequest(event);
-		if (!loggedInUser) {
-			throw createError({
-				status: 401,
-				message: 'Вы не авторизованы',
-			});
-		}
+  try {
+    const { user: loggedInUser } = await validateRequest(event);
+    if (!loggedInUser) {
+      throw createError({
+        status: 401,
+        message: 'Вы не авторизованы',
+      });
+    }
 
-		const id = getRouterParam(event, 'id');
-		if (!id) {
-			throw createError({
-				status: 400,
-				message: 'id обязателен',
-			});
-		}
+    const id = getRouterParam(event, 'id');
+    if (!id) {
+      throw createError({
+        status: 400,
+        message: 'id обязателен',
+      });
+    }
 
-		await prisma.favoriteLocation.deleteMany({
-			where: {
-				userId: loggedInUser.id,
-				locationId: id,
-			},
-		});
+    await prisma.favoriteLocation.deleteMany({
+      where: {
+        userId: loggedInUser.id,
+        locationId: id,
+      },
+    });
 
-		setResponseStatus(event, 204);
-	}
-	catch (err: unknown) {
-		if (err instanceof Error) {
-			throw err;
-		}
-		throw createError({
-			status: 500,
-			message: 'Ошибка удаления из избранного. Попробуйте позже.',
-		});
-	}
+    setResponseStatus(event, 204);
+  }
+  catch (err: unknown) {
+    if (err instanceof Error) {
+      throw err;
+    }
+    throw createError({
+      status: 500,
+      message: 'Ошибка удаления из избранного. Попробуйте позже.',
+    });
+  }
 });
