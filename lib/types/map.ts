@@ -15,20 +15,20 @@ export type Coordinates = LngLat;
 type BaseMapMarker = Pick<YMapMarkerProps, 'coordinates'>;
 
 export interface MapMarker extends BaseMapMarker {
-	id: string;
-	name: string;
-	slug: string;
-	description: string | null;
-	userName: string;
-	username: string;
-	isFavorite?: boolean;
+  id: string;
+  name: string;
+  slug: string;
+  description: string | null;
+  userName: string;
+  username: string;
+  isFavorite?: boolean;
 }
 
 export interface MapLocation {
-	center: LngLat;
-	zoom: number;
+  center: LngLat;
+  zoom: number;
 }
 
 export interface MapClickEvent {
-	coordinates: Coordinates;
+  coordinates: Coordinates;
 }

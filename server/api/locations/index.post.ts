@@ -37,55 +37,55 @@ import { generateIdFromEntropySize } from 'lucia';
 import { generateSlug } from '~/utils/utils';
 
 export default defineEventHandler(async (event: H3Event) => {
-	try {
-		const { user: loggedInUser } = await validateRequest(event);
-		if (!loggedInUser) {
-			throw createError({
-				status: 401,
-				message: 'Требуется авторизация для добавления локации',
-			});
-		}
+  try {
+    const { user: loggedInUser } = await validateRequest(event);
+    if (!loggedInUser) {
+      throw createError({
+        status: 401,
+        message: 'Требуется авторизация для добавления локации',
+      });
+    }
 
-		const locationData = await readBody(event);
+    const locationData = await readBody(event);
 
-		const validatedData = addLocationSchema.parse(locationData);
+    const validatedData = addLocationSchema.parse(locationData);
 
-		const slugName = generateSlug(validatedData.name);
+    const slugName = generateSlug(validatedData.name);
 
-		const existingLocation = await prisma.location.findUnique({
-			where: { slug: slugName },
-		});
-		if (existingLocation) {
-			throw createError({
-				status: 400,
-				message: 'Локация с таким URL уже существует',
-			});
-		}
+    const existingLocation = await prisma.location.findUnique({
+      where: { slug: slugName },
+    });
+    if (existingLocation) {
+      throw createError({
+        status: 400,
+        message: 'Локация с таким URL уже существует',
+      });
+    }
 
-		const locationId = generateIdFromEntropySize(10);
+    const locationId = generateIdFromEntropySize(10);
 
-		const location = await prisma.location.create({
-			data: {
-				id: locationId,
-				userId: loggedInUser.id,
-				name: validatedData.name,
-				slug: slugName,
-				description: validatedData.description,
-				latitude: validatedData.latitude,
-				longitude: validatedData.longitude,
-			},
-			include: getLocationDataInclude(loggedInUser.id),
-		});
+    const location = await prisma.location.create({
+      data: {
+        id: locationId,
+        userId: loggedInUser.id,
+        name: validatedData.name,
+        slug: slugName,
+        description: validatedData.description,
+        latitude: validatedData.latitude,
+        longitude: validatedData.longitude,
+      },
+      include: getLocationDataInclude(loggedInUser.id),
+    });
 
-		return location;
-	}
-	catch (err: unknown) {
-		if (err instanceof Error) {
-			throw err;
-		}
-		throw createError({
-			status: 500,
-			message: 'Ошибка создания локации. Попробуйте позже.',
-		});
-	}
+    return location;
+  }
+  catch (err: unknown) {
+    if (err instanceof Error) {
+      throw err;
+    }
+    throw createError({
+      status: 500,
+      message: 'Ошибка создания локации. Попробуйте позже.',
+    });
+  }
 });

@@ -4,15 +4,15 @@ import type { HTMLAttributes } from 'vue';
 import { cn } from '~/utils/utils';
 
 interface SkeletonProps {
-	class?: HTMLAttributes['class'];
+  class?: HTMLAttributes['class'];
 }
 
 const props = defineProps<SkeletonProps>();
 </script>
 
 <template>
-	<div
-		data-slot="skeleton"
-		:class="cn('animate-pulse rounded-md bg-primary/20', props.class)"
-	/>
+  <div
+    data-slot="skeleton"
+    :class="cn('animate-pulse rounded-md bg-primary/20', props.class)"
+  />
 </template>

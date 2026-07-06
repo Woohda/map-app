@@ -25,42 +25,42 @@ import { validateRequest } from '~server/utils/auth';
 import { createError, defineEventHandler } from 'h3';
 
 export default defineEventHandler(async (event: H3Event) => {
-	try {
-		const { user: loggedInUser } = await validateRequest(event);
-		if (!loggedInUser) {
-			throw createError({
-				status: 401,
-				message: 'Вы не авторизованы',
-			});
-		}
+  try {
+    const { user: loggedInUser } = await validateRequest(event);
+    if (!loggedInUser) {
+      throw createError({
+        status: 401,
+        message: 'Вы не авторизованы',
+      });
+    }
 
-		const favorites = await prisma.favoriteLocation.findMany({
-			where: {
-				userId: loggedInUser.id,
-			},
-			include: {
-				location: {
-					include: getLocationDataInclude(loggedInUser.id),
-				},
-			},
-			orderBy: {
-				createdAt: 'desc',
-			},
-		});
+    const favorites = await prisma.favoriteLocation.findMany({
+      where: {
+        userId: loggedInUser.id,
+      },
+      include: {
+        location: {
+          include: getLocationDataInclude(loggedInUser.id),
+        },
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
+    });
 
-		return favorites.map(favorite => ({
-			id: favorite.id,
-			createdAt: favorite.createdAt,
-			location: favorite.location,
-		}));
-	}
-	catch (err: unknown) {
-		if (err instanceof Error) {
-			throw err;
-		}
-		throw createError({
-			status: 500,
-			message: 'Ошибка получения избранных локаций. Попробуйте позже.',
-		});
-	}
+    return favorites.map(favorite => ({
+      id: favorite.id,
+      createdAt: favorite.createdAt,
+      location: favorite.location,
+    }));
+  }
+  catch (err: unknown) {
+    if (err instanceof Error) {
+      throw err;
+    }
+    throw createError({
+      status: 500,
+      message: 'Ошибка получения избранных локаций. Попробуйте позже.',
+    });
+  }
 });

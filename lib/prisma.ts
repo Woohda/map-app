@@ -17,14 +17,14 @@ import env from './env/env';
  */
 
 const globalForPrisma = globalThis as unknown as {
-	prisma: PrismaClient;
+  prisma: PrismaClient;
 };
 
 const prisma
-	= globalForPrisma.prisma
-		|| (new PrismaClient().$extends(withAccelerate()) as unknown as PrismaClient);
+  = globalForPrisma.prisma
+    || (new PrismaClient().$extends(withAccelerate()) as unknown as PrismaClient);
 
 if (env.NODE_ENV !== 'production')
-	globalForPrisma.prisma = prisma;
+  globalForPrisma.prisma = prisma;
 
 export default prisma;

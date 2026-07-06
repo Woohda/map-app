@@ -32,6 +32,6 @@ import type { H3Event } from 'h3';
 import { validateRequest } from '~server/utils/auth';
 
 export default defineEventHandler(async (event: H3Event) => {
-	const { user } = await validateRequest(event);
-	return user;
+  const { user } = await validateRequest(event);
+  return user;
 });

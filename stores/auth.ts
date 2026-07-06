@@ -34,65 +34,65 @@ import { computed, ref } from 'vue';
 import { useToast } from '~/composables/use-toast';
 
 export const useAuthUserStore = defineStore('authUser', () => {
-	const currentUser = ref<UserData | null>(null);
-	const isAuthenticated = computed(() => currentUser.value !== null);
-	const isLoggingOut = ref(false);
-	const { toast } = useToast();
+  const currentUser = ref<UserData | null>(null);
+  const isAuthenticated = computed(() => currentUser.value !== null);
+  const isLoggingOut = ref(false);
+  const { toast } = useToast();
 
-	async function signIn(formData: SignInValues) {
-		const user = await $fetch<UserData>('/api/auth/sign-in', {
-			method: 'POST',
-			body: formData,
-		});
-		currentUser.value = user ?? null;
-		toast({
-			title: `Добро пожаловать, ${currentUser.value?.name}!`,
-			variant: 'success',
-		});
-		await navigateTo('/');
-	}
+  async function signIn(formData: SignInValues) {
+    const user = await $fetch<UserData>('/api/auth/sign-in', {
+      method: 'POST',
+      body: formData,
+    });
+    currentUser.value = user ?? null;
+    toast({
+      title: `Добро пожаловать, ${currentUser.value?.name}!`,
+      variant: 'success',
+    });
+    await navigateTo('/');
+  }
 
-	async function signUp(formData: SignUpValues) {
-		const user = await $fetch<UserData>('/api/auth/sign-up', {
-			method: 'POST',
-			body: formData,
-		});
-		currentUser.value = user ?? null;
-		toast({
-			title: `${currentUser.value?.name}, Вы успешно зарегистрировались!`,
-			variant: 'success',
-		});
-		await navigateTo('/');
-	}
+  async function signUp(formData: SignUpValues) {
+    const user = await $fetch<UserData>('/api/auth/sign-up', {
+      method: 'POST',
+      body: formData,
+    });
+    currentUser.value = user ?? null;
+    toast({
+      title: `${currentUser.value?.name}, Вы успешно зарегистрировались!`,
+      variant: 'success',
+    });
+    await navigateTo('/');
+  }
 
-	async function logout() {
-		try {
-			isLoggingOut.value = true;
-			await $fetch<UserData>('/api/auth/logout', {
-				method: 'POST',
-				credentials: 'include',
-			});
-			currentUser.value = null;
-			await navigateTo('/');
-		}
-		catch (error: unknown) {
-			console.error('Ошибка выхода из аккаунта', error);
-			toast({
-				title: 'Произошла ошибка, попробуйте еще раз',
-				variant: 'destructive',
-			});
-		}
-		finally {
-			isLoggingOut.value = false;
-		}
-	}
+  async function logout() {
+    try {
+      isLoggingOut.value = true;
+      await $fetch<UserData>('/api/auth/logout', {
+        method: 'POST',
+        credentials: 'include',
+      });
+      currentUser.value = null;
+      await navigateTo('/');
+    }
+    catch (error: unknown) {
+      console.error('Ошибка выхода из аккаунта', error);
+      toast({
+        title: 'Произошла ошибка, попробуйте еще раз',
+        variant: 'destructive',
+      });
+    }
+    finally {
+      isLoggingOut.value = false;
+    }
+  }
 
-	return {
-		currentUser,
-		isAuthenticated,
-		isLoggingOut,
-		signIn,
-		signUp,
-		logout,
-	};
+  return {
+    currentUser,
+    isAuthenticated,
+    isLoggingOut,
+    signIn,
+    signUp,
+    logout,
+  };
 });

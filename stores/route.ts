@@ -4,34 +4,34 @@ import { defineStore } from 'pinia';
 import { ref } from 'vue';
 
 export const useRouteStore = defineStore('route', () => {
-	const route = ref<RouteFeature | null>(null);
-	const loading = ref(false);
-	const error = ref<string | null>(null);
+  const route = ref<RouteFeature | null>(null);
+  const loading = ref(false);
+  const error = ref<string | null>(null);
 
-	function setRoute(newRoute: RouteFeature | null) {
-		route.value = newRoute;
-	}
+  function setRoute(newRoute: RouteFeature | null) {
+    route.value = newRoute;
+  }
 
-	function setLoading(isLoading: boolean) {
-		loading.value = isLoading;
-	}
+  function setLoading(isLoading: boolean) {
+    loading.value = isLoading;
+  }
 
-	function setError(errorMessage: string | null) {
-		error.value = errorMessage;
-	}
+  function setError(errorMessage: string | null) {
+    error.value = errorMessage;
+  }
 
-	function clearRoute() {
-		route.value = null;
-		error.value = null;
-	}
+  function clearRoute() {
+    route.value = null;
+    error.value = null;
+  }
 
-	return {
-		route,
-		loading,
-		error,
-		setRoute,
-		setLoading,
-		setError,
-		clearRoute,
-	};
+  return {
+    route,
+    loading,
+    error,
+    setRoute,
+    setLoading,
+    setError,
+    clearRoute,
+  };
 });

@@ -26,59 +26,59 @@ import { validateRequest } from '~server/utils/auth';
 import { createError, defineEventHandler, readBody, setResponseStatus } from 'h3';
 
 export default defineEventHandler(async (event: H3Event) => {
-	try {
-		const { user: loggedInUser } = await validateRequest(event);
-		if (!loggedInUser) {
-			throw createError({
-				status: 401,
-				message: 'Вы не авторизованы',
-			});
-		}
+  try {
+    const { user: loggedInUser } = await validateRequest(event);
+    if (!loggedInUser) {
+      throw createError({
+        status: 401,
+        message: 'Вы не авторизованы',
+      });
+    }
 
-		const body = await readBody(event);
-		const { locationId } = body;
+    const body = await readBody(event);
+    const { locationId } = body;
 
-		if (!locationId) {
-			throw createError({
-				status: 400,
-				message: 'locationId обязателен',
-			});
-		}
+    if (!locationId) {
+      throw createError({
+        status: 400,
+        message: 'locationId обязателен',
+      });
+    }
 
-		const location = await prisma.location.findUnique({
-			where: { id: locationId },
-		});
+    const location = await prisma.location.findUnique({
+      where: { id: locationId },
+    });
 
-		if (!location) {
-			throw createError({
-				status: 404,
-				message: 'Локация не найдена',
-			});
-		}
+    if (!location) {
+      throw createError({
+        status: 404,
+        message: 'Локация не найдена',
+      });
+    }
 
-		await prisma.favoriteLocation.upsert({
-			where: {
-				userId_locationId: {
-					userId: loggedInUser.id,
-					locationId,
-				},
-			},
-			create: {
-				userId: loggedInUser.id,
-				locationId,
-			},
-			update: {},
-		});
+    await prisma.favoriteLocation.upsert({
+      where: {
+        userId_locationId: {
+          userId: loggedInUser.id,
+          locationId,
+        },
+      },
+      create: {
+        userId: loggedInUser.id,
+        locationId,
+      },
+      update: {},
+    });
 
-		setResponseStatus(event, 204);
-	}
-	catch (err: unknown) {
-		if (err instanceof Error) {
-			throw err;
-		}
-		throw createError({
-			status: 500,
-			message: 'Ошибка добавления в избранное. Попробуйте позже.',
-		});
-	}
+    setResponseStatus(event, 204);
+  }
+  catch (err: unknown) {
+    if (err instanceof Error) {
+      throw err;
+    }
+    throw createError({
+      status: 500,
+      message: 'Ошибка добавления в избранное. Попробуйте позже.',
+    });
+  }
 });

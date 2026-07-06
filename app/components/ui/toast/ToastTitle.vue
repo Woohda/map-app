@@ -13,7 +13,7 @@ const delegatedProps = reactiveOmit(props, 'class');
 </script>
 
 <template>
-	<ToastTitle v-bind="delegatedProps" :class="cn('text-sm font-semibold', props.class)">
-		<slot />
-	</ToastTitle>
+  <ToastTitle v-bind="delegatedProps" :class="cn('text-sm font-semibold', props.class)">
+    <slot />
+  </ToastTitle>
 </template>

@@ -12,16 +12,16 @@ import { useGeolocationStore } from '~stores/userGeolocation';
 import { computed, provide, ref, shallowRef, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import {
-	YandexMap,
-	YandexMapClusterer,
-	YandexMapControls,
-	YandexMapDefaultFeaturesLayer,
-	YandexMapDefaultSchemeLayer,
-	YandexMapFeature,
-	YandexMapGeolocationControl,
-	yandexMapIsLoaded,
-	YandexMapListener,
-	YandexMapZoomControl,
+  YandexMap,
+  YandexMapClusterer,
+  YandexMapControls,
+  YandexMapDefaultFeaturesLayer,
+  YandexMapDefaultSchemeLayer,
+  YandexMapFeature,
+  YandexMapGeolocationControl,
+  yandexMapIsLoaded,
+  YandexMapListener,
+  YandexMapZoomControl,
 } from 'vue-yandex-maps';
 
 import InfoCard from '~/components/location/card/InfoCard.vue';
@@ -65,175 +65,175 @@ const mapController = useMapController();
 const { lineStyle } = useRouteBuilder();
 
 const markers = computed(() => {
-	return locationStore.markers;
+  return locationStore.markers;
 });
 const selectedMarker = computed(() =>
-	markers.value.find(m => m.slug === locationStore.selectedMarkerSlug),
+  markers.value.find(m => m.slug === locationStore.selectedMarkerSlug),
 );
 
 useMapInitialization({
-	locationStore,
-	userGeolocationStore,
-	mapController,
-	popupStore,
+  locationStore,
+  userGeolocationStore,
+  mapController,
+  popupStore,
 });
 
 const { handleMapDoubleClick, handleFirstInteraction } = useMapEvents({
-	authStore,
-	popupStore,
-	clickedCoordinates,
-	hasInteracted,
+  authStore,
+  popupStore,
+  clickedCoordinates,
+  hasInteracted,
 });
 
 const { openMarkerBySlug, handleMarkerClick } = useMapMarkers({
-	markers,
-	locationStore,
-	mapController,
-	popupStore,
-	route,
-	router,
+  markers,
+  locationStore,
+  mapController,
+  popupStore,
+  route,
+  router,
 });
 
 watch(map, (newMap) => {
-	if (newMap) {
-		mapController.setMap(newMap);
+  if (newMap) {
+    mapController.setMap(newMap);
 
-		const pendingSlug = locationStore.pendingNavigationSlug;
-		if (pendingSlug && markers.value.length > 0) {
-			openMarkerBySlug(pendingSlug);
-			locationStore.setPendingNavigation(null);
-		}
-	}
+    const pendingSlug = locationStore.pendingNavigationSlug;
+    if (pendingSlug && markers.value.length > 0) {
+      openMarkerBySlug(pendingSlug);
+      locationStore.setPendingNavigation(null);
+    }
+  }
 });
 
 watch(
-	() => route.query.location,
-	(locationSlug) => {
-		if (typeof locationSlug !== 'string' || markers.value.length === 0) {
-			return;
-		}
-		openMarkerBySlug(locationSlug);
-	},
+  () => route.query.location,
+  (locationSlug) => {
+    if (typeof locationSlug !== 'string' || markers.value.length === 0) {
+      return;
+    }
+    openMarkerBySlug(locationSlug);
+  },
 );
 
 async function closePopup(): Promise<void> {
-	popupStore.clearPopup();
-	if (route.query.location) {
-		await router.replace({ query: {} });
-	}
-	locationStore.selectMapMarker(null);
-	locationStore.forceRefreshClusterer();
-	routeStore.clearRoute();
-	if (locationStore.isAddingLocation) {
-		locationStore.cancelAddingLocation();
-	}
+  popupStore.clearPopup();
+  if (route.query.location) {
+    await router.replace({ query: {} });
+  }
+  locationStore.selectMapMarker(null);
+  locationStore.forceRefreshClusterer();
+  routeStore.clearRoute();
+  if (locationStore.isAddingLocation) {
+    locationStore.cancelAddingLocation();
+  }
 }
 </script>
 
 <template>
-	<div class="relative h-full w-full overflow-hidden flex justify-center">
-		<LoadingIndicator
-			v-if="!yandexMapIsLoaded"
-			message="Загрузка карты..."
-			:fullscreen="true"
-			:show-backdrop="true"
-		/>
-		<LoadingIndicator
-			v-if="userGeolocationStore.loading"
-			message="Определение вашей геолокации..."
-			:fullscreen="true"
-			:show-backdrop="true"
-		/>
+  <div class="relative h-full w-full overflow-hidden flex justify-center">
+    <LoadingIndicator
+      v-if="!yandexMapIsLoaded"
+      message="Загрузка карты..."
+      :fullscreen="true"
+      :show-backdrop="true"
+    />
+    <LoadingIndicator
+      v-if="userGeolocationStore.loading"
+      message="Определение вашей геолокации..."
+      :fullscreen="true"
+      :show-backdrop="true"
+    />
 
-		<YandexMap
-			v-model="map"
-			:settings="{
-				location: userGeolocationStore.location,
-			}"
-			width="100%"
-			height="100%"
-		>
-			<YandexMapListener
-				:settings="{
-					onDblClick: handleMapDoubleClick,
-					onMouseDown: handleFirstInteraction,
-					onTouchStart: handleFirstInteraction,
-					onTouchMove: handleFirstInteraction,
-				}"
-			/>
+    <YandexMap
+      v-model="map"
+      :settings="{
+        location: userGeolocationStore.location,
+      }"
+      width="100%"
+      height="100%"
+    >
+      <YandexMapListener
+        :settings="{
+          onDblClick: handleMapDoubleClick,
+          onMouseDown: handleFirstInteraction,
+          onTouchStart: handleFirstInteraction,
+          onTouchMove: handleFirstInteraction,
+        }"
+      />
 
-			<YandexMapDefaultSchemeLayer
-				:settings="{ theme: colorMode.value as 'dark' | 'light' }"
-			/>
-			<YandexMapDefaultFeaturesLayer />
+      <YandexMapDefaultSchemeLayer
+        :settings="{ theme: colorMode.value as 'dark' | 'light' }"
+      />
+      <YandexMapDefaultFeaturesLayer />
 
-			<YandexMapClusterer
-				:key="locationStore.refreshKeyClusterer"
-				v-model="clusterer"
-				:grid-size="88"
-				:zoom-on-cluster-click="{ duration: 1000, easing: 'ease-in-out' }"
-			>
-				<StandardMarker
-					v-for="marker in markers"
-					:key="marker.id"
-					:marker="marker"
-					:on-click="handleMarkerClick"
-				/>
-				<template #cluster="{ length }">
-					<ClusterMarker :length="length" />
-				</template>
-			</YandexMapClusterer>
+      <YandexMapClusterer
+        :key="locationStore.refreshKeyClusterer"
+        v-model="clusterer"
+        :grid-size="88"
+        :zoom-on-cluster-click="{ duration: 1000, easing: 'ease-in-out' }"
+      >
+        <StandardMarker
+          v-for="marker in markers"
+          :key="marker.id"
+          :marker="marker"
+          :on-click="handleMarkerClick"
+        />
+        <template #cluster="{ length }">
+          <ClusterMarker :length="length" />
+        </template>
+      </YandexMapClusterer>
 
-			<YandexMapFeature
-				v-if="routeStore.route"
-				:settings="{ ...routeStore.route, style: lineStyle }"
-			/>
+      <YandexMapFeature
+        v-if="routeStore.route"
+        :settings="{ ...routeStore.route, style: lineStyle }"
+      />
 
-			<YandexMapControls :settings="{ position: 'right' }">
-				<YandexMapZoomControl />
-				<YandexMapGeolocationControl />
-			</YandexMapControls>
+      <YandexMapControls :settings="{ position: 'right' }">
+        <YandexMapZoomControl />
+        <YandexMapGeolocationControl />
+      </YandexMapControls>
 
-			<DraftMarker />
-		</YandexMap>
+      <DraftMarker />
+    </YandexMap>
 
-		<DraftControls />
+    <DraftControls />
 
-		<PopupWrapper
-			:show="!!popupStore.popup.type"
-			:size="popupStore.popup.type === 'locationsList' ? 'wide' : 'default'"
-			@close="closePopup"
-		>
-			<MarkerDetails
-				v-if="popupStore.popup.type === 'markerInfo' && selectedMarker"
-				:marker="selectedMarker"
-			/>
-			<AddLocation
-				v-if="popupStore.popup.type === 'addLocation'"
-				:coordinates="clickedCoordinates"
-				:on-close="closePopup"
-			/>
-			<LocationsList
-				v-if="popupStore.popup.type === 'locationsList'"
-			/>
-			<ErrorDetails />
-		</PopupWrapper>
+    <PopupWrapper
+      :show="!!popupStore.popup.type"
+      :size="popupStore.popup.type === 'locationsList' ? 'wide' : 'default'"
+      @close="closePopup"
+    >
+      <MarkerDetails
+        v-if="popupStore.popup.type === 'markerInfo' && selectedMarker"
+        :marker="selectedMarker"
+      />
+      <AddLocation
+        v-if="popupStore.popup.type === 'addLocation'"
+        :coordinates="clickedCoordinates"
+        :on-close="closePopup"
+      />
+      <LocationsList
+        v-if="popupStore.popup.type === 'locationsList'"
+      />
+      <ErrorDetails />
+    </PopupWrapper>
 
-		<div
-			v-if="
-				!popupStore.popup.type
-					&& !hasInteracted
-					&& !locationStore.isAddingLocation
-			"
-			class="pointer-events-none absolute top-20 right-5"
-		>
-			<InfoCard />
-		</div>
-		<LoadingIndicator
-			v-if="locationStore.loading"
-			message="Загрузка локаций..."
-		/>
-	</div>
+    <div
+      v-if="
+        !popupStore.popup.type
+          && !hasInteracted
+          && !locationStore.isAddingLocation
+      "
+      class="pointer-events-none absolute top-20 right-5"
+    >
+      <InfoCard />
+    </div>
+    <LoadingIndicator
+      v-if="locationStore.loading"
+      message="Загрузка локаций..."
+    />
+  </div>
 </template>
 
 <style scoped></style>

@@ -30,34 +30,34 @@ import { validateRequest } from '~server/utils/auth';
 import { createError, defineEventHandler } from 'h3';
 
 export default defineEventHandler(async (event) => {
-	try {
-		const { user: loggedInUser } = await validateRequest(event);
-		if (!loggedInUser) {
-			throw createError({
-				status: 401,
-				message: 'Вы не авторизованы',
-			});
-		}
+  try {
+    const { user: loggedInUser } = await validateRequest(event);
+    if (!loggedInUser) {
+      throw createError({
+        status: 401,
+        message: 'Вы не авторизованы',
+      });
+    }
 
-		const locations = await prisma.location.findMany({
-			where: {
-				userId: loggedInUser.id,
-			},
-			include: getLocationDataInclude(loggedInUser.id),
-			orderBy: {
-				createdAt: 'desc',
-			},
-		});
+    const locations = await prisma.location.findMany({
+      where: {
+        userId: loggedInUser.id,
+      },
+      include: getLocationDataInclude(loggedInUser.id),
+      orderBy: {
+        createdAt: 'desc',
+      },
+    });
 
-		return locations;
-	}
-	catch (err: unknown) {
-		if (err instanceof Error) {
-			throw err;
-		}
-		throw createError({
-			status: 500,
-			message: 'Ошибка получения локаций пользователя. Попробуйте позже.',
-		});
-	}
+    return locations;
+  }
+  catch (err: unknown) {
+    if (err instanceof Error) {
+      throw err;
+    }
+    throw createError({
+      status: 500,
+      message: 'Ошибка получения локаций пользователя. Попробуйте позже.',
+    });
+  }
 });
