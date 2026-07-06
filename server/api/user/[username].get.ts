@@ -30,62 +30,62 @@ import type { H3Event } from 'h3';
 
 import prisma from '~lib/prisma';
 import { getLocationDataInclude } from '~lib/types/location';
-import { getUserDataSelect } from '~lib/types/user';
+import { getPublicUserDataSelect } from '~lib/types/user';
 import { validateRequest } from '~server/utils/auth';
 import { createError, defineEventHandler, getRouterParam } from 'h3';
 
 export default defineEventHandler(async (event: H3Event) => {
-	try {
-		const username = getRouterParam(event, 'username');
-		if (!username) {
-			throw createError({
-				status: 400,
-				message: 'Username обязателен',
-			});
-		}
+  try {
+    const username = getRouterParam(event, 'username');
+    if (!username) {
+      throw createError({
+        status: 400,
+        message: 'Username обязателен',
+      });
+    }
 
-		const { user: currentUser } = await validateRequest(event);
-		const currentUserId = currentUser?.id;
+    const { user: currentUser } = await validateRequest(event);
+    const currentUserId = currentUser?.id;
 
-		const user = await prisma.user.findFirst({
-			where: {
-				username: {
-					equals: username,
-					mode: 'insensitive',
-				},
-			},
-			select: getUserDataSelect(),
-		});
+    const user = await prisma.user.findFirst({
+      where: {
+        username: {
+          equals: username,
+          mode: 'insensitive',
+        },
+      },
+      select: getPublicUserDataSelect(),
+    });
 
-		if (!user) {
-			throw createError({
-				status: 404,
-				message: 'Пользователь не найден',
-			});
-		}
+    if (!user) {
+      throw createError({
+        status: 404,
+        message: 'Пользователь не найден',
+      });
+    }
 
-		const locations = await prisma.location.findMany({
-			where: {
-				userId: user.id,
-			},
-			include: getLocationDataInclude(currentUserId),
-			orderBy: {
-				createdAt: 'desc',
-			},
-		});
+    const locations = await prisma.location.findMany({
+      where: {
+        userId: user.id,
+      },
+      include: getLocationDataInclude(currentUserId),
+      orderBy: {
+        createdAt: 'desc',
+      },
+    });
 
-		return {
-			...user,
-			locations,
-		};
-	}
-	catch (err: unknown) {
-		if (err instanceof Error) {
-			throw err;
-		}
-		throw createError({
-			status: 500,
-			message: 'Ошибка получения профиля пользователя. Попробуйте позже.',
-		});
-	}
+    return {
+      ...user,
+      locations,
+    };
+  }
+  catch (err: unknown) {
+    if (err instanceof Error) {
+      throw err;
+    }
+    throw createError({
+      status: 500,
+      message: 'Ошибка получения профиля пользователя. Попробуйте позже.',
+    });
+  }
 });

@@ -1,6 +1,6 @@
 import type { Prisma } from '@prisma/client';
 
-import { getUserDataSelect } from './user';
+import { getPublicUserDataSelect } from './user';
 
 /**
  * Модуль содержит типы и функции для работы с данными локаций.
@@ -17,120 +17,120 @@ import { getUserDataSelect } from './user';
  */
 
 export function getLocationDataSelect() {
-	return {
-		id: true,
-		name: true,
-		slug: true,
-		description: true,
-		latitude: true,
-		longitude: true,
-		createdAt: true,
-		updatedAt: true,
-		userId: true,
-	} satisfies Prisma.LocationSelect;
+  return {
+    id: true,
+    name: true,
+    slug: true,
+    description: true,
+    latitude: true,
+    longitude: true,
+    createdAt: true,
+    updatedAt: true,
+    userId: true,
+  } satisfies Prisma.LocationSelect;
 }
 
 export function getLocationDataInclude(userId?: string) {
-	return {
-		user: {
-			select: getUserDataSelect(),
-		},
-		_count: {
-			select: {
-				FavoriteLocation: true,
-			},
-		},
-		...(userId
-			? {
-					FavoriteLocation: {
-						where: {
-							userId,
-						},
-						select: {
-							userId: true,
-						},
-					},
-				}
-			: {}),
-	} satisfies Prisma.LocationInclude;
+  return {
+    user: {
+      select: getPublicUserDataSelect(),
+    },
+    _count: {
+      select: {
+        FavoriteLocation: true,
+      },
+    },
+    ...(userId
+      ? {
+          FavoriteLocation: {
+            where: {
+              userId,
+            },
+            select: {
+              userId: true,
+            },
+          },
+        }
+      : {}),
+  } satisfies Prisma.LocationInclude;
 }
 
 export type LocationData = Prisma.LocationGetPayload<{
-	include: ReturnType<typeof getLocationDataInclude>;
+  include: ReturnType<typeof getLocationDataInclude>;
 }>;
 
 export type LocationSelectData = Prisma.LocationGetPayload<{
-	select: ReturnType<typeof getLocationDataSelect>;
+  select: ReturnType<typeof getLocationDataSelect>;
 }>;
 
 export function getLocationLogDataInclude() {
-	return {
-		user: {
-			select: getUserDataSelect(),
-		},
-		location: {
-			select: getLocationDataSelect(),
-		},
-		LocationLogImage: {
-			select: {
-				id: true,
-				url: true,
-				createdAt: true,
-			},
-		},
-		_count: {
-			select: {
-				LocationLogImage: true,
-			},
-		},
-	} satisfies Prisma.LocationLogInclude;
+  return {
+    user: {
+      select: getPublicUserDataSelect(),
+    },
+    location: {
+      select: getLocationDataSelect(),
+    },
+    LocationLogImage: {
+      select: {
+        id: true,
+        url: true,
+        createdAt: true,
+      },
+    },
+    _count: {
+      select: {
+        LocationLogImage: true,
+      },
+    },
+  } satisfies Prisma.LocationLogInclude;
 }
 
 export type LocationLogData = Prisma.LocationLogGetPayload<{
-	include: ReturnType<typeof getLocationLogDataInclude>;
+  include: ReturnType<typeof getLocationLogDataInclude>;
 }>;
 
 export function getLocationLogDataSelect() {
-	return {
-		id: true,
-		name: true,
-		description: true,
-		startedAt: true,
-		endedAt: true,
-		latitude: true,
-		longitude: true,
-		createdAt: true,
-		updatedAt: true,
-		userId: true,
-		LocationId: true,
-	} satisfies Prisma.LocationLogSelect;
+  return {
+    id: true,
+    name: true,
+    description: true,
+    startedAt: true,
+    endedAt: true,
+    latitude: true,
+    longitude: true,
+    createdAt: true,
+    updatedAt: true,
+    userId: true,
+    LocationId: true,
+  } satisfies Prisma.LocationLogSelect;
 }
 
 export type LocationLogSelectData = Prisma.LocationLogGetPayload<{
-	select: ReturnType<typeof getLocationLogDataSelect>;
+  select: ReturnType<typeof getLocationLogDataSelect>;
 }>;
 
 export interface LocationsPage {
-	locations: LocationData[];
-	nextCursor: string | null;
+  locations: LocationData[];
+  nextCursor: string | null;
 }
 
 export interface LocationLogsPage {
-	locationLogs: LocationLogData[];
-	nextCursor: string | null;
+  locationLogs: LocationLogData[];
+  nextCursor: string | null;
 }
 
 export interface LocationCountInfo {
-	count: number;
+  count: number;
 }
 
 export interface LocationLogCountInfo {
-	count: number;
+  count: number;
 }
 
 export interface LocationStats {
-	totalLocations: number;
-	totalLogs: number;
-	userLocations: number;
-	userLogs: number;
+  totalLocations: number;
+  totalLogs: number;
+  userLocations: number;
+  userLogs: number;
 }
