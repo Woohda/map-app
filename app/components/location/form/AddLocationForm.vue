@@ -1,11 +1,13 @@
 <script setup lang="ts">
 import type { LngLat } from '@yandex/ymaps3-types';
+import type { UploadedImage } from '~lib/types/upload';
 import type { AddLocationFormValues, AddLocationValues } from '~lib/types/validation';
 
 import { toTypedSchema } from '@vee-validate/zod';
 import { addLocationFormSchema } from '~lib/types/validation';
 import { useLocationStore } from '~stores/location';
 
+import PhotoUpload from '~/components/location/form/PhotoUpload.vue';
 import { Button } from '~/components/ui/button';
 import {
   Form,
@@ -21,16 +23,30 @@ import { Textarea } from '~/components/ui/textarea';
 
 interface Props {
   coordinates: LngLat | null;
-  onClose: () => void;
 }
 
 const props = defineProps<Props>();
 
+const emit = defineEmits<{
+  success: [];
+  cancel: [];
+}>();
 const formError = ref('');
 const loading = ref(false);
+const images = ref<UploadedImage[]>([]);
 const { addLocation } = useLocationStore();
 
+const { resetAttachments, clearAttachments } = useAttachmentUpload();
+
 const currentCoordinates = computed(() => props.coordinates || [0, 0]);
+
+function cancel() {
+  resetAttachments();
+  emit('cancel');
+}
+defineExpose({
+  cancel,
+});
 
 async function onSubmit(
   values: unknown,
@@ -44,14 +60,18 @@ async function onSubmit(
       ...formData,
       longitude: currentCoordinates.value[0],
       latitude: currentCoordinates.value[1],
+      images: images.value,
     };
     await addLocation(submitData);
     resetForm();
-    props.onClose();
+    images.value = [];
+    clearAttachments();
+    emit('success');
   }
   catch (error: any) {
     formError.value
-      = error?.response?._data?.message || 'Ошибка добавления локации. Попробуйте еще раз';
+      = error?.response?._data?.message
+        || 'Ошибка добавления локации. Попробуйте еще раз';
   }
   finally {
     loading.value = false;
@@ -73,11 +93,7 @@ async function onSubmit(
             Название локации:
           </FormLabel>
           <FormControl>
-            <Input
-              v-bind="field"
-              type="text"
-              placeholder="Название локации"
-            />
+            <Input v-bind="field" type="text" placeholder="Название локации" />
           </FormControl>
           <Transition name="fade-slide" appear>
             <FormMessage class="text-xs">
@@ -107,13 +123,28 @@ async function onSubmit(
         </FormItem>
       </FormField>
 
+      <FormField name="images">
+        <FormItem>
+          <FormLabel class="mb-1">
+            Фото локации:
+          </FormLabel>
+          <FormControl>
+            <PhotoUpload
+              v-model="images"
+              :disabled="loading"
+            />
+          </FormControl>
+        </FormItem>
+      </FormField>
+
       <FormField name="coordinates">
         <FormItem>
           <FormLabel class="mb-1">
             Координаты:
           </FormLabel>
           <FormControl class="text-sm text-muted-foreground">
-            {{ currentCoordinates[0].toFixed(6) }}, {{ currentCoordinates[1].toFixed(6) }}
+            {{ currentCoordinates[0].toFixed(6) }},
+            {{ currentCoordinates[1].toFixed(6) }}
           </FormControl>
         </FormItem>
       </FormField>

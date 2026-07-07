@@ -22,7 +22,7 @@
     "@prisma/extension-accelerate": "^2.0.2",
     "@prisma/nuxt": "^0.3.0",
     "@tailwindcss/vite": "^4.1.16",
-    "@uploadthing/nuxt": "^7.1.10",
+    "@uploadthing/vue": "^7.3.3",
     "@vee-validate/zod": "^4.15.1",
     "argon2": "^0.44.0",
     "class-variance-authority": "^0.7.1",
@@ -38,6 +38,7 @@
     "uploadthing": "^7.7.4",
     "vee-validate": "^4.15.1",
     "vue": "^3.5.22",
+    "vue-draggable-plus": "^0.6.1",
     "vue-router": "^4.6.3",
     "vue-yandex-maps": "^3.0.1",
     "zod": "^4.1.12"

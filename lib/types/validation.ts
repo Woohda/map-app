@@ -76,9 +76,15 @@ export const addLocationFormSchema = z.object({
     .optional(),
 });
 
+const uploadedImageSchema = z.object({
+  url: z.url('Некорректный URL изображения'),
+  uploadthingKey: z.string().min(1, 'Ключ изображения обязателен'),
+});
+
 export const addLocationSchema = addLocationFormSchema.extend({
   latitude: z.number(),
   longitude: z.number(),
+  images: z.array(uploadedImageSchema).optional(),
 });
 
 export type AddLocationFormValues = z.infer<typeof addLocationFormSchema>;

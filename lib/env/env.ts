@@ -33,7 +33,7 @@ const EnvSchema = z.object({
   PRISMA_DATABASE_URL: z.string(),
   YANDEX_MAPS_API_KEY: z.string(),
   YANDEX_MAPS_ROUTER_API_KEY: z.string(),
-  NUXT_UPLOADTHING_TOKEN: z.string(),
+  UPLOADTHING_TOKEN: z.string(),
 });
 
 export type EnvSchema = z.infer<typeof EnvSchema>;

@@ -5,10 +5,23 @@ import AddLocationForm from '~/components/location/form/AddLocationForm.vue';
 
 interface Props {
   coordinates: LngLat | null;
-  onClose: () => void;
 }
 
 const props = defineProps<Props>();
+
+const emit = defineEmits<{
+  close: [];
+}>();
+
+const formRef = ref<InstanceType<typeof AddLocationForm> | null>(null);
+
+function handleSuccess() {
+  emit('close');
+}
+function handleCancel() {
+  formRef.value?.cancel();
+  emit('close');
+}
 </script>
 
 <template>
@@ -16,6 +29,10 @@ const props = defineProps<Props>();
     <h2 class="text-xl font-bold">
       Добавить локацию
     </h2>
-    <AddLocationForm :coordinates="props.coordinates" :on-close="props.onClose" />
+    <AddLocationForm
+      :coordinates="props.coordinates"
+      @success="handleSuccess"
+      @cancel="handleCancel"
+    />
   </div>
 </template>

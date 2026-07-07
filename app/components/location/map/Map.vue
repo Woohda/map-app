@@ -211,7 +211,7 @@ async function closePopup(): Promise<void> {
       <AddLocation
         v-if="popupStore.popup.type === 'addLocation'"
         :coordinates="clickedCoordinates"
-        :on-close="closePopup"
+        @close="closePopup"
       />
       <LocationsList
         v-if="popupStore.popup.type === 'locationsList'"
