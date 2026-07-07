@@ -12,7 +12,7 @@ jobs:
       PRISMA_DATABASE_URL: ${{ secrets.PRISMA_DATABASE_URL }}
       YANDEX_MAPS_API_KEY: ${{ secrets.YANDEX_MAPS_API_KEY }}
       YANDEX_MAPS_ROUTER_API_KEY: ${{ secrets.YANDEX_MAPS_ROUTER_API_KEY }}
-      NUXT_UPLOADTHING_TOKEN: ${{ secrets.NUXT_UPLOADTHING_TOKEN }}
+      UPLOADTHING_TOKEN: ${{ secrets.UPLOADTHING_TOKEN }}
     steps:
       - uses: actions/checkout@v4
       - uses: oven-sh/setup-bun@v2
