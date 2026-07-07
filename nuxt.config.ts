@@ -17,7 +17,6 @@ export default defineNuxtConfig({
     '@nuxtjs/color-mode',
     '@pinia/nuxt',
     'vue-yandex-maps/nuxt',
-    '@uploadthing/nuxt',
   ],
   typescript: {
     tsConfig: {
@@ -43,9 +42,6 @@ export default defineNuxtConfig({
     servicesApikeys: {
       router: env.YANDEX_MAPS_ROUTER_API_KEY,
     },
-  },
-  uploadthing: {
-    routerPath: '~/server/uploadthing',
   },
   colorMode: {
     preference: 'system',
