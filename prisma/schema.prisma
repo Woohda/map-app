@@ -71,16 +71,19 @@ model Location {
 }
 
 model LocationImage {
-  id         String   @id @default(uuid())
-  locationId String
-  userId     String
-  url        String
-  altText    String?
-  order      Int      @default(0)
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
-  location   Location @relation(fields: [locationId], references: [id], onDelete: Cascade)
-  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id             String  @id @default(uuid())
+  locationId     String
+  userId         String
+  url            String
+  uploadthingKey String  @unique
+  altText        String?
+  order          Int     @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  location Location @relation(fields: [locationId], references: [id], onDelete: Cascade)
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("location_images")
 }
