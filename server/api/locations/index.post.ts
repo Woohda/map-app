@@ -73,6 +73,18 @@ export default defineEventHandler(async (event: H3Event) => {
         description: validatedData.description,
         latitude: validatedData.latitude,
         longitude: validatedData.longitude,
+        ...(validatedData.images && validatedData.images.length > 0
+          ? {
+              LocationImage: {
+                create: validatedData.images.map((image, index) => ({
+                  url: image.url,
+                  uploadthingKey: image.uploadthingKey,
+                  userId: loggedInUser.id,
+                  order: index,
+                })),
+              },
+            }
+          : {}),
       },
       include: getLocationDataInclude(loggedInUser.id),
     });

@@ -22,6 +22,7 @@ export interface MapMarker extends BaseMapMarker {
   userName: string;
   username: string;
   isFavorite?: boolean;
+  images?: string[];
 }
 
 export interface MapLocation {

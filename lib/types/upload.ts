@@ -1,6 +1,6 @@
 export interface UploadedImage {
   url: string;
-  key: string;
+  uploadthingKey: string;
 }
 
 export interface UploadAttachment extends UploadedImage {

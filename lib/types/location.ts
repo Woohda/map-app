@@ -40,6 +40,17 @@ export function getLocationDataInclude(userId?: string) {
         FavoriteLocation: true,
       },
     },
+    LocationImage: {
+      select: {
+        id: true,
+        url: true,
+        altText: true,
+        order: true,
+      },
+      orderBy: {
+        order: 'asc',
+      },
+    },
     ...(userId
       ? {
           FavoriteLocation: {
@@ -93,16 +104,13 @@ export type LocationLogData = Prisma.LocationLogGetPayload<{
 export function getLocationLogDataSelect() {
   return {
     id: true,
-    name: true,
-    description: true,
     startedAt: true,
     endedAt: true,
-    latitude: true,
-    longitude: true,
+    status: true,
     createdAt: true,
     updatedAt: true,
     userId: true,
-    LocationId: true,
+    locationId: true,
   } satisfies Prisma.LocationLogSelect;
 }
 

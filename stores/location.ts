@@ -119,6 +119,7 @@ export const useLocationStore = defineStore('location', () => {
         userName: location.user.name,
         username: location.user.username,
         isFavorite: location.FavoriteLocation && location.FavoriteLocation.length > 0,
+        images: location.LocationImage?.map(img => img.url) || [],
       }));
 
       loadedMarkerIds.value = newIds;
@@ -160,6 +161,7 @@ export const useLocationStore = defineStore('location', () => {
         userName: location.user.name,
         username: location.user.username,
         isFavorite: location.FavoriteLocation && location.FavoriteLocation.length > 0,
+        images: location.LocationImage?.map(img => img.url) || [],
       }));
 
       loadedUserMarkerIds.value = newIds;
@@ -195,6 +197,7 @@ export const useLocationStore = defineStore('location', () => {
         userName: newLocation.user.name,
         username: newLocation.user.username,
         isFavorite: newLocation.FavoriteLocation && newLocation.FavoriteLocation.length > 0,
+        images: newLocation.LocationImage?.map(img => img.url) || [],
       };
 
       userMarkers.value.unshift(newMarker);
@@ -251,6 +254,7 @@ export const useLocationStore = defineStore('location', () => {
         userName: fav.location.user.name,
         username: fav.location.user.username,
         isFavorite: true,
+        images: fav.location.LocationImage?.map(img => img.url) || [],
       }));
 
       loadedFavoriteIds.value = newIds;
