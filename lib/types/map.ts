@@ -1,14 +1,26 @@
-import type { LngLat, YMapMarkerProps } from '@yandex/ymaps3-types';
-
 /**
- * Модуль содержит типы для работы с картой Яндекс.
- * Он предоставляет интерфейсы для маркеров, событий и обработчиков кликов.
+ * @module lib/types/map
+ * @fileoverview Типы для работы с Яндекс Картой
+ * @description
+ * Этот модуль предоставляет типы и интерфейсы для работы с Яндекс Картой.
+ * Включает типы для маркеров, координат, событий кликов и настроек карты.
+ * ---
+ * ### Типы данных:
+ * - `Coordinates`: Алиас для LngLat (координаты [lng, lat])
+ * - `MapMarker`: Маркер на карте с данными локации
+ * - `MapLocation`: Настройки центра и масштаба карты
+ * - `MapClickEvent`: Событие клика по карте с координатами
  *
- * @interface {MapMarker} - Интерфейс маркера на карте с дополнительными полями
- * @interface {MapLocation} - Интерфейс для определения центра карты и масштаба
- * @interface {MapClickEvent} - Интерфейс события клика по карте
- * @interface {MapClickHandler} - Интерфейс обработчика клика по карте
+ * ### Примечания:
+ * - `MapMarker` расширяет базовый тип YMapMarkerProps
+ * - `isFavorite` используется для отметки избранных локаций
+ * - `images` содержит массив URL изображений локации
+ *
+ * ### Зависимости:
+ * - LngLat, YMapMarkerProps из @yandex/ymaps3-types
  */
+
+import type { LngLat, YMapMarkerProps } from '@yandex/ymaps3-types';
 
 export type Coordinates = LngLat;
 

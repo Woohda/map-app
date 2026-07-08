@@ -1,3 +1,46 @@
+/**
+ * @module app/composables/useAttachmentUpload
+ * @fileoverview Composable для управления загрузкой и удалением вложений через UploadThing
+ * @description
+ * Этот модуль реализует функциональность загрузки файлов с использованием UploadThing сервиса.
+ * Поддерживает загрузку до 5 файлов, отслеживание прогресса, удаление и переупорядочивание вложений.
+ * ---
+ * ### Логика работы:
+ * 1. `Upload Process`: Использует useUploadThing для загрузки файлов на сервер UploadThing
+ * 2. `File Renaming`: Перед загрузкой файлы переименовываются с уникальными UUID для предотвращения конфликтов
+ * 3. `Progress Tracking`: Отслеживает прогресс загрузки через uploadProgress ref
+ * 4. `Validation`: Проверяет лимит файлов (максимум 5) и предотвращает одновременную загрузку
+ * 5. `Cleanup`: Поддерживает удаление файлов с сервера через API endpoint
+ *
+ * ### API:
+ * - `startUpload(files)`: Начинает загрузку файлов с валидацией лимитов
+ * - `removeAttachment(id)`: Удаляет вложение по ID (включая удаление с сервера)
+ * - `reorderAttachments(newOrder)`: Изменяет порядок вложений
+ * - `clearAttachments()`: Очищает список вложений без удаления с сервера
+ * - `resetAttachments()`: Полный сброс с удалением всех файлов с сервера
+ *
+ * ### Особенности:
+ * - Автоматическое переименование файлов с UUID
+ * - Toast уведомления об успешной загрузке и ошибках
+ * - Защита от превышения лимита файлов (5 штук)
+ * - Отслеживание состояния загрузки (isUploading, uploadProgress)
+ * - Интеграция с UploadThing API для удаления файлов
+ *
+ * ### Ограничения:
+ * - Максимум 5 файлов одновременно
+ * - Блокировка повторной загрузки во время активной загрузки
+ *
+ * ### Примечания:
+ * - Использует crypto.randomUUID() для генерации уникальных имен
+ * - При ошибке загрузки неудачные вложения автоматически удаляются из списка
+ * - Файлы удаляются с сервера через /api/uploadthing/delete endpoint
+ *
+ * ### Зависимости:
+ * - UploadAttachment из ~lib/types/upload
+ * - useUploadThing из ~lib/uploadthing
+ * - useToast из ~/composables/use-toast
+ */
+
 import type { UploadAttachment } from '~lib/types/upload';
 
 import { useUploadThing } from '~lib/uploadthing';
