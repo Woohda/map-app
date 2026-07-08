@@ -13,6 +13,7 @@ jobs:
       YANDEX_MAPS_API_KEY: ${{ secrets.YANDEX_MAPS_API_KEY }}
       YANDEX_MAPS_ROUTER_API_KEY: ${{ secrets.YANDEX_MAPS_ROUTER_API_KEY }}
       UPLOADTHING_TOKEN: ${{ secrets.UPLOADTHING_TOKEN }}
+      SITE_URL: ${{ secrets.SITE_URL }}
     steps:
       - uses: actions/checkout@v4
       - uses: oven-sh/setup-bun@v2
