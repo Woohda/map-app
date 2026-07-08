@@ -11,6 +11,9 @@
  *    - `NODE_ENV`: среда выполнения (например, "development" или "production").
  *    - `PRISMA_DATABASE_URL`: URL базы данных для Prisma.
  *    - `YANDEX_MAPS_API_KEY`: API ключ для Яндекс Карт.
+ *    - `YANDEX_MAPS_ROUTER_API_KEY`: API ключ для маршрутизации Яндекс Карт.
+ *    - `UPLOADTHING_TOKEN`: токен для сервиса UploadThing.
+ *    - `SITE_URL`: базовый URL сайта для SEO мета тегов.
  * 2. Вызов `tryParseEnv(EnvSchema)` для проверки наличия всех обязательных переменных.
  * 3. Парсинг `process.env` через `EnvSchema.parse()` и экспорт результата.
  *
@@ -34,6 +37,7 @@ const EnvSchema = z.object({
   YANDEX_MAPS_API_KEY: z.string(),
   YANDEX_MAPS_ROUTER_API_KEY: z.string(),
   UPLOADTHING_TOKEN: z.string(),
+  SITE_URL: z.string(),
 });
 
 export type EnvSchema = z.infer<typeof EnvSchema>;

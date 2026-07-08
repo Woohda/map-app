@@ -104,4 +104,9 @@ export default defineNuxtConfig({
       'autoprefixer': {},
     },
   },
+  runtimeConfig: {
+    public: {
+      siteUrl: env.SITE_URL,
+    },
+  },
 });
